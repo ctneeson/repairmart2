@@ -1,21 +1,19 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ListingController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\HelloController;
 
-Route::get('/', function () {
-    $person = [
-        'name' => 'Jake Blues',
-        'email' => 'jake@blues.com',
-    ];
-    $aboutPageURL = route(name: 'about');
-    dd($aboutPageURL);
-    dump($person);
-    return view('welcome');
-});
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
 
 Route::view('/about', 'about')->name('about');
 
-Route::get('/listing/{id}', function (string $id) {
-    return "listingId = $id";
-    // return view('listing');
-})->whereNumber('id');
+
+Route::resources([
+    'listings' => ListingController::class,
+    'orders' => OrderController::class,
+]);

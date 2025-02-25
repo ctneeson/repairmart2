@@ -3,6 +3,11 @@
 @section('title','Home page')
 
 @section('content')
+    <x-card>
+      <x-slot:title>Card Title 1</x-slot:title>
+      Card Content 1
+      <x-slot:footer>Card Footer 1</x-slot:footer>
+    </x-card>
     <!-- Home Slider -->
     <section class="hero-slider">
         <!-- Carousel wrapper -->
@@ -1008,4 +1013,9 @@
         </section>
         <!--/ New Cars -->
     </main>
+    @section('footerLinks')
+      @parent
+      <a href="#">Link 3</a>
+      <a href="#">Link 4</a>
+    @endsection
 @endsection

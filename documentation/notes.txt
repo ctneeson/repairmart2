@@ -1,1 +1,8 @@
-https://youtu.be/0M84Nk7iWkA?t=12548
+https://youtu.be/0M84Nk7iWkA?t=14608
+
+>>> Dissertation
+- US right to repair
+https://www.404media.co/all-50-states-have-now-introduced-right-to-repair-legislation/
+
+- Why Laravel?
+  https://www.youtube.com/watch?v=2WjMrh7ZHIA

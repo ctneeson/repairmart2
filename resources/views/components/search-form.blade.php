@@ -2,8 +2,8 @@
 <section class="find-a-car">
 <div class="container">
     <form
-    action="{{$action}}"
-    method="{{$method}}"
+    action="{{ route('listings.search') }}"
+    method="GET"
     class="find-a-car-form card flex p-medium"
     >
     <div class="find-a-car-inputs">

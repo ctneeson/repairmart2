@@ -1,5 +1,5 @@
 <div class="listing-item card">
-    <a href="/view.html">
+    <a href="{{route('listings.show', 1)}}">
       <img
         src="/img/cars/Lexus-RX200t-2016/1.jpeg"
         alt=""

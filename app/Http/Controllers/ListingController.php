@@ -11,7 +11,7 @@ class ListingController extends Controller
      */
     public function index()
     {
-        //
+        return view('listings.index');
     }
 
     /**
@@ -19,7 +19,7 @@ class ListingController extends Controller
      */
     public function create()
     {
-        //
+        return view('listings.create');
     }
 
     /**
@@ -35,7 +35,7 @@ class ListingController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return view('listings.show');
     }
 
     /**
@@ -43,7 +43,7 @@ class ListingController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return view('listings.edit');
     }
 
     /**
@@ -60,5 +60,10 @@ class ListingController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function search()
+    {
+        return view('listings.search');
     }
 }

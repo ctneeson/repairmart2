@@ -8,6 +8,7 @@ use App\Models\CarType;
 use App\Models\CarFeatures;
 use App\Models\CarImage;
 use App\Models\Maker;
+use App\Models\Model as CarModel;
 use App\Models\FuelType;
 use Illuminate\Support\Facades\View;
 class HomeController extends Controller
@@ -165,7 +166,7 @@ class HomeController extends Controller
         // ]);
         // $car->features()->save($carFeatures);
 
-        $car = Car::find(1);
+        // $car = Car::find(1);
 
         // Create new image
         // $image = new CarImage(['image_path' => 'path3', 'position' => 3]);
@@ -196,17 +197,45 @@ class HomeController extends Controller
         // $car->carType()->associate($carType);
         // $car->save();
 
-        $user = User::find(1);
+        // $user = User::find(1);
 
         // $user->favouriteCars()->attach([3, 4]);
 
         // $user->favouriteCars()->sync([3, 4]);
 
-        $user->favouriteCars()->detach([3]);
+        // $user->favouriteCars()->detach([3]);
 
+        // dd($user->favouriteCars);
 
-        dd($user->favouriteCars);
+        // >> Make 10 records but don't save them to database
+        // $makers = Maker::factory()->count(10)->make();
+        // >> Make 10 records and save them to database
+        // $makers = Maker::factory()->count(10)->create();
+        // dd($makers);
 
+        // User::factory()->state([
+        //     'name' => 'John Doe',
+        // ])->create();
+
+        // User::factory()->afterMaking(function (User $user) {
+        //     dump($user);
+        // })->create();
+
+        // >> Make 5 records with the same name
+        // Maker::factory()->count(5)->hasModels(5, ['name' => 'TestName'])->create();
+
+        // Maker::factory()->count(1)->hasModels(1, function(array $attributes, Maker $maker) {
+        //     return [];
+        // })->create();
+
+        // >> Make 1 Maker with 3 Models
+        // Maker::factory()->count(1)->has(CarModel::factory()->count(3), 'models')->create();
+
+        // CarModel::factory()->count(5)->forMaker(['name' => 'Lexus'])->create();
+        // CarModel::factory()->count(5)->for(Maker::factory()->state(['name'=>'Mitsubishi']), 'maker')->create();
+
+        $maker = Maker::factory()->create();
+        CarModel::factory()->count(5)->for($maker)->create();
 
         return View::make('home.index');
     }

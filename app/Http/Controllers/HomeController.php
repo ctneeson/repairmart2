@@ -242,6 +242,11 @@ class HomeController extends Controller
         //     // ->hasAttached(count(5), ['col1'=>'val1'], 'favouriteCars')
         //     ->create();
 
-        return View::make('home.index');
+        $listings = Car::where('published_at', '<', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(30)
+            ->get();
+
+        return View::make('home.index', ['listings' => $listings]);
     }
 }

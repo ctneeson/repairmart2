@@ -65,6 +65,9 @@ class ListingController extends Controller
 
     public function search()
     {
-        return view('listings.search');
+        $query = Listing::where('published_at', '<', now())->orderBy('published_at', 'desc');
+        $listingCount = $query->count();
+        $listings = $query->limit(30)->get();
+        return view('listings.search', ['listings' => $listings, 'listingCount' => $listingCount]);
     }
 }

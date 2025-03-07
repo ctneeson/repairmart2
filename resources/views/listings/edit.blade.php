@@ -1,12 +1,12 @@
 <x-app-layout>
     <main>
         <div class="container-small">
-          <h1 class="car-details-page-title">Add new car</h1>
+          <h1 class="listing-details-page-title">Edit listing</h1>
           <form
             action=""
             method="POST"
             enctype="multipart/form-data"
-            class="card add-new-car-form"
+            class="card add-new-listing-form"
           >
             <div class="form-content">
               <div class="form-details">
@@ -292,9 +292,9 @@
                       />
                     </svg>
                   </div>
-                  <input id="carFormImageUpload" type="file" multiple />
+                  <input id="listingFormImageUpload" type="file" multiple />
                 </div>
-                <div id="imagePreviews" class="car-form-images"></div>
+                <div id="imagePreviews" class="listing-form-images"></div>
               </div>
             </div>
             <div class="p-medium" style="width: 100%">

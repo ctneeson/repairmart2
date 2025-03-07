@@ -1,28 +1,28 @@
 <x-app-layout>
     <main>
         <div class="container">
-          <h1 class="car-details-page-title">Lexus NX200t - 2016</h1>
-          <div class="car-details-region">New Jersey - 2 days ago</div>
+          <h1 class="listing-details-page-title">Lexus NX200t - 2016</h1>
+          <div class="listing-details-region">New Jersey - 2 days ago</div>
   
-          <div class="car-details-content">
-            <div class="car-images-and-description">
-              <div class="car-images-carousel">
-                <div class="car-image-wrapper">
+          <div class="listing-details-content">
+            <div class="listing-images-and-description">
+              <div class="listing-images-carousel">
+                <div class="listing-image-wrapper">
                   <img
-                    src="/img/cars/Lexus-RX200t-2016/1.jpeg"
+                    src="/img/listings/Lexus-RX200t-2016/1.jpeg"
                     alt=""
-                    class="car-active-image"
+                    class="listing-active-image"
                     id="activeImage"
                   />
                 </div>
-                <div class="car-image-thumbnails">
-                  <img src="/img/cars/Lexus-RX200t-2016/1.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/2.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/3.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/4.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/5.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/6.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/7.jpeg" alt="" />
+                <div class="listing-image-thumbnails">
+                  <img src="/img/listings/Lexus-RX200t-2016/1.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/2.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/3.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/4.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/5.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/6.jpeg" alt="" />
+                  <img src="/img/listings/Lexus-RX200t-2016/7.jpeg" alt="" />
                 </div>
                 <button class="carousel-button prev-button" id="prevButton">
                   <svg
@@ -58,8 +58,8 @@
                 </button>
               </div>
   
-              <div class="card car-detailed-description">
-                <h2 class="car-details-title">Detailed Description</h2>
+              <div class="card listing-detailed-description">
+                <h2 class="listing-details-title">Detailed Description</h2>
                 <p>
                   Lorem, ipsum dolor sit amet consectetur adipisicing elit.
                   Mollitia delectus, vitae blanditiis praesentium doloremque
@@ -83,10 +83,10 @@
                 </p>
               </div>
   
-              <div class="card car-detailed-description">
-                <h2 class="car-details-title">Car Specifications</h2>
+              <div class="card listing-detailed-description">
+                <h2 class="listing-details-title">Listing Specifications</h2>
   
-                <ul class="car-specifications">
+                <ul class="listing-specifications">
                   <li>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -275,9 +275,9 @@
                 </ul>
               </div>
             </div>
-            <div class="car-details card">
+            <div class="listing-details card">
               <div class="flex items-center justify-between">
-                <p class="car-details-price">$25,000</p>
+                <p class="listing-details-price">$25,000</p>
                 <button class="btn-heart">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -297,7 +297,7 @@
               </div>
   
               <hr />
-              <table class="car-details-table">
+              <table class="listing-details-table">
                 <tbody>
                   <tr>
                     <th>Maker</th>
@@ -327,14 +327,14 @@
                 <img
                   src="/img/avatar.png"
                   alt=""
-                  class="car-details-owner-image"
+                  class="listing-details-owner-image"
                 />
                 <div>
-                  <h3 class="car-details-owner">John Smith</h3>
-                  <div class="text-muted">5 cars</div>
+                  <h3 class="listing-details-owner">John Smith</h3>
+                  <div class="text-muted">5 listings</div>
                 </div>
               </div>
-              <a href="tel:+995557123***" class="car-details-phone">
+              <a href="tel:+995557123***" class="listing-details-phone">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -351,7 +351,7 @@
                 </svg>
   
                 +995557123***
-                <span class="car-details-phone-view">view full number</span>
+                <span class="listing-details-phone-view">view full number</span>
               </a>
             </div>
           </div>

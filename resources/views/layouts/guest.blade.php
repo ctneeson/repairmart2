@@ -7,7 +7,7 @@
                 <div class="auth-page-form">
                     <div class="text-center">
                         <a href="/">
-                            <img src="/img/logoipsum-265.svg" alt="" />
+                            <img src="/img/RepairMart-logo.png" alt="" />
                         </a>
                     </div>
                     {{$slot}}
@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <div class="auth-page-image">
-                    <img src="/img/car-png-39071.png" alt="" class="img-responsive" />
+                    <img src="/img/electronics-repair.png" alt="" class="img-responsive" />
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <header class="navbar">
     <div class="container navbar-content">
         <a href="/" class="logo-wrapper">
-        <img src="/img/logoipsum-265.svg" alt="Logo" />
+        <img src="/img/RepairMart-logo.png" alt="Logo" />
         </a>
         <button class="btn btn-default btn-navbar-toggle">
         <svg
@@ -20,7 +20,7 @@
         </svg>
         </button>
         <div class="navbar-auth">
-        <a href="{{route('listings.create')}}" class="btn btn-add-new-car">
+        <a href="{{route('listings.create')}}" class="btn btn-add-new-listing">
             <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -58,10 +58,10 @@
             </a>
             <ul class="submenu">
             <li>
-                <a href="my_cars.html">My Cars</a>
+                <a href="my_listings.html">My Listings</a>
             </li>
             <li>
-                <a href="watchlist.html">My Favourite Cars</a>
+                <a href="watchlist.html">Favourites</a>
             </li>
             <li>
                 <form action="#" method="post">

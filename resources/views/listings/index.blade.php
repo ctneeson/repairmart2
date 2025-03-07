@@ -2,7 +2,7 @@
     <main>
         <div>
           <div class="container">
-            <h1 class="car-details-page-title">My Cars</h1>
+            <h1 class="listing-details-page-title">My Listings</h1>
             <div class="card p-medium">
               <div class="table-responsive">
                 <table class="table">
@@ -19,9 +19,9 @@
                     <tr>
                       <td>
                         <img
-                          src="/img/cars/Lexus-RX200t-2016/1.jpeg"
+                          src="/img/listings/Lexus-RX200t-2016/1.jpeg"
                           alt=""
-                          class="my-cars-img-thumbnail"
+                          class="my-listings-img-thumbnail"
                         />
                       </td>
                       <td>2016 - Lexus NX200t</td>
@@ -29,7 +29,7 @@
                       <td>Yes</td>
                       <td class="">
                         <a
-                          href="edit_car.html"
+                          href="edit_listing.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg
@@ -50,7 +50,7 @@
                           edit
                         </a>
                         <a
-                          href="car_images.html"
+                          href="listing_images.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg
@@ -92,9 +92,9 @@
                     <tr>
                       <td>
                         <img
-                          src="/img/cars/Lexus-RX200t-2016/1.jpeg"
+                          src="/img/listings/Lexus-RX200t-2016/1.jpeg"
                           alt=""
-                          class="my-cars-img-thumbnail"
+                          class="my-listings-img-thumbnail"
                         />
                       </td>
                       <td>2016 - Lexus NX200t</td>
@@ -102,7 +102,7 @@
                       <td>Yes</td>
                       <td>
                         <a
-                          href="edit_car.html"
+                          href="edit_listing.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg
@@ -123,7 +123,7 @@
                           edit
                         </a>
                         <a
-                          href="car_images.html"
+                          href="listing_images.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg
@@ -165,9 +165,9 @@
                     <tr>
                       <td>
                         <img
-                          src="/img/cars/Lexus-RX200t-2016/1.jpeg"
+                          src="/img/listings/Lexus-RX200t-2016/1.jpeg"
                           alt=""
-                          class="my-cars-img-thumbnail"
+                          class="my-listings-img-thumbnail"
                         />
                       </td>
                       <td>2016 - Lexus NX200t</td>
@@ -175,7 +175,7 @@
                       <td>Yes</td>
                       <td class="">
                         <a
-                          href="edit_car.html"
+                          href="edit_listing.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg
@@ -196,7 +196,7 @@
                           edit
                         </a>
                         <a
-                          href="edit_car.html"
+                          href="edit_listing.html"
                           class="btn btn-edit inline-flex items-center"
                         >
                           <svg

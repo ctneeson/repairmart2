@@ -1,6 +1,6 @@
 <x-app-layout>
     <main>
-        <!-- Found Cars -->
+        <!-- Found Listings -->
         <section>
           <div class="container">
             <div class="sm:flex items-center justify-between mb-medium">
@@ -22,10 +22,10 @@
                 <option value="-price">Price Desc</option>
               </select>
             </div>
-            <div class="search-car-results-wrapper">
-              <div class="search-cars-sidebar">
-                <div class="card card-found-cars">
-                  <p class="m-0">Found <strong>{{$carCount}}</strong> listings</p>
+            <div class="search-listing-results-wrapper">
+              <div class="search-listings-sidebar">
+                <div class="card card-found-listings">
+                  <p class="m-0">Found <strong>{{$listingCount}}</strong> listings</p>
     
                   <button class="close-filters-button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px">
@@ -36,10 +36,10 @@
                   </button>
                 </div>
     
-                <!-- Find a car form -->
-                <section class="find-a-car">
-                  <form action="/s.html" method="GET" class="find-a-car-form card flex p-medium">
-                    <div class="find-a-car-inputs">
+                <!-- Find a listing form -->
+                <section class="find-a-listing">
+                  <form action="/s.html" method="GET" class="find-a-listing-form card flex p-medium">
+                    <div class="find-a-listing-inputs">
                       <div class="form-group">
                         <label class="mb-medium">Maker</label>
                         <select id="makerSelect" name="maker_id">
@@ -395,20 +395,20 @@
                       </div>
                     </div>
                     <div class="flex">
-                      <button type="button" class="btn btn-find-a-car-reset">
+                      <button type="button" class="btn btn-find-a-listing-reset">
                         Reset
                       </button>
-                      <button class="btn btn-primary btn-find-a-car-submit">
+                      <button class="btn btn-primary btn-find-a-listing-submit">
                         Search
                       </button>
                     </div>
                   </form>
                 </section>
-                <!--/ Find a car form -->
+                <!--/ Find a listing form -->
               </div>
     
-              <div class="search-cars-results">
-                <div class="car-items-listing">
+              <div class="search-listings-results">
+                <div class="listing-items-listing">
                   @foreach($listings as $listing)
                     <x-listing-item :$listing/>
                   @endforeach
@@ -450,6 +450,6 @@
             </div>
           </div>
         </section>
-        <!--/ Found Cars -->
+        <!--/ Found Listings -->
     </main>
 </x-app-layout>

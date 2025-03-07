@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
@@ -28,6 +29,10 @@ class User extends Authenticatable
         'password',
         'google_id',
         'facebook_id',
+        'address_line1',
+        'address_line2',
+        'country_id',
+        'postcode',
     ];
 
     /**
@@ -62,5 +67,20 @@ class User extends Authenticatable
     public function cars(): HasMany
     {
         return $this->hasMany(Car::class);
+    }
+
+    public function listings(): HasMany
+    {
+        return $this->hasMany(Listing::class);
+    }
+
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Currency extends Model
+class Country extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -15,6 +15,11 @@ class Currency extends Model
         'iso_code',
         'name'
     ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 
     public function listings(): HasMany
     {

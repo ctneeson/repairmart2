@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Quote extends Model
 {
@@ -49,5 +50,10 @@ class Quote extends Model
     public function quoteCountry(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'override_country_id');
+    }
+
+    public function deliveryMethods(): BelongsToMany
+    {
+        return $this->belongsToMany(DeliveryMethod::class, 'quotes_deliveryMethods');
     }
 }

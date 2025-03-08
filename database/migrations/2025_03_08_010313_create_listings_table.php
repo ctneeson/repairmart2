@@ -1,0 +1,41 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('listings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrainedTo('users');
+            $table->foreignId('status_id')->constrainedTo('listing_status');
+            $table->foreignId('manufacturer_id')->constrainedTo('manufacturers');
+            $table->string('title', 255);
+            $table->text('description');
+            $table->foreignId('budget_currency_id')->constrainedTo('currency')->nullable();
+            $table->decimal('budget', 10, 2)->nullable();
+            $table->boolean('use_default_location')->default(false);
+            $table->string('override_address_line1', 255)->nullable();
+            $table->string('override_address_line2', 255)->nullable();
+            $table->string('override_postcode', 50)->nullable();
+            $table->foreignId('override_country_id')->constrainedTo('countries')->nullable();
+            $table->integer('expiry_days')->default(30);
+            $table->timestamp('published_at')->nullable();
+            $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('listings');
+    }
+};

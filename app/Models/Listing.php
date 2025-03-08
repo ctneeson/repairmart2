@@ -47,6 +47,11 @@ class Listing extends Model
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'override_country_id');
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'budget_currency_id');

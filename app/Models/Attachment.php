@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Attachment extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'listing_id',
+        'order_id',
+        'email_id',
+        'path',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public function listings(): BelongsTo
+    {
+        return $this->belongsTo(Listing::class);
+    }
+
+    public function orders(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function emails(): BelongsTo
+    {
+        return $this->belongsTo(Email::class);
+    }
+}

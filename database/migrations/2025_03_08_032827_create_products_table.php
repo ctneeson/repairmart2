@@ -10,10 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('orders_attachments', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrainedTo('orders');
-            $table->foreignId('attachment_id')->constrainedTo('attachments');
+            $table->string('category', 255);
+            $table->string('subcategory', 255);
+            $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
@@ -22,6 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders_attachments');
+        Schema::dropIfExists('products');
     }
 };

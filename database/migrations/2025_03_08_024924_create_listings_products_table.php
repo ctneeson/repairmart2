@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Listing;
+use App\Models\Product;
 
 return new class extends Migration {
     /**
@@ -12,8 +14,8 @@ return new class extends Migration {
     {
         Schema::create('listings_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('listing_id')->constrainedTo('listings');
-            $table->foreignId('product_id')->constrainedTo('products');
+            $table->foreignIdFor(Listing::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
         });
     }
 

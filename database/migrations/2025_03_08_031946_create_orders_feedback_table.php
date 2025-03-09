@@ -3,6 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\FeedbackType;
 
 return new class extends Migration {
     /**
@@ -12,11 +15,12 @@ return new class extends Migration {
     {
         Schema::create('orders_feedback', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrainedTo('orders');
-            $table->foreignId('user_id')->constrainedTo('users');
-            $table->foreignId('feedback_type_id')->constrainedTo('feedback_type');
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(FeedbackType::class)->constrained()->cascadeOnDelete();
             $table->text('comments');
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

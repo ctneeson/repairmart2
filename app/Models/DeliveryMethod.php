@@ -17,6 +17,11 @@ class DeliveryMethod extends Model
 
     public function quotes(): BelongsToMany
     {
-        return $this->belongsToMany(Quote::class, 'quotes_deliveryMethods', );
+        return $this->belongsToMany(
+            Quote::class,
+            'quotes_deliverymethods',
+            'deliverymethod_id',
+            'quote_id'
+        );
     }
 }

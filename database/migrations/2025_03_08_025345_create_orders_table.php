@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('listing_id')->constrainedTo('listings');
-            $table->foreignId('quote_deliverymethod_id')->constrainedTo('quotes_deliverymethods');
+            $table->foreignId('quote_id')->constrainedTo('quotes');
             $table->foreignId('status_id')->constrainedTo('order_status')->cascadeOnDelete();
             $table->boolean('override_quote')->default(false);
             $table->decimal('override_amount', 10, 2)->nullable();

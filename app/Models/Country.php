@@ -18,16 +18,16 @@ class Country extends Model
 
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'country_id', 'id');
     }
 
     public function listings(): HasMany
     {
-        return $this->hasMany(Listing::class);
+        return $this->hasMany(Listing::class, 'override_country_id', 'id');
     }
 
     public function quotes(): HasMany
     {
-        return $this->hasMany(Quote::class);
+        return $this->hasMany(Quote::class, 'override_country_id', 'id');
     }
 }

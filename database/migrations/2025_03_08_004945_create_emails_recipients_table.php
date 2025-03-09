@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Email;
+use App\Models\User;
 
 return new class extends Migration {
     /**
@@ -12,8 +14,8 @@ return new class extends Migration {
     {
         Schema::create('emails_recipients', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('email_id')->constrainedTo('email');
-            $table->foreignId('recipient_id')->constrainedTo('users');
+            $table->foreignIdFor(Email::class)->constrained('emails')->cascadeOnDelete();
+            $table->foreignIdFor(User::class, 'recipient_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

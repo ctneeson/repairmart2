@@ -7,22 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Currency extends Model
+class OrderStatus extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'iso_code',
-        'name'
+        'name',
     ];
 
-    public function listings(): HasMany
+    public function orders(): HasMany
     {
-        return $this->hasMany(Listing::class, 'budget_currency_id', 'id');
-    }
-
-    public function quotes(): HasMany
-    {
-        return $this->hasMany(Quote::class, 'override_currency_id', 'id');
+        return $this->hasMany(Order::class);
     }
 }

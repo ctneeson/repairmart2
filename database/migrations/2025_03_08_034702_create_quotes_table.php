@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreignId('listing_id')->constrainedTo('listings');
             $table->foreignId('status_id')->constrainedTo('quote_status');
             $table->foreignId('currency_id')->constrainedTo('currencies');
+            $table->foreignId('deliverymethod_id')->constrainedTo('deliverymethods');
             $table->decimal('amount', 10, 2);
             $table->integer('turnaround');
             $table->boolean('use_default_locations')->defaultValue(true);

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Quote extends Model
 {
@@ -27,7 +27,19 @@ class Quote extends Model
         'expiry',
     ];
 
-    public function user(): BelongsTo
+    public function customer(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            User::class, // The final model we want to access
+            Listing::class, // The intermediate model
+            'id', // Foreign key on the listings table
+            'id', // Foreign key on the users table
+            'listing_id', // Local key on the quotes table
+            'user_id' // Local key on the listings table
+        );
+    }
+
+    public function repairSpecialist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -37,23 +49,23 @@ class Quote extends Model
         return $this->belongsTo(Listing::class, 'listing_id');
     }
 
-    public function quoteStatus(): BelongsTo
+    public function status(): BelongsTo
     {
         return $this->belongsTo(QuoteStatus::class, 'quote_status_id');
     }
 
-    public function quoteCurrency(): BelongsTo
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'quote_currency_id');
     }
 
-    public function quoteCountry(): BelongsTo
+    public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'override_country_id');
     }
 
-    public function deliveryMethods(): BelongsToMany
+    public function deliveryMethod(): BelongsTo
     {
-        return $this->belongsToMany(DeliveryMethod::class, 'quotes_deliveryMethods');
+        return $this->belongsTo(DeliveryMethod::class, 'deliverymethod_id');
     }
 }

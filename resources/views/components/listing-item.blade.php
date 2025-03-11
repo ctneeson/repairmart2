@@ -3,14 +3,14 @@
 <div class="listing-item card">
     <a href="{{route('listings.show', $listing->id)}}">
       <img
-        src={{$listing->primaryImage->image_path}}
+        src={{$listing->primaryAttachment->path}}
         alt=""
         class="listing-item-img rounded-t"
       />
     </a>
     <div class="p-medium">
       <div class="flex items-center justify-between">
-        <small class="m-0 text-muted">{{$listing->city->name}}</small>
+        <small class="m-0 text-muted">{{$listing->customer->city}}</small>
         <button class="btn-heart">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +28,7 @@
           </svg>
         </button>
       </div>
-      <h2 class="listing-item-title">{{$listing->year}} - {{$listing->maker->name}} {{$listing->model->name}}</h2>
+      <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->product}}</h2>
       <p class="listing-item-price">${{$listing->price}}</p>
       <hr />
       <p class="m-0">

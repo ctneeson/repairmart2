@@ -22,6 +22,7 @@ class Quote extends Model
         'use_default_location',
         'override_address_line1',
         'override_address_line2',
+        'override_city',
         'override_country_id',
         'override_postcode',
         'expiry',

@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('feedback_type', function (Blueprint $table) {
+        Schema::create('feedback_types', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('feedback_type');
+        Schema::dropIfExists('feedback_types');
     }
 };

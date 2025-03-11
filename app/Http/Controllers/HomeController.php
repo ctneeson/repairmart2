@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Car;
+use App\Models\Listing;
 use App\Models\CarType;
 use App\Models\CarFeatures;
 use App\Models\CarImage;
@@ -113,6 +113,7 @@ class HomeController extends Controller
         // >> Delete Car
         // $car = Car::find(2)->delete();
 
+        // >> Delete Car (Mass Delete)
         // Car::destroy([4,3]);
 
         // Car::where('published_at', null)
@@ -242,7 +243,7 @@ class HomeController extends Controller
         //     // ->hasAttached(count(5), ['col1'=>'val1'], 'favouriteCars')
         //     ->create();
 
-        $listings = Car::where('published_at', '<', now())
+        $listings = Listing::where('published_at', '<', now())
             ->orderBy('published_at', 'desc')
             ->limit(30)
             ->get();

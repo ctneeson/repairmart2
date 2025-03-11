@@ -21,10 +21,12 @@ return new class extends Migration {
             $table->string('facebook_id', 45)->nullable();
             $table->string('address_line1', 255)->nullable();
             $table->string('address_line2', 255)->nullable();
+            $table->string('city', 255)->nullable();
             $table->string('postcode', 50)->nullable();
             $table->foreignId('country_id')->constrainedTo('countries')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

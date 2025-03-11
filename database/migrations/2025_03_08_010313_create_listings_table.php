@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->boolean('use_default_location')->default(false);
             $table->string('override_address_line1', 255)->nullable();
             $table->string('override_address_line2', 255)->nullable();
+            $table->string('override_city', 255)->nullable();
             $table->string('override_postcode', 50)->nullable();
             $table->foreignId('override_country_id')->constrainedTo('countries')->nullable();
             $table->integer('expiry_days')->default(30);

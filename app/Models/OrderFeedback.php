@@ -12,6 +12,8 @@ class OrderFeedback extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = "orders_feedback";
+
     protected $fillable = [
         'order_id',
         'user_id',

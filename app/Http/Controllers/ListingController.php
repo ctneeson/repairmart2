@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ListingPosted;
 
 class ListingController extends Controller
 {
@@ -28,7 +30,25 @@ class ListingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $listing = Listing::create([
+            'user_id' => request('user_id'),
+            'listing_status_id' => request('listing_status_id'),
+            'manufacturer_id' => request('manufacturer_id'),
+            'title' => request('title'),
+            'detail' => request('detail'),
+            'budget_currency_id' => request('budget_currency_id'),
+            'budget' => request('budget'),
+            'use_default_location' => request('use_default_location'),
+            'override_address_line1' => request('override_address_line1'),
+            'override_address_line2' => request('override_address_line2'),
+            'override_country_id' => request('override_country_id'),
+            'override_postcode' => request('override_postcode'),
+            'expiry' => request('expiry'),
+        ]);
+
+        Mail::to($listing->user)->send(
+            new ListingPosted($listing)
+        );
     }
 
     /**

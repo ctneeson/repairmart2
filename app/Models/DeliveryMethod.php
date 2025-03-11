@@ -11,6 +11,8 @@ class DeliveryMethod extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'deliverymethods';
+
     protected $fillable = [
         'name',
     ];

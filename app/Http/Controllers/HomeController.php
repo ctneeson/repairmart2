@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Listing;
+use App\Models\Product;
 use App\Models\CarType;
 use App\Models\CarFeatures;
 use App\Models\CarImage;
@@ -247,6 +248,17 @@ class HomeController extends Controller
             ->orderBy('published_at', 'desc')
             ->limit(30)
             ->get();
+
+        // $product = Product::where('category', 'Audio-Visual');
+        // $listings = Listing::whereBelongsTo($product)->get();
+        // $listing->attachments()->delete();
+        // $listing->attachments()->createMany([
+        //     ['position' => 2, 'path' => 'path2'],
+        // ]);
+        // dd($product);
+        $listing = Listing::find(1);
+        // $listing->products()->sync([1, 3]);
+        $listing->products()->detach([1]);
 
         return View::make('home.index', ['listings' => $listings]);
     }

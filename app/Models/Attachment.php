@@ -15,6 +15,7 @@ class Attachment extends Model
         'listing_id',
         'order_id',
         'email_id',
+        'position',
         'path',
         'created_at',
         'updated_at',

@@ -244,11 +244,6 @@ class HomeController extends Controller
         //     // ->hasAttached(count(5), ['col1'=>'val1'], 'favouriteCars')
         //     ->create();
 
-        $listings = Listing::where('published_at', '<', now())
-            ->orderBy('published_at', 'desc')
-            ->limit(30)
-            ->get();
-
         // $product = Product::where('category', 'Audio-Visual');
         // $listings = Listing::whereBelongsTo($product)->get();
         // $listing->attachments()->delete();
@@ -261,8 +256,30 @@ class HomeController extends Controller
         // $listing->products()->sync([1, 3]);
         // $listing->products()->detach([1]);
 
-        $maker = Maker::factory()->make();
-        dd($maker);
+        // $maker = Maker::factory()->create();
+        // dd($maker);
+
+        // Create a user with 5 listings
+        $user = User::factory()
+            ->has(Listing::factory()->count(5), 'listingsCreated')
+            ->create();
+
+        // Get all product IDs
+        $productIds = Product::pluck('id')->toArray();
+
+        // Attach 2 existing products to each listing
+        foreach ($user->listingsCreated as $listing) {
+            $randomProductIds = array_rand($productIds, 2);
+            $listing->products()->attach([
+                $productIds[$randomProductIds[0]],
+                $productIds[$randomProductIds[1]]
+            ]);
+        }
+
+        $listings = Listing::where('published_at', '<', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(30)
+            ->get();
 
         return View::make('home.index', ['listings' => $listings]);
     }

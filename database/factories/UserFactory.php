@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Country;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -29,6 +30,13 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'phone' => fake()->numerify('###########'),
             'password' => static::$password ??= Hash::make('password'),
+            'google_id' => null,
+            'facebook_id' => null,
+            'address_line1' => $this->faker->streetAddress,
+            'address_line2' => $this->faker->secondaryAddress,
+            'city' => $this->faker->city,
+            'postcode' => $this->faker->postcode,
+            'country_id' => Country::inRandomOrder()->first()->id,
             'remember_token' => Str::random(10),
         ];
     }

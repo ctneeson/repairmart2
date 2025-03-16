@@ -41,7 +41,7 @@ class ListingFactory extends Factory
             'override_postcode' => $useDefaultLocation ? $this->faker->postcode : null,
             'override_country_id' => $useDefaultLocation ? Country::inRandomOrder()->first()->id : null,
             'expiry_days' => $this->faker->numberBetween(7, 90),
-            'published_at' => fake()->optional(0.9)->dateTimeBetween('-1 month', 'now'),
+            'published_at' => $this->faker->optional(0.9)->dateTimeBetween('-1 month', 'now')->format('Y-m-d H:i:s'),
         ];
     }
 }

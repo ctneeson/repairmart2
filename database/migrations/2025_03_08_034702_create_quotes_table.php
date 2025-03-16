@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->foreignId('deliverymethod_id')->constrainedTo('deliverymethods');
             $table->decimal('amount', 10, 2);
             $table->integer('turnaround');
-            $table->boolean('use_default_locations')->defaultValue(true);
+            $table->boolean('use_default_location')->defaultValue(true);
             $table->string('override_address_line1', 255)->nullable();
             $table->string('override_address_line2', 255)->nullable();
             $table->string('override_city', 255)->nullable();

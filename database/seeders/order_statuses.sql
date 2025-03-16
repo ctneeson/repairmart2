@@ -1,0 +1,10 @@
+INSERT INTO order_statuses(name) VALUES ('Created');
+INSERT INTO order_statuses(name) VALUES ('Dispatched to Specialist');
+INSERT INTO order_statuses(name) VALUES ('Specialist Assessing');
+INSERT INTO order_statuses(name) VALUES ('Quote Adjustment Requested');
+INSERT INTO order_statuses(name) VALUES ('Quote Adjustment Approved');
+INSERT INTO order_statuses(name) VALUES ('Quote Adjustment Rejected');
+INSERT INTO order_statuses(name) VALUES ('Specialist Repairing');
+INSERT INTO order_statuses(name) VALUES ('Dispatched to Customer');
+INSERT INTO order_statuses(name) VALUES ('Closed-Repaired');
+INSERT INTO order_statuses(name) VALUES ('Closed-Cancelled');

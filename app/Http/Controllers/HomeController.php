@@ -256,9 +256,13 @@ class HomeController extends Controller
         //     ['position' => 2, 'path' => 'path2'],
         // ]);
         // dd($product);
-        $listing = Listing::find(1);
+
+        // $listing = Listing::find(1);
         // $listing->products()->sync([1, 3]);
-        $listing->products()->detach([1]);
+        // $listing->products()->detach([1]);
+
+        $maker = Maker::factory()->make();
+        dd($maker);
 
         return View::make('home.index', ['listings' => $listings]);
     }

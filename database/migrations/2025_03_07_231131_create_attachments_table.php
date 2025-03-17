@@ -15,12 +15,13 @@ return new class extends Migration {
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Listing::class)->constrained()->nullable();
-            $table->foreignIdFor(Order::class)->constrained()->nullable();
-            $table->foreignIdFor(Email::class)->constrained()->nullable();
+            $table->foreignIdFor(Listing::class)->nullable()->constrained();
+            $table->foreignIdFor(Order::class)->nullable()->constrained();
+            $table->foreignIdFor(Email::class)->nullable()->constrained();
             $table->integer('position');
             $table->string('path', 255);
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent(); // Set default value of current timestamp
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate(); // Set default value of current timestamp and update on change
             $table->timestamp('deleted_at')->nullable();
         });
     }

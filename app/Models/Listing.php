@@ -121,4 +121,9 @@ class Listing extends Model
             'product_id' // Foreign key on the pivot table for the related model
         );
     }
+
+    public function emails(): HasMany
+    {
+        return $this->HasMany(Email::class, 'listing_id');
+    }
 }

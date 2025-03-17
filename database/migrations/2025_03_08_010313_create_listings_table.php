@@ -27,7 +27,8 @@ return new class extends Migration {
             $table->foreignId('override_country_id')->constrainedTo('countries')->nullable();
             $table->integer('expiry_days')->default(30);
             $table->timestamp('published_at')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
     }

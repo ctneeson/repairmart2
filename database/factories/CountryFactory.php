@@ -17,7 +17,8 @@ class CountryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'iso_code' => $this->faker->countryCode,
+            'name' => fake()->word,
         ];
     }
 }

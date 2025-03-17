@@ -17,7 +17,8 @@ class CurrencyFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'iso_code' => $this->faker->currencyCode,
+            'name' => fake()->word,
         ];
     }
 }

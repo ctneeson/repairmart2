@@ -259,23 +259,6 @@ class HomeController extends Controller
         // $maker = Maker::factory()->create();
         // dd($maker);
 
-        // Create a user with 5 listings
-        $user = User::factory()
-            ->has(Listing::factory()->count(5), 'listingsCreated')
-            ->create();
-
-        // Get all product IDs
-        $productIds = Product::pluck('id')->toArray();
-
-        // Attach 2 existing products to each listing
-        foreach ($user->listingsCreated as $listing) {
-            $randomProductIds = array_rand($productIds, 2);
-            $listing->products()->attach([
-                $productIds[$randomProductIds[0]],
-                $productIds[$randomProductIds[1]]
-            ]);
-        }
-
         $listings = Listing::where('published_at', '<', now())
             ->orderBy('published_at', 'desc')
             ->limit(30)

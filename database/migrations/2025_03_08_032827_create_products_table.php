@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->string('category', 255);
             $table->string('subcategory', 255);
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
     }

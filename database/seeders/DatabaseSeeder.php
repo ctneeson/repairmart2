@@ -2,24 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\DeliveryMethod;
-use App\Models\FeedbackType;
-use App\Models\ListingStatus;
-use App\Models\Manufacturer;
-use App\Models\OrderStatus;
-use App\Models\Product;
-use App\Models\QuoteStatus;
-use App\Models\FuelType;
-use App\Models\State;
-use App\Models\City;
-use App\Models\Maker;
-use App\Models\Car;
-use App\Models\CarImage;
-use App\Models\Model as CarModel;
 use Illuminate\Database\Eloquent\Factories\Sequence;
+use App\Models\User;
+use App\Models\Product;
+use App\Models\Listing;
+use App\Models\Attachment;
+use App\Models\Email;
+use App\Models\Quote;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,756 +25,95 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        // $this->call(UserSeeder::class);
+        $this->call(CountriesSeeder::class);
+        $this->call(CurrenciesSeeder::class);
+        $this->call(DeliveryMethodsSeeder::class);
+        $this->call(FeedbackTypesSeeder::class);
+        $this->call(ListingStatusesSeeder::class);
+        $this->call(ManufacturersSeeder::class);
+        $this->call(OrderStatusesSeeder::class);
+        $this->call(ProductsSeeder::class);
+        $this->call(QuoteStatusesSeeder::class);
 
-        Country::factory()
-            ->sequence(
-                ['iso_code' => 'AD', 'name' => 'Andorra'],
-                ['iso_code' => 'AE', 'name' => 'United Arab Emirates'],
-                ['iso_code' => 'AF', 'name' => 'Afghanistan'],
-                ['iso_code' => 'AG', 'name' => 'Antigua And Barbuda'],
-                ['iso_code' => 'AI', 'name' => 'Anguilla'],
-                ['iso_code' => 'AL', 'name' => 'Albania'],
-                ['iso_code' => 'AM', 'name' => 'Armenia'],
-                ['iso_code' => 'AO', 'name' => 'Angola'],
-                ['iso_code' => 'AR', 'name' => 'Argentina'],
-                ['iso_code' => 'AS', 'name' => 'American Samoa'],
-                ['iso_code' => 'AT', 'name' => 'Austria'],
-                ['iso_code' => 'AU', 'name' => 'Australia'],
-                ['iso_code' => 'AW', 'name' => 'Aruba'],
-                ['iso_code' => 'AZ', 'name' => 'Azerbaijan'],
-                ['iso_code' => 'BA', 'name' => 'Bosnia And Herzegovina'],
-                ['iso_code' => 'BB', 'name' => 'Barbados'],
-                ['iso_code' => 'BD', 'name' => 'Bangladesh'],
-                ['iso_code' => 'BE', 'name' => 'Belgium'],
-                ['iso_code' => 'BF', 'name' => 'Burkina Faso'],
-                ['iso_code' => 'BG', 'name' => 'Bulgaria'],
-                ['iso_code' => 'BH', 'name' => 'Bahrain'],
-                ['iso_code' => 'BI', 'name' => 'Burundi'],
-                ['iso_code' => 'BJ', 'name' => 'Benin'],
-                ['iso_code' => 'BM', 'name' => 'Bermuda'],
-                ['iso_code' => 'BN', 'name' => 'Brunei Darussalam'],
-                ['iso_code' => 'BO', 'name' => 'Bolivia'],
-                ['iso_code' => 'BR', 'name' => 'Brazil'],
-                ['iso_code' => 'BS', 'name' => 'Bahamas'],
-                ['iso_code' => 'BT', 'name' => 'Bhutan'],
-                ['iso_code' => 'BV', 'name' => 'Bouvet Island'],
-                ['iso_code' => 'BW', 'name' => 'Botswana'],
-                ['iso_code' => 'BY', 'name' => 'Belarus'],
-                ['iso_code' => 'BZ', 'name' => 'Belize'],
-                ['iso_code' => 'CA', 'name' => 'Canada'],
-                ['iso_code' => 'CC', 'name' => 'Cocos (Keeling) Islands'],
-                ['iso_code' => 'CD', 'name' => 'Democratic Republic Of The Congo'],
-                ['iso_code' => 'CF', 'name' => 'Central African Republic'],
-                ['iso_code' => 'CG', 'name' => 'Congo'],
-                ['iso_code' => 'CH', 'name' => 'Switzerland'],
-                ['iso_code' => 'CI', 'name' => 'Côte D\'Ivoire'],
-                ['iso_code' => 'CL', 'name' => 'Chile'],
-                ['iso_code' => 'CM', 'name' => 'Cameroon'],
-                ['iso_code' => 'CN', 'name' => 'China'],
-                ['iso_code' => 'CO', 'name' => 'Colombia'],
-                ['iso_code' => 'CR', 'name' => 'Costa Rica'],
-                ['iso_code' => 'CU', 'name' => 'Cuba'],
-                ['iso_code' => 'CV', 'name' => 'Cape Verde'],
-                ['iso_code' => 'CX', 'name' => 'Christmas Island'],
-                ['iso_code' => 'CY', 'name' => 'Cyprus'],
-                ['iso_code' => 'CZ', 'name' => 'Czech Republic'],
-                ['iso_code' => 'DE', 'name' => 'Germany'],
-                ['iso_code' => 'DJ', 'name' => 'Djibouti'],
-                ['iso_code' => 'DK', 'name' => 'Denmark'],
-                ['iso_code' => 'DM', 'name' => 'Dominica'],
-                ['iso_code' => 'DO', 'name' => 'Dominican Republic'],
-                ['iso_code' => 'DZ', 'name' => 'Algeria'],
-                ['iso_code' => 'EC', 'name' => 'Ecuador'],
-                ['iso_code' => 'EE', 'name' => 'Estonia'],
-                ['iso_code' => 'EG', 'name' => 'Egypt'],
-                ['iso_code' => 'EH', 'name' => 'Western Sahara'],
-                ['iso_code' => 'ER', 'name' => 'Eritrea'],
-                ['iso_code' => 'ES', 'name' => 'Spain'],
-                ['iso_code' => 'ET', 'name' => 'Ethiopia'],
-                ['iso_code' => 'FI', 'name' => 'Finland'],
-                ['iso_code' => 'FJ', 'name' => 'Fiji'],
-                ['iso_code' => 'FO', 'name' => 'Faroe Islands'],
-                ['iso_code' => 'FR', 'name' => 'France'],
-                ['iso_code' => 'GA', 'name' => 'Gabon'],
-                ['iso_code' => 'GB', 'name' => 'United Kingdom'],
-                ['iso_code' => 'GD', 'name' => 'Grenada'],
-                ['iso_code' => 'GE', 'name' => 'Georgia'],
-                ['iso_code' => 'GF', 'name' => 'French Guiana'],
-                ['iso_code' => 'GG', 'name' => 'Guernsey'],
-                ['iso_code' => 'GH', 'name' => 'Ghana'],
-                ['iso_code' => 'GI', 'name' => 'Gibraltar'],
-                ['iso_code' => 'GL', 'name' => 'Greenland'],
-                ['iso_code' => 'GM', 'name' => 'Gambia'],
-                ['iso_code' => 'GN', 'name' => 'Guinea'],
-                ['iso_code' => 'GP', 'name' => 'Guadeloupe'],
-                ['iso_code' => 'GQ', 'name' => 'Equatorial Guinea'],
-                ['iso_code' => 'GR', 'name' => 'Greece'],
-                ['iso_code' => 'GT', 'name' => 'Guatemala'],
-                ['iso_code' => 'GU', 'name' => 'Guam'],
-                ['iso_code' => 'GW', 'name' => 'Guinea-Bissau'],
-                ['iso_code' => 'GY', 'name' => 'Guyana'],
-                ['iso_code' => 'HK', 'name' => 'Hong Kong'],
-                ['iso_code' => 'HM', 'name' => 'Heard Island And Mcdonald Islands'],
-                ['iso_code' => 'HN', 'name' => 'Honduras'],
-                ['iso_code' => 'HR', 'name' => 'Croatia'],
-                ['iso_code' => 'HT', 'name' => 'Haiti'],
-                ['iso_code' => 'HU', 'name' => 'Hungary'],
-                ['iso_code' => 'ID', 'name' => 'Indonesia'],
-                ['iso_code' => 'IE', 'name' => 'Ireland'],
-                ['iso_code' => 'IL', 'name' => 'Israel'],
-                ['iso_code' => 'IM', 'name' => 'Isle Of Man'],
-                ['iso_code' => 'IN', 'name' => 'India'],
-                ['iso_code' => 'IO', 'name' => 'British Indian Ocean Territory'],
-                ['iso_code' => 'IQ', 'name' => 'Iraq'],
-                ['iso_code' => 'IR', 'name' => 'Iran'],
-                ['iso_code' => 'IS', 'name' => 'Iceland'],
-                ['iso_code' => 'IT', 'name' => 'Italy'],
-                ['iso_code' => 'JE', 'name' => 'Jersey'],
-                ['iso_code' => 'JM', 'name' => 'Jamaica'],
-                ['iso_code' => 'JO', 'name' => 'Jordan'],
-                ['iso_code' => 'JP', 'name' => 'Japan'],
-                ['iso_code' => 'KE', 'name' => 'Kenya'],
-                ['iso_code' => 'KG', 'name' => 'Kyrgyzstan'],
-                ['iso_code' => 'KH', 'name' => 'Cambodia'],
-                ['iso_code' => 'KI', 'name' => 'Kiribati'],
-                ['iso_code' => 'KM', 'name' => 'Comoros'],
-                ['iso_code' => 'KN', 'name' => 'Saint Kitts And Nevis'],
-                ['iso_code' => 'KP', 'name' => 'North Korea'],
-                ['iso_code' => 'KR', 'name' => 'South Korea'],
-                ['iso_code' => 'KW', 'name' => 'Kuwait'],
-                ['iso_code' => 'KY', 'name' => 'Cayman Islands'],
-                ['iso_code' => 'KZ', 'name' => 'Kazakhstan'],
-                ['iso_code' => 'LA', 'name' => 'Lao Peoples Democratic Republic'],
-                ['iso_code' => 'LB', 'name' => 'Lebanon'],
-                ['iso_code' => 'LC', 'name' => 'Saint Lucia'],
-                ['iso_code' => 'LI', 'name' => 'Liechtenstein'],
-                ['iso_code' => 'LK', 'name' => 'Sri Lanka'],
-                ['iso_code' => 'LR', 'name' => 'Liberia'],
-                ['iso_code' => 'LS', 'name' => 'Lesotho'],
-                ['iso_code' => 'LT', 'name' => 'Lithuania'],
-                ['iso_code' => 'LU', 'name' => 'Luxembourg'],
-                ['iso_code' => 'LV', 'name' => 'Latvia'],
-                ['iso_code' => 'LY', 'name' => 'Libya'],
-                ['iso_code' => 'MA', 'name' => 'Morocco'],
-                ['iso_code' => 'MC', 'name' => 'Monaco'],
-                ['iso_code' => 'MD', 'name' => 'Moldova'],
-                ['iso_code' => 'ME', 'name' => 'Montenegro'],
-                ['iso_code' => 'MF', 'name' => 'Saint Martin (French Part)'],
-                ['iso_code' => 'MG', 'name' => 'Madagascar'],
-                ['iso_code' => 'MH', 'name' => 'Marshall Islands'],
-                ['iso_code' => 'MK', 'name' => 'North Macedonia'],
-                ['iso_code' => 'ML', 'name' => 'Mali'],
-                ['iso_code' => 'MM', 'name' => 'Myanmar'],
-                ['iso_code' => 'MN', 'name' => 'Mongolia'],
-                ['iso_code' => 'MO', 'name' => 'Macao'],
-                ['iso_code' => 'MP', 'name' => 'Northern Mariana Islands'],
-                ['iso_code' => 'MQ', 'name' => 'Martinique'],
-                ['iso_code' => 'MR', 'name' => 'Mauritania'],
-                ['iso_code' => 'MS', 'name' => 'Montserrat'],
-                ['iso_code' => 'MT', 'name' => 'Malta'],
-                ['iso_code' => 'MU', 'name' => 'Mauritius'],
-                ['iso_code' => 'MV', 'name' => 'Maldives'],
-                ['iso_code' => 'MW', 'name' => 'Malawi'],
-                ['iso_code' => 'MX', 'name' => 'Mexico'],
-                ['iso_code' => 'MY', 'name' => 'Malaysia'],
-                ['iso_code' => 'MZ', 'name' => 'Mozambique'],
-                ['iso_code' => 'NA', 'name' => 'Namibia'],
-                ['iso_code' => 'NC', 'name' => 'New Caledonia'],
-                ['iso_code' => 'NE', 'name' => 'Niger'],
-                ['iso_code' => 'NF', 'name' => 'Norfolk Island'],
-                ['iso_code' => 'NG', 'name' => 'Nigeria'],
-                ['iso_code' => 'NI', 'name' => 'Nicaragua'],
-                ['iso_code' => 'NL', 'name' => 'Netherlands'],
-                ['iso_code' => 'NO', 'name' => 'Norway'],
-                ['iso_code' => 'NP', 'name' => 'Nepal'],
-                ['iso_code' => 'NR', 'name' => 'Nauru'],
-                ['iso_code' => 'NU', 'name' => 'Niue'],
-                ['iso_code' => 'NZ', 'name' => 'New Zealand'],
-                ['iso_code' => 'OM', 'name' => 'Oman'],
-                ['iso_code' => 'PA', 'name' => 'Panama'],
-                ['iso_code' => 'PE', 'name' => 'Peru'],
-                ['iso_code' => 'PF', 'name' => 'French Polynesia'],
-                ['iso_code' => 'PG', 'name' => 'Papua New Guinea'],
-                ['iso_code' => 'PH', 'name' => 'Philippines'],
-                ['iso_code' => 'PK', 'name' => 'Pakistan'],
-                ['iso_code' => 'PL', 'name' => 'Poland'],
-                ['iso_code' => 'PM', 'name' => 'Saint Pierre And Miquelon'],
-                ['iso_code' => 'PN', 'name' => 'Pitcairn'],
-                ['iso_code' => 'PR', 'name' => 'Puerto Rico'],
-                ['iso_code' => 'PT', 'name' => 'Portugal'],
-                ['iso_code' => 'PW', 'name' => 'Palau'],
-                ['iso_code' => 'PY', 'name' => 'Paraguay'],
-                ['iso_code' => 'QA', 'name' => 'Qatar'],
-                ['iso_code' => 'RO', 'name' => 'Romania'],
-                ['iso_code' => 'RS', 'name' => 'Serbia'],
-                ['iso_code' => 'RU', 'name' => 'Russian Federation'],
-                ['iso_code' => 'RW', 'name' => 'Rwanda'],
-                ['iso_code' => 'SA', 'name' => 'Saudi Arabia'],
-                ['iso_code' => 'SB', 'name' => 'Solomon Islands'],
-                ['iso_code' => 'SC', 'name' => 'Seychelles'],
-                ['iso_code' => 'SD', 'name' => 'Sudan'],
-                ['iso_code' => 'SE', 'name' => 'Sweden'],
-                ['iso_code' => 'SG', 'name' => 'Singapore'],
-                ['iso_code' => 'SI', 'name' => 'Slovenia'],
-                ['iso_code' => 'SJ', 'name' => 'Svalbard And Jan Mayen'],
-                ['iso_code' => 'SK', 'name' => 'Slovakia'],
-                ['iso_code' => 'SL', 'name' => 'Sierra Leone'],
-                ['iso_code' => 'SM', 'name' => 'San Marino'],
-                ['iso_code' => 'SN', 'name' => 'Senegal'],
-                ['iso_code' => 'SO', 'name' => 'Somalia'],
-                ['iso_code' => 'SR', 'name' => 'Suriname'],
-                ['iso_code' => 'SS', 'name' => 'South Sudan'],
-                ['iso_code' => 'ST', 'name' => 'Sao Tome And Principe'],
-                ['iso_code' => 'SV', 'name' => 'El Salvador'],
-                ['iso_code' => 'SX', 'name' => 'Sint Maarten (Dutch Part)'],
-                ['iso_code' => 'SY', 'name' => 'Syrian Arab Republic'],
-                ['iso_code' => 'SZ', 'name' => 'Swaziland'],
-                ['iso_code' => 'TC', 'name' => 'Turks And Caicos Islands'],
-                ['iso_code' => 'TD', 'name' => 'Chad'],
-                ['iso_code' => 'TG', 'name' => 'Togo'],
-                ['iso_code' => 'TH', 'name' => 'Thailand'],
-                ['iso_code' => 'TJ', 'name' => 'Tajikistan'],
-                ['iso_code' => 'TK', 'name' => 'Tokelau'],
-                ['iso_code' => 'TL', 'name' => 'Timor-Leste'],
-                ['iso_code' => 'TM', 'name' => 'Turkmenistan'],
-                ['iso_code' => 'TN', 'name' => 'Tunisia'],
-                ['iso_code' => 'TO', 'name' => 'Tonga'],
-                ['iso_code' => 'TR', 'name' => 'Turkey'],
-                ['iso_code' => 'TT', 'name' => 'Trinidad And Tobago'],
-                ['iso_code' => 'TV', 'name' => 'Tuvalu'],
-                ['iso_code' => 'TW', 'name' => 'Taiwan'],
-                ['iso_code' => 'TZ', 'name' => 'Tanzania'],
-                ['iso_code' => 'UA', 'name' => 'Ukraine'],
-                ['iso_code' => 'UG', 'name' => 'Uganda'],
-                ['iso_code' => 'UM', 'name' => 'United States Minor Outlying Islands'],
-                ['iso_code' => 'US', 'name' => 'United States'],
-                ['iso_code' => 'UY', 'name' => 'Uruguay'],
-                ['iso_code' => 'UZ', 'name' => 'Uzbekistan'],
-                ['iso_code' => 'VA', 'name' => 'Holy See (Vatican City State)'],
-                ['iso_code' => 'VC', 'name' => 'Saint Vincent And The Grenadines'],
-                ['iso_code' => 'VE', 'name' => 'Venezuela'],
-                ['iso_code' => 'VN', 'name' => 'Viet Nam'],
-                ['iso_code' => 'VU', 'name' => 'Vanuatu'],
-                ['iso_code' => 'WF', 'name' => 'Wallis And Futuna'],
-                ['iso_code' => 'WS', 'name' => 'Samoa'],
-                ['iso_code' => 'YE', 'name' => 'Yemen'],
-                ['iso_code' => 'YT', 'name' => 'Mayotte'],
-                ['iso_code' => 'ZA', 'name' => 'South Africa'],
-                ['iso_code' => 'ZM', 'name' => 'Zambia'],
-                ['iso_code' => 'ZW', 'name' => 'Zimbabwe'],
-            )
-            ->count(234)
-            ->create();
+        // Create system user
+        $systemUser = User::factory()->create([
+            'name' => 'RepairMart',
+            'email' => 'system@repairmart.net',
+        ]);
 
-        Currency::factory()
-            ->sequence(
-                ['iso_code' => 'AED', 'name' => 'UAE Dirham'],
-                ['iso_code' => 'AFN', 'name' => 'Afghani'],
-                ['iso_code' => 'ALL', 'name' => 'Lek'],
-                ['iso_code' => 'AMD', 'name' => 'Armenian Dram'],
-                ['iso_code' => 'ANG', 'name' => 'Netherlands Antillean Guilder'],
-                ['iso_code' => 'AOA', 'name' => 'Kwanza'],
-                ['iso_code' => 'ARS', 'name' => 'Argentine Peso'],
-                ['iso_code' => 'AUD', 'name' => 'Australian Dollar'],
-                ['iso_code' => 'AWG', 'name' => 'Aruban Florin'],
-                ['iso_code' => 'AZN', 'name' => 'Azerbaijanian Manat'],
-                ['iso_code' => 'BAM', 'name' => 'Convertible Mark'],
-                ['iso_code' => 'BBD', 'name' => 'Barbados Dollar'],
-                ['iso_code' => 'BDT', 'name' => 'Taka'],
-                ['iso_code' => 'BGN', 'name' => 'Bulgarian Lev'],
-                ['iso_code' => 'BHD', 'name' => 'Bahraini Dinar'],
-                ['iso_code' => 'BIF', 'name' => 'Burundi Franc'],
-                ['iso_code' => 'BMD', 'name' => 'Bermudian Dollar'],
-                ['iso_code' => 'BND', 'name' => 'Brunei Dollar'],
-                ['iso_code' => 'BOB', 'name' => 'Boliviano'],
-                ['iso_code' => 'BRL', 'name' => 'Brazilian Real'],
-                ['iso_code' => 'BSD', 'name' => 'Bahamian Dollar'],
-                ['iso_code' => 'BTN', 'name' => 'Ngultrum'],
-                ['iso_code' => 'BWP', 'name' => 'Pula'],
-                ['iso_code' => 'BYN', 'name' => 'Belarussian Ruble'],
-                ['iso_code' => 'BZD', 'name' => 'Belize Dollar'],
-                ['iso_code' => 'CAD', 'name' => 'Canadian Dollar'],
-                ['iso_code' => 'CDF', 'name' => 'Congolese Franc'],
-                ['iso_code' => 'CHF', 'name' => 'Swiss Franc'],
-                ['iso_code' => 'CLP', 'name' => 'Chilean Peso'],
-                ['iso_code' => 'CNY', 'name' => 'Yuan Renminbi'],
-                ['iso_code' => 'COP', 'name' => 'Colombian Peso'],
-                ['iso_code' => 'CRC', 'name' => 'Costa Rican Colon'],
-                ['iso_code' => 'CUP', 'name' => 'Cuban Peso'],
-                ['iso_code' => 'CVE', 'name' => 'Cabo Verde Escudo'],
-                ['iso_code' => 'CZK', 'name' => 'Czech Koruna'],
-                ['iso_code' => 'DJF', 'name' => 'Djibouti Franc'],
-                ['iso_code' => 'DKK', 'name' => 'Danish Krone'],
-                ['iso_code' => 'DOP', 'name' => 'Dominican Peso'],
-                ['iso_code' => 'DZD', 'name' => 'Algerian Dinar'],
-                ['iso_code' => 'EGP', 'name' => 'Egyptian Pound'],
-                ['iso_code' => 'ERN', 'name' => 'Nakfa'],
-                ['iso_code' => 'ETB', 'name' => 'Ethiopian Birr'],
-                ['iso_code' => 'EUR', 'name' => 'Euro'],
-                ['iso_code' => 'FJD', 'name' => 'Fiji Dollar'],
-                ['iso_code' => 'GBP', 'name' => 'Pound Sterling'],
-                ['iso_code' => 'GEL', 'name' => 'Lari'],
-                ['iso_code' => 'GHS', 'name' => 'Ghana Cedi'],
-                ['iso_code' => 'GIP', 'name' => 'Gibraltar Pound'],
-                ['iso_code' => 'GMD', 'name' => 'Dalasi'],
-                ['iso_code' => 'GNF', 'name' => 'Guinea Franc'],
-                ['iso_code' => 'GTQ', 'name' => 'Quetzal'],
-                ['iso_code' => 'GYD', 'name' => 'Guyana Dollar'],
-                ['iso_code' => 'HKD', 'name' => 'Hong Kong Dollar'],
-                ['iso_code' => 'HNL', 'name' => 'Lempira'],
-                ['iso_code' => 'HRK', 'name' => 'Kuna'],
-                ['iso_code' => 'HTG', 'name' => 'Gourde'],
-                ['iso_code' => 'HUF', 'name' => 'Forint'],
-                ['iso_code' => 'IDR', 'name' => 'Rupiah'],
-                ['iso_code' => 'ILS', 'name' => 'New Israeli Sheqel'],
-                ['iso_code' => 'INR', 'name' => 'Indian Rupee'],
-                ['iso_code' => 'IQD', 'name' => 'Iraqi Dinar'],
-                ['iso_code' => 'IRR', 'name' => 'Iranian Rial'],
-                ['iso_code' => 'ISK', 'name' => 'Iceland Krona'],
-                ['iso_code' => 'JMD', 'name' => 'Jamaican Dollar'],
-                ['iso_code' => 'JOD', 'name' => 'Jordanian Dinar'],
-                ['iso_code' => 'JPY', 'name' => 'Yen'],
-                ['iso_code' => 'KES', 'name' => 'Kenyan Shilling'],
-                ['iso_code' => 'KGS', 'name' => 'Som'],
-                ['iso_code' => 'KHR', 'name' => 'Riel'],
-                ['iso_code' => 'KMF', 'name' => 'Comoro Franc'],
-                ['iso_code' => 'KPW', 'name' => 'North Korean Won'],
-                ['iso_code' => 'KRW', 'name' => 'Won'],
-                ['iso_code' => 'KWD', 'name' => 'Kuwaiti Dinar'],
-                ['iso_code' => 'KYD', 'name' => 'Cayman Islands Dollar'],
-                ['iso_code' => 'KZT', 'name' => 'Tenge'],
-                ['iso_code' => 'LAK', 'name' => 'Kip'],
-                ['iso_code' => 'LBP', 'name' => 'Lebanese Pound'],
-                ['iso_code' => 'LKR', 'name' => 'Sri Lanka Rupee'],
-                ['iso_code' => 'LRD', 'name' => 'Liberian Dollar'],
-                ['iso_code' => 'LSL', 'name' => 'Loti'],
-                ['iso_code' => 'LYD', 'name' => 'Libyan Dinar'],
-                ['iso_code' => 'MAD', 'name' => 'Moroccan Dirham'],
-                ['iso_code' => 'MDL', 'name' => 'Moldovan Leu'],
-                ['iso_code' => 'MGA', 'name' => 'Malagasy Ariary'],
-                ['iso_code' => 'MKD', 'name' => 'Denar'],
-                ['iso_code' => 'MMK', 'name' => 'Kyat'],
-                ['iso_code' => 'MNT', 'name' => 'Tugrik'],
-                ['iso_code' => 'MOP', 'name' => 'Pataca'],
-                ['iso_code' => 'MRU', 'name' => 'Ouguiya'],
-                ['iso_code' => 'MUR', 'name' => 'Mauritius Rupee'],
-                ['iso_code' => 'MVR', 'name' => 'Rufiyaa'],
-                ['iso_code' => 'MWK', 'name' => 'Kwacha'],
-                ['iso_code' => 'MXN', 'name' => 'Mexican Peso'],
-                ['iso_code' => 'MYR', 'name' => 'Malaysian Ringgit'],
-                ['iso_code' => 'MZN', 'name' => 'Mozambique Metical'],
-                ['iso_code' => 'NAD', 'name' => 'Namibia Dollar'],
-                ['iso_code' => 'NGN', 'name' => 'Naira'],
-                ['iso_code' => 'NIO', 'name' => 'Cordoba Oro'],
-                ['iso_code' => 'NOK', 'name' => 'Norwegian Krone'],
-                ['iso_code' => 'NPR', 'name' => 'Nepalese Rupee'],
-                ['iso_code' => 'NZD', 'name' => 'New Zealand Dollar'],
-                ['iso_code' => 'OMR', 'name' => 'Rial Omani'],
-                ['iso_code' => 'PAB', 'name' => 'Balboa'],
-                ['iso_code' => 'PEN', 'name' => 'Nuevo Sol'],
-                ['iso_code' => 'PGK', 'name' => 'Kina'],
-                ['iso_code' => 'PHP', 'name' => 'Philippine Peso'],
-                ['iso_code' => 'PKR', 'name' => 'Pakistan Rupee'],
-                ['iso_code' => 'PLN', 'name' => 'Zloty'],
-                ['iso_code' => 'PYG', 'name' => 'Guarani'],
-                ['iso_code' => 'QAR', 'name' => 'Qatari Rial'],
-                ['iso_code' => 'RON', 'name' => 'Romanian Leu'],
-                ['iso_code' => 'RSD', 'name' => 'Serbian Dinar'],
-                ['iso_code' => 'RUB', 'name' => 'Russian Ruble'],
-                ['iso_code' => 'RWF', 'name' => 'Rwanda Franc'],
-                ['iso_code' => 'SAR', 'name' => 'Saudi Riyal'],
-                ['iso_code' => 'SBD', 'name' => 'Solomon Islands Dollar'],
-                ['iso_code' => 'SCR', 'name' => 'Seychelles Rupee'],
-                ['iso_code' => 'SDG', 'name' => 'Sudanese Pound'],
-                ['iso_code' => 'SEK', 'name' => 'Swedish Krona'],
-                ['iso_code' => 'SGD', 'name' => 'Singapore Dollar'],
-                ['iso_code' => 'SLE', 'name' => 'Leone'],
-                ['iso_code' => 'SOS', 'name' => 'Somali Shilling'],
-                ['iso_code' => 'SRD', 'name' => 'Surinam Dollar'],
-                ['iso_code' => 'SSP', 'name' => 'South Sudanese Pound'],
-                ['iso_code' => 'STN', 'name' => 'Dobra'],
-                ['iso_code' => 'SVC', 'name' => 'El Salvador Colon'],
-                ['iso_code' => 'SYP', 'name' => 'Syrian Pound'],
-                ['iso_code' => 'SZL', 'name' => 'Lilangeni'],
-                ['iso_code' => 'THB', 'name' => 'Baht'],
-                ['iso_code' => 'TJS', 'name' => 'Somoni'],
-                ['iso_code' => 'TMT', 'name' => 'Turkmenistan New Manat'],
-                ['iso_code' => 'TND', 'name' => 'Tunisian Dinar'],
-                ['iso_code' => 'TOP', 'name' => 'Pa\'anga'],
-                ['iso_code' => 'TRY', 'name' => 'Turkish Lira'],
-                ['iso_code' => 'TTD', 'name' => 'Trinidad and Tobago Dollar'],
-                ['iso_code' => 'TWD', 'name' => 'New Taiwan Dollar'],
-                ['iso_code' => 'TZS', 'name' => 'Tanzanian Shilling'],
-                ['iso_code' => 'UAH', 'name' => 'Hryvnia'],
-                ['iso_code' => 'UGX', 'name' => 'Uganda Shilling'],
-                ['iso_code' => 'USD', 'name' => 'US Dollar'],
-                ['iso_code' => 'UYU', 'name' => 'Peso Uruguayo'],
-                ['iso_code' => 'UZS', 'name' => 'Uzbekistan Sum'],
-                ['iso_code' => 'VEF', 'name' => 'Bolivar'],
-                ['iso_code' => 'VND', 'name' => 'Dong'],
-                ['iso_code' => 'VUV', 'name' => 'Vatu'],
-                ['iso_code' => 'WST', 'name' => 'Tala'],
-                ['iso_code' => 'XAF', 'name' => 'CFA Franc BEAC'],
-                ['iso_code' => 'XCD', 'name' => 'East Caribbean Dollar'],
-                ['iso_code' => 'XOF', 'name' => 'CFA Franc BCEAO'],
-                ['iso_code' => 'XPF', 'name' => 'CFP Franc'],
-                ['iso_code' => 'YER', 'name' => 'Yemeni Rial'],
-                ['iso_code' => 'ZAR', 'name' => 'Rand'],
-                ['iso_code' => 'ZMW', 'name' => 'Zambian Kwacha'],
-                ['iso_code' => 'ZWL', 'name' => 'Zimbabwe Dollar'],
-            )
-            ->count(154)
-            ->create();
-
-        DeliveryMethod::factory()
-            ->sequence(
-                ['name' => 'Drop-off at Customer address'],
-                ['name' => 'Pick-up at Business address'],
-                ['name' => 'Postage (tracked)'],
-                ['name' => 'Postage (untracked)'],
-            )
-            ->count(4)
-            ->create();
-
-        FeedbackType::factory()
-            ->sequence(
-                ['name' => 'Positive'],
-                ['name' => 'Neutral'],
-                ['name' => 'Negative'],
-            )
-            ->count(3)
-            ->create();
-
-        ListingStatus::factory()
-            ->sequence(
-                ['name' => 'Open'],
-                ['name' => 'Closed-Expired'],
-                ['name' => 'Closed-Retracted'],
-                ['name' => 'Closed-Order Created'],
-            )
-            ->count(4)
-            ->create();
-
-        Manufacturer::factory()
-            ->sequence(
-                ['name' => '3M'],
-                ['name' => 'Acer'],
-                ['name' => 'Aiwa'],
-                ['name' => 'Akai'],
-                ['name' => 'Alba'],
-                ['name' => 'Alcatel'],
-                ['name' => 'Amazon'],
-                ['name' => 'AMD'],
-                ['name' => 'Amstrad'],
-                ['name' => 'AOC'],
-                ['name' => 'Apple'],
-                ['name' => 'Asus'],
-                ['name' => 'Atari'],
-                ['name' => 'Avaya'],
-                ['name' => 'Beko'],
-                ['name' => 'BenQ'],
-                ['name' => 'Binatone'],
-                ['name' => 'Blaupunkt'],
-                ['name' => 'Bosch'],
-                ['name' => 'Bose'],
-                ['name' => 'Braun'],
-                ['name' => 'BT'],
-                ['name' => 'Bush'],
-                ['name' => 'BYD Electronic'],
-                ['name' => 'Canon'],
-                ['name' => 'Casio'],
-                ['name' => 'Cisco'],
-                ['name' => 'Clarion'],
-                ['name' => 'Daewoo'],
-                ['name' => 'Dell'],
-                ['name' => 'D-Link'],
-                ['name' => 'Dynalite'],
-                ['name' => 'Dyson'],
-                ['name' => 'Electrolux'],
-                ['name' => 'Epson'],
-                ['name' => 'Ericcson'],
-                ['name' => 'Fitbit'],
-                ['name' => 'Fujifilm'],
-                ['name' => 'Fujitsu'],
-                ['name' => 'Gateway'],
-                ['name' => 'Gionee'],
-                ['name' => 'Google'],
-                ['name' => 'Grundig'],
-                ['name' => 'Hewlett-Packard'],
-                ['name' => 'Hisense'],
-                ['name' => 'Hitachi'],
-                ['name' => 'HP'],
-                ['name' => 'HTC'],
-                ['name' => 'Huawei'],
-                ['name' => 'Husqvarna'],
-                ['name' => 'Hyundai'],
-                ['name' => 'IBM'],
-                ['name' => 'Intel'],
-                ['name' => 'JBL'],
-                ['name' => 'JVC'],
-                ['name' => 'Kenwood'],
-                ['name' => 'Kingston'],
-                ['name' => 'Konica Minolta'],
-                ['name' => 'Kyocera'],
-                ['name' => 'Lenovo'],
-                ['name' => 'LG'],
-                ['name' => 'Marconi'],
-                ['name' => 'Marshall'],
-                ['name' => 'MediaTek'],
-                ['name' => 'Micron'],
-                ['name' => 'Microsoft'],
-                ['name' => 'Miele'],
-                ['name' => 'Mitsubishi'],
-                ['name' => 'Morphy Richards'],
-                ['name' => 'Motorola'],
-                ['name' => 'NEC'],
-                ['name' => 'Nikon'],
-                ['name' => 'Nintendo'],
-                ['name' => 'Nokia'],
-                ['name' => 'Nvidia'],
-                ['name' => 'Olivetti'],
-                ['name' => 'Olympus'],
-                ['name' => 'OnePlus'],
-                ['name' => 'Oppo'],
-                ['name' => 'Packard Bell'],
-                ['name' => 'Panasonic'],
-                ['name' => 'Pentax'],
-                ['name' => 'Philips'],
-                ['name' => 'Pioneer'],
-                ['name' => 'Plantronics'],
-                ['name' => 'Polycom'],
-                ['name' => 'Pye'],
-                ['name' => 'Qualcomm'],
-                ['name' => 'RCA'],
-                ['name' => 'Realtek'],
-                ['name' => 'Ricoh'],
-                ['name' => 'Russell Hobbs'],
-                ['name' => 'Samsung'],
-                ['name' => 'Sandisk'],
-                ['name' => 'Sanyo'],
-                ['name' => 'Seagate'],
-                ['name' => 'Sega'],
-                ['name' => 'Sennheiser'],
-                ['name' => 'Severin'],
-                ['name' => 'Sharp'],
-                ['name' => 'Siemens'],
-                ['name' => 'Sonos'],
-                ['name' => 'Sony'],
-                ['name' => 'TDK'],
-                ['name' => 'Telefunken'],
-                ['name' => 'Texas Instruments'],
-                ['name' => 'Thomson'],
-                ['name' => 'Thorn'],
-                ['name' => 'Toshiba'],
-                ['name' => 'TP-Link/intex'],
-                ['name' => 'Unisys'],
-                ['name' => 'Viewsonic'],
-                ['name' => 'Western Digital'],
-                ['name' => 'Wipro'],
-                ['name' => 'Wortmann'],
-                ['name' => 'Xerox'],
-                ['name' => 'Xiaomi'],
-                ['name' => 'ZTE'],
-            )
-            ->count(118)
-            ->create();
-
-        OrderStatus::factory()
-            ->sequence(
-                ['name' => 'Created'],
-                ['name' => 'Dispatched to Specialist'],
-                ['name' => 'Specialist Assessing'],
-                ['name' => 'Quote Adjustment Requested'],
-                ['name' => 'Quote Adjustment Approved'],
-                ['name' => 'Quote Adjustment Rejected'],
-                ['name' => 'Specialist Repairing'],
-                ['name' => 'Dispatched to Customer'],
-                ['name' => 'Closed-Repaired'],
-                ['name' => 'Closed-Cancelled'],
-            )
-            ->count(10)
-            ->create();
-
-        Product::factory()
-            ->sequence(
-                ['category' => 'Arts, Crafts & Sewing', 'subcategory' => 'Printing Presses & Accessories'],
-                ['category' => 'Arts, Crafts & Sewing', 'subcategory' => 'Sewing Machines'],
-                ['category' => 'Arts, Crafts & Sewing', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Audio Headphones & Accessories'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Blu-ray Players & Recorders'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Cassette Players & Recorders'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'CB & Two-Way Radios'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'CD Players'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Compact Radios & Stereos'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Digital Voice Recorders'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'DVD Players & Recorders'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Home Theater Systems'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'MP3 & MP4 Players'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Radios'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Satellite Television Products'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Speakers & Audio Systems'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Streaming Media Players'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Televisions'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Turntables & Accessories'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'TV-DVD Combinations'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'VCRs'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Video Projectors'],
-                ['category' => 'Audio-Visual', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Beauty & Personal Care', 'subcategory' => 'Personal Care Products'],
-                ['category' => 'Beauty & Personal Care', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Camera & Photo Accessories'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Digital Cameras'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Film Cameras'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Photo Printers & Scanners'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Quadcopters & Accessories'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Video Cameras'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Video Surveillance Equipment'],
-                ['category' => 'Camera & Photo', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Cell Phones & Accessories', 'subcategory' => 'Cell Phone Accessories'],
-                ['category' => 'Cell Phones & Accessories', 'subcategory' => 'Cell Phones'],
-                ['category' => 'Cell Phones & Accessories', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Audio Devices'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Game Hardware'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Keyboards, Mice & Accessories'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Monitors'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Servers'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Computer Tablets'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Data Storage'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Desktop Computers'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Laptop Computers'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'USB Gadgets'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Webcams'],
-                ['category' => 'Computers & Accessories', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'eBook Readers & Accessories', 'subcategory' => 'eBook Readers'],
-                ['category' => 'eBook Readers & Accessories', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Dehumidifiers'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Home Air Purifiers'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Household Fans'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Humidifiers'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Indoor Space Heaters'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Room Air Conditioners'],
-                ['category' => 'Heating, Cooling & Air Quality', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Dishwashers'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Doorbells'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Electric Cookers'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Home Automation Devices'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Ironing Products'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Laundry Appliances'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Refrigerators, Freezers & Ice Makers'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Room Air Conditioners & Accessories'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Safety & Security Devices'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Vacuum Cleaners & Steam Cleaners'],
-                ['category' => 'Home Electronics', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => '3D Printers'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => '3D Scanners'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Cutting Tools'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Digital Signage Equipment'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Electronic Components'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Filtration'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Food Service Equipment & Supplies'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Hydraulics, Pneumatics & Plumbing'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Industrial Power & Hand Tools'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Lab Instruments & Equipment'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Occupational Health & Safety Products'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Security & Surveillance Equipment'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Testing, Measurement & Inspection Devices'],
-                ['category' => 'Industrial & Scientific', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Kitchen Appliances', 'subcategory' => 'Coffee, Tea & Espresso'],
-                ['category' => 'Kitchen Appliances', 'subcategory' => 'Electric Knives'],
-                ['category' => 'Kitchen Appliances', 'subcategory' => 'Kitchen Small Appliances'],
-                ['category' => 'Kitchen Appliances', 'subcategory' => 'Kitchen Utensils & Gadgets'],
-                ['category' => 'Kitchen Appliances', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Electronic Drums'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Electronic Music, DJ & Karaoke'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Music Recording Equipment'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Musical Instrument Accessories'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Musical Instrument Amplifiers & Effects'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Musical Instrument Keyboards & MIDI'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Recording Microphones & Accessories'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Stage & Sound Equipment'],
-                ['category' => 'Musical Instruments', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Fax Machines'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Point-of-Sale (POS) Equipment'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Printers, Scanners, Copiers'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Telephones'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Video Projectors & Accessories'],
-                ['category' => 'Office Electronics', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Patio, Lawn & Garden', 'subcategory' => 'Outdoor Kitchen Appliances'],
-                ['category' => 'Patio, Lawn & Garden', 'subcategory' => 'Outdoor Power & Lawn Equipment'],
-                ['category' => 'Patio, Lawn & Garden', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Robotics', 'subcategory' => 'Unmanned Aerial Vehicles (UAVs)'],
-                ['category' => 'Robotics', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Camping & Hiking Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Cycling Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Exercise & Fitness Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Golf Accessories'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Hunting & Fishing'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Leisure & Games Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Other Sports Types'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Outdoor Recreation Accessories'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Sports Accessories'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Team Sports Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Water Sports'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Winter Sports Equipment'],
-                ['category' => 'Sports & Outdoors', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Tools', 'subcategory' => 'Electrical Tools & Hardware'],
-                ['category' => 'Tools', 'subcategory' => 'Power Tools'],
-                ['category' => 'Tools', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Toys & Games', 'subcategory' => 'Electronic Toys'],
-                ['category' => 'Toys & Games', 'subcategory' => 'Remote & App Controlled Vehicles & Parts'],
-                ['category' => 'Toys & Games', 'subcategory' => 'Video Game Consoles & Accessories'],
-                ['category' => 'Toys & Games', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Vehicle Electronics', 'subcategory' => 'Car Audio & Video Accessories'],
-                ['category' => 'Vehicle Electronics', 'subcategory' => 'Car Electronics'],
-                ['category' => 'Vehicle Electronics', 'subcategory' => 'Marine Electronics'],
-                ['category' => 'Vehicle Electronics', 'subcategory' => 'Vehicle GPS Units & Equipment'],
-                ['category' => 'Vehicle Electronics', 'subcategory' => 'Other-Misc.'],
-                ['category' => 'Wearable Technology', 'subcategory' => 'Smart Glasses'],
-                ['category' => 'Wearable Technology', 'subcategory' => 'Smartwatches & Smart Rings'],
-                ['category' => 'Wearable Technology', 'subcategory' => 'Other-Misc.'],
-            )
-            ->count(135)
-            ->create();
-
-        QuoteStatus::factory()
-            ->sequence(
-                ['name' => 'Open'],
-                ['name' => 'Closed-Rejected'],
-                ['name' => 'Closed-Retracted'],
-                ['name' => 'Closed-Order Created'],
-            )
-            ->count(4)
-            ->create();
-
-        // >> Create users, cars with images & features
-        // >> Create 3 users first, then 2 more users
-        // >> For each user create 50 cars with images & features
-        // >> Add these to the favourite cars of the 2 users
-        User::factory()
-            ->count(3)
-            ->create();
-
-        User::factory()
-            ->count(2)
+        // Create a user with 5 listings
+        $sidUser = User::factory()
             ->has(
-                Car::factory()
-                    ->count(50)
+                Listing::factory()
+                    ->count(5)
                     ->has(
-                        CarImage::factory()
-                            ->count(5)
-                            ->sequence(fn(Sequence $sequence) => ['position' => $sequence->index % 5 + 1]),
-                        // ->sequence(
-                        //     ['position' => 1],
-                        //     ['position' => 2],
-                        //     ['position' => 3],
-                        //     ['position' => 4],
-                        //     ['position' => 5]
-                        // ),
-                        'images'
-                    )
-                    ->hasFeatures(),
-                'favouriteCars'
-            )->create();
+                        Attachment::factory()->count(2)->state(new Sequence(
+                            ['position' => 1],
+                            ['position' => 2]
+                        )),
+                        'attachments'
+                    ), // Create 2 attachments for each listing with alternating positions
+                'listingsCreated'
+            )
+            ->create([
+                'email' => 'sid@penguins.com',
+            ]);
+
+        // Get all product IDs
+        $productIds = Product::pluck('id')->toArray();
+
+        // Attach 2 existing products to each listing
+        foreach ($sidUser->listingsCreated as $listing) {
+            $randomProductIds = array_rand($productIds, 2);
+            $listing->products()->attach([
+                $productIds[$randomProductIds[0]],
+                $productIds[$randomProductIds[1]]
+            ]);
+
+            // Create an email from the system user to the user for each listing
+            $email = Email::create([
+                'from_id' => $systemUser->id,
+                'subject' => 'Re: Listing ' . $listing->id,
+                'content' => 'This is a notification regarding your listing.',
+            ]);
+
+            // Create an entry in the emails_recipients table
+            $email->recipients()->attach($sidUser->id);
+        }
+
+        // Create a new user with email connor@oilers.ca
+        $connorUser = User::factory()->create([
+            'email' => 'connor@oilers.ca',
+        ]);
+
+        // Generate 2 quotes for each listing created for the user with email sid@penguins.com
+        foreach ($sidUser->listingsCreated as $listing) {
+            $currencyId = $listing->budget_currency_id;
+            $amount = $listing->budget;
+
+            // Create the first quote with deliverymethod_id = 2
+            Quote::create([
+                'user_id' => $connorUser->id,
+                'listing_id' => $listing->id,
+                'status_id' => 1,
+                'currency_id' => $currencyId,
+                'deliverymethod_id' => 2,
+                'turnaround' => 10,
+                'use_default_location' => true,
+                'amount' => $amount,
+            ]);
+
+            // Create the second quote with deliverymethod_id = 3 and amount 10 units greater
+            Quote::create([
+                'user_id' => $connorUser->id,
+                'listing_id' => $listing->id,
+                'status_id' => 1,
+                'currency_id' => $currencyId,
+                'deliverymethod_id' => 3,
+                'turnaround' => 15,
+                'use_default_location' => true,
+                'amount' => $amount + 10,
+            ]);
+        }
     }
 }

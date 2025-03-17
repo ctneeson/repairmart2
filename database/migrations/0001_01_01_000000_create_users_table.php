@@ -25,7 +25,8 @@ return new class extends Migration {
             $table->string('postcode', 50)->nullable();
             $table->foreignId('country_id')->constrainedTo('countries')->nullable();
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
 

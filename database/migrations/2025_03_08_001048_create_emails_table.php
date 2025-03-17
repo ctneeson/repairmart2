@@ -18,7 +18,8 @@ return new class extends Migration {
             $table->foreignId('order_id')->constrainedTo('orders')->nullable();
             $table->string('subject', 255);
             $table->text('content');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

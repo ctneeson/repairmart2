@@ -26,17 +26,21 @@ class AttachmentFactory extends Factory
         $random = $this->faker->randomFloat(2, 0, 1);
 
         if ($random <= 0.50) {
-            $listingId = Listing::inRandomOrder()->first()->id;
+            $listing = Listing::inRandomOrder()->first();
+            $listingId = $listing ? $listing->id : null;
         } elseif ($random <= 0.65) {
-            $orderId = Order::inRandomOrder()->first()->id;
+            $order = Order::inRandomOrder()->first();
+            $orderId = $order ? $order->id : null;
         } else {
-            $emailId = Email::inRandomOrder()->first()->id;
+            $email = Email::inRandomOrder()->first();
+            $emailId = $email ? $email->id : null;
         }
 
         return [
             'listing_id' => $listingId,
             'order_id' => $orderId,
             'email_id' => $emailId,
+            'position' => 1, // Default value, will be overridden
             'path' => $this->faker->imageUrl(),
         ];
     }

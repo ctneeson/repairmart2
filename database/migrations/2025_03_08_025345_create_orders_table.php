@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->foreignId('status_id')->constrainedTo('order_status')->cascadeOnDelete();
             $table->boolean('override_quote')->default(false);
             $table->decimal('override_amount', 10, 2)->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
     }

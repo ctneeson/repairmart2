@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrainedTo('users');
             $table->foreignId('listing_id')->constrainedTo('listings');
-            $table->foreignId('status_id')->constrainedTo('quote_status');
+            $table->foreignId('status_id')->constrainedTo('quote_statuses')->default(1);
             $table->foreignId('currency_id')->constrainedTo('currencies');
             $table->foreignId('deliverymethod_id')->constrainedTo('deliverymethods');
             $table->decimal('amount', 10, 2);
@@ -25,7 +25,8 @@ return new class extends Migration {
             $table->string('override_city', 255)->nullable();
             $table->string('override_postcode', 50)->nullable();
             $table->foreignId('override_country_id')->constrainedTo('countries')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
     }

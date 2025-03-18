@@ -60,17 +60,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function cars(): HasMany
-    {
-        return $this->hasMany(Car::class);
-    }
-
-    public function favouriteCars(): BelongsToMany
-    {
-        return $this->belongsToMany(Car::class, 'favourite_cars', 'user_id', 'car_id');
-        // ->withTimestamps();
-    }
-
     public function emailsSent(): HasMany
     {
         return $this->hasMany(Email::class, 'from_id');
@@ -146,6 +135,6 @@ class User extends Authenticatable
 
     public function country(): BelongsTo
     {
-        return $this->belongsTo(Country::class);
+        return $this->belongsTo(Country::class, 'country_id');
     }
 }

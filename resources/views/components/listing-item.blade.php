@@ -3,14 +3,20 @@
 <div class="listing-item card">
     <a href="{{route('listings.show', $listing->id)}}">
       <img
-        src={{$listing->primaryAttachment->path}}
+        src="{{$listing->primaryAttachment->path}}"
         alt=""
         class="listing-item-img rounded-t"
       />
     </a>
     <div class="p-medium">
       <div class="flex items-center justify-between">
-        <small class="m-0 text-muted">{{$listing->customer->city}}</small>
+        <small class="m-0 text-muted">
+          @if($listing->use_default_location==0)
+          {{$listing->override_city}}, {{$listing->country->name}}
+          @else
+          {{$listing->customer->city}}, {{$listing->customer->country->name}}
+          @endif
+      </small>
         <button class="btn-heart">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,14 +34,13 @@
           </svg>
         </button>
       </div>
-      <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->product}}</h2>
-      <p class="listing-item-price">${{$listing->price}}</p>
+      <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->title}}</h2>
+      <p class="listing-item-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
       <hr />
       <p class="m-0">
-        {{-- <span class="listing-item-badge">{{$listing->carType->name}}</span>
-        <span class="listing-item-badge">{{$listing->fuelType->name}}</span> --}}
-        <span class="listing-item-badge">TBC</span>
-        <span class="listing-item-badge">TBC</span>
+        @foreach($listing->products as $product)
+          <span class="listing-item-badge">{{$product->subcategory}}</span>
+        @endforeach
       </p>
     </div>
   </div>

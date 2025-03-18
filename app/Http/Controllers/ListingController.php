@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Listing;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ListingPosted;
@@ -14,7 +15,12 @@ class ListingController extends Controller
      */
     public function index()
     {
-        return view('listings.index');
+        $listings = User::find(2)
+            ->listingsCreated()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('listings.index', ['listings' => $listings]);
     }
 
     /**
@@ -56,7 +62,7 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
-        return view('listings.show');
+        return view('listings.show', ['listing' => $listing]);
     }
 
     /**

@@ -28,8 +28,8 @@ class Listing extends Model
         'override_address_line1',
         'override_address_line2',
         'override_city',
-        'override_country_id',
         'override_postcode',
+        'override_country_id',
         'expiry',
     ];
 
@@ -57,7 +57,7 @@ class Listing extends Model
 
     public function country(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'override_country_id');
+        return $this->belongsTo(Country::class, 'override_country_id');
     }
 
     public function primaryAttachment(): HasOne

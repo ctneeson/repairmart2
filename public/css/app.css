@@ -727,6 +727,8 @@ main {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
 }
 
 .btn-heart {
@@ -931,6 +933,10 @@ a.pagination-item:hover {
 .listing-details-table th {
     text-align: left;
     font-weight: 300;
+}
+
+.listing-details-table td {
+    text-align: right;
 }
 
 .listing-details-owner {

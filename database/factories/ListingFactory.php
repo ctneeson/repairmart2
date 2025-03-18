@@ -28,18 +28,17 @@ class ListingFactory extends Factory
             'user_id' => User::inRandomOrder()->first()->id,
             'status_id' => ListingStatus::first()->id,
             'manufacturer_id' => Manufacturer::inRandomOrder()->first()->id,
-            'title' => Manufacturer::inRandomOrder()->first()->name
-                . ' ' . Product::inRandomOrder()->first()->subcategory
+            'title' => Product::inRandomOrder()->first()->subcategory
                 . ' ' . $this->faker->sentence,
             'description' => $this->faker->paragraph,
             'budget_currency_id' => Currency::inRandomOrder()->first()->id,
             'budget' => $this->faker->randomFloat(2, 10, 1000),
             'use_default_location' => $useDefaultLocation,
-            'override_address_line1' => $useDefaultLocation ? $this->faker->streetAddress : null,
-            'override_address_line2' => $useDefaultLocation ? $this->faker->secondaryAddress : null,
-            'override_city' => $useDefaultLocation ? $this->faker->city : null,
-            'override_postcode' => $useDefaultLocation ? $this->faker->postcode : null,
-            'override_country_id' => $useDefaultLocation ? Country::inRandomOrder()->first()->id : null,
+            'override_address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
+            'override_address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
+            'override_city' => $useDefaultLocation ? null : $this->faker->city,
+            'override_postcode' => $useDefaultLocation ? null : $this->faker->postcode,
+            'override_country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
             'expiry_days' => $this->faker->numberBetween(7, 90),
             'published_at' => ($this->faker->optional(0.9)->dateTimeBetween('-1 month', 'now') ?? now())->format('Y-m-d H:i:s'),
         ];

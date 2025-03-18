@@ -259,7 +259,7 @@ class HomeController extends Controller
         // $maker = Maker::factory()->create();
         // dd($maker);
 
-        $listings = Listing::where('published_at', '<', now())
+        $listings = Listing::where('published_at', '<=', now())
             ->orderBy('published_at', 'desc')
             ->limit(30)
             ->get();

@@ -17,8 +17,9 @@ class ListingController extends Controller
     {
         $listings = User::find(2)
             ->listingsCreated()
+            ->with(['primaryAttachment', 'manufacturer', 'products'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('listings.index', ['listings' => $listings]);
     }
@@ -91,9 +92,40 @@ class ListingController extends Controller
 
     public function search()
     {
-        $query = Listing::where('published_at', '<', now())->orderBy('published_at', 'desc');
-        $listingCount = $query->count();
-        $listings = $query->limit(30)->get();
-        return view('listings.search', ['listings' => $listings, 'listingCount' => $listingCount]);
+        $query = Listing::where('published_at', '<', now())->orderBy('published_at', 'desc')
+            ->with([
+                'country',
+                'customer',
+                'customer.country',
+                'manufacturer',
+                'currency',
+                'primaryAttachment',
+                'products'
+            ]);
+
+        $listings = $query->paginate(15);
+
+        // $listingCount = $query->count();
+        // $listings = $query->limit(30)->get();
+
+        return view('listings.search', ['listings' => $listings]);
+    }
+
+    public function watchlist()
+    {
+        $listings = User::find(2)
+            ->favouriteListings()
+            ->with([
+                'country',
+                'customer',
+                'customer.country',
+                'manufacturer',
+                'currency',
+                'primaryAttachment',
+                'products'
+            ])
+            ->paginate(15);
+
+        return view('listings.watchlist', ['listings' => $listings]);
     }
 }

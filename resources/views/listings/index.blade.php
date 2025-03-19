@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout bodyClass="page-my-listings">
     <main>
         <div>
           <div class="container">
@@ -10,13 +10,15 @@
                     <tr>
                       <th>Image</th>
                       <th>Title</th>
+                      <th>Manufacturer</th>
+                      <th>Product Categories</th>
                       <th>Date</th>
                       <th>Published</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach ($listings as $listing)
+                    @forelse ($listings as $listing)
                     <tr>
                       <td>
                         <img
@@ -25,12 +27,15 @@
                           class="my-listings-img-thumbnail"
                         />
                       </td>
+                      <td>{{$listing->title}}</td>
                       <td>{{$listing->manufacturer->name}}</td>
-                      @foreach($listing->products as $product)
-                      <td>{{$product->category}} > {{$product->subcategory}}</td>
-                      @endforeach
-                      <td>{{$listing->created_at}}</td>
-                      <td>{{$listing->pulished_at ? 'Yes' : 'No'}}</td>
+                      <td>
+                        @foreach($listing->products as $product)
+                        <div>{{$product->category}} > {{$product->subcategory}}</div><br>
+                        @endforeach
+                      </td>
+                      <td>{{ $listing->getCreatedDate() }}</td>
+                      <td>{{$listing->published_at ? 'Yes' : 'No'}}</td>
                       <td class="">
                         <a
                           href="{{route('listings.edit', $listing->id)}}"
@@ -93,82 +98,18 @@
                         </button>
                       </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                      <td colspan="7" class="text-center p-large">
+                        No listings found. <a href="{{route('listings.create')}}">Create a new listing</a>
+                      </td>
+                    </tr>
+                    @endforelse
                   </tbody>
                 </table>
               </div>
   
-              <nav class="pagination my-large">
-                <a href="#" class="pagination-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    style="width: 18px"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
-                    />
-                  </svg>
-                </a>
-                <a href="#" class="pagination-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    style="width: 18px"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15.75 19.5 8.25 12l7.5-7.5"
-                    />
-                  </svg>
-                </a>
-  
-                <a href="#" class="pagination-item"> 1 </a>
-                <a href="#" class="pagination-item"> 2 </a>
-                <span class="pagination-item active"> 3 </span>
-                <a href="#" class="pagination-item"> 4 </a>
-                <a href="#" class="pagination-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    style="width: 18px"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
-                </a>
-                <a href="#" class="pagination-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    style="width: 18px"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
-                </a>
-              </nav>
+              {{ $listings->onEachSide(3)->links() }}
             </div>
           </div>
         </div>

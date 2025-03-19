@@ -1,6 +1,6 @@
-@props(['title' => '', 'footerLinks' => ''])
+@props(['title' => '', 'bodyClass' => null, 'footerLinks' => ''])
 
-<x-base-layout :title='$title'>
+<x-base-layout :title :$bodyClass>
     <x-layouts.header/>
     {{$slot}}
 </x-base-layout>

@@ -14,7 +14,8 @@ Route::get('/signup', [SignupController::class, 'create'])->name('signup');
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 
 Route::get('/listings/search', [ListingController::class, 'search'])->name('listings.search');
-Route::get('/listing', [ListingController::class, 'index'])->name('listings.index');
+Route::get('/listings/watchlist', [ListingController::class, 'watchlist'])->name('listings.watchlist');
+Route::resource('listings', ListingController::class);
 
 Route::resources([
     'listings' => ListingController::class,

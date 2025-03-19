@@ -260,6 +260,15 @@ class HomeController extends Controller
         // dd($maker);
 
         $listings = Listing::where('published_at', '<=', now())
+            ->with([
+                'country',
+                'customer',
+                'customer.country',
+                'manufacturer',
+                'currency',
+                'primaryAttachment',
+                'products'
+            ])
             ->orderBy('published_at', 'desc')
             ->limit(30)
             ->get();

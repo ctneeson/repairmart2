@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Carbon\Carbon;
 
 class Listing extends Model
 {
@@ -125,5 +126,10 @@ class Listing extends Model
     public function emails(): HasMany
     {
         return $this->HasMany(Email::class, 'listing_id');
+    }
+
+    public function getCreatedDate(): string
+    {
+        return (new Carbon($this->created_at))->format('Y-m-d');
     }
 }

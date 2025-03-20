@@ -132,4 +132,9 @@ class Listing extends Model
     {
         return (new Carbon($this->created_at))->format('Y-m-d');
     }
+
+    public function watchlistUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'favourite_listings');
+    }
 }

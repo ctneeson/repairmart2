@@ -1439,3 +1439,99 @@ a.pagination-item:hover {
         grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 }
+
+.find-a-listing-inputs {
+    display: flex;
+    flex-direction: column; /* Display elements vertically */
+    gap: 1rem; /* Adjust the gap between dropdowns as needed */
+}
+
+.dropdown-container {
+    width: 90%; /* Set the width to 90% of the container */
+    max-width: 100%; /* Ensure the dropdown does not exceed the container width */
+}
+
+.dropdown {
+    position: relative;
+    display: block; /* Ensure each dropdown is displayed as a block element */
+    width: 100%; /* Ensure the dropdown takes the full width of its container */
+}
+
+.dropdown label {
+    display: block;
+    margin-bottom: 0.5rem; /* Adjust the spacing as needed */
+    font-weight: bold; /* Make the label bold */
+}
+
+.dropdown-toggle-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-toggle {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    width: 100%; /* Ensure the button takes the full width of its container */
+    text-align: left; /* Align text to the left */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    flex-grow: 1;
+}
+
+.reset-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.reset-icon {
+    width: 1rem;
+    height: 1rem;
+    stroke: #dc3545; /* Red color for the icon */
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    width: 100%; /* Ensure the dropdown menu takes the full width of its container */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    z-index: 1;
+    border-radius: 0.25rem;
+    max-height: 200px; /* Set a maximum height for the dropdown menu */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.select-product-checkboxes,
+.search-listings-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Adjust the gap between checkboxes as needed */
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 0.5rem; /* Adjust the spacing between checkbox and label as needed */
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    align-items: center; /* Center buttons vertically */
+    gap: 0.1rem; /* Adjust the gap between buttons as needed */
+}

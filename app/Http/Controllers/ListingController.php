@@ -37,6 +37,8 @@ class ListingController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
+
         $listing = Listing::create([
             'user_id' => request('user_id'),
             'listing_status_id' => request('listing_status_id'),
@@ -90,9 +92,17 @@ class ListingController extends Controller
         //
     }
 
-    public function search()
+    public function search(Request $request)
     {
-        $query = Listing::where('published_at', '<', now())->orderBy('published_at', 'desc')
+        // dump($request->product_ids);
+        // dump($request->manufacturer_ids);
+        // dump($request->country_ids);
+        $products = $request->product_ids;
+        $countries = $request->country_ids;
+        $manufacturers = $request->manufacturer_ids;
+        $sort = $request->input('sort', '-published_at');
+
+        $query = Listing::where('published_at', '<', now())
             ->with([
                 'country',
                 'customer',
@@ -103,7 +113,33 @@ class ListingController extends Controller
                 'products'
             ]);
 
-        $listings = $query->paginate(15);
+        if ($products) {
+            $query->whereHas('products', function ($q) use ($products) {
+                $q->whereIn('product_id', $products);
+            });
+        }
+
+        if ($countries) {
+            $query->where(function ($q) use ($countries) {
+                $q->where(function ($q) use ($countries) {
+                    $q->where('use_default_location', 0)
+                        ->whereIn('override_country_id', $countries);
+                })->orWhereHas('customer', function ($q) use ($countries) {
+                    $q->where('use_default_location', 1)
+                        ->whereIn('country_id', $countries);
+                });
+            });
+        }
+
+        if (str_starts_with($sort, '-')) {
+            $sort = substr($sort, 1);
+            $query->orderBy($sort, 'desc');
+        } else {
+            $query->orderBy($sort, 'asc');
+        }
+
+        $listings = $query->paginate(15)
+            ->withQueryString();
 
         // $listingCount = $query->count();
         // $listings = $query->limit(30)->get();
@@ -114,7 +150,7 @@ class ListingController extends Controller
     public function watchlist()
     {
         $listings = User::find(2)
-            ->favouriteListings()
+            ->watchlistListings()
             ->with([
                 'country',
                 'customer',

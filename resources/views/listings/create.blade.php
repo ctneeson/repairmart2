@@ -3,11 +3,12 @@
         <div class="container-small">
           <h1 class="listing-details-page-title">Add new listing</h1>
           <form
-            action=""
+            action="{{ route('listings.store') }}"
             method="POST"
             enctype="multipart/form-data"
             class="card add-new-listing-form"
           >
+            @csrf
             <div class="form-content">
               <div class="form-details">
                 <div class="row">

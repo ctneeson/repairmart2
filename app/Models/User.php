@@ -137,4 +137,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
+
+    public function watchlistListings(): BelongsToMany
+    {
+        return $this->belongsToMany(Listing::class, 'favourite_listings');
+    }
 }

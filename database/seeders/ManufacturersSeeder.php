@@ -15,6 +15,7 @@ class ManufacturersSeeder extends Seeder
     {
         Manufacturer::factory()
             ->sequence(
+                ['name' => '-- Other/Unknown --'],
                 ['name' => '3M'],
                 ['name' => 'Acer'],
                 ['name' => 'Aiwa'],

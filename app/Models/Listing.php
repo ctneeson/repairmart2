@@ -19,10 +19,10 @@ class Listing extends Model
 
     protected $fillable = [
         'user_id',
-        'listing_status_id',
+        'status_id',
         'manufacturer_id',
         'title',
-        'detail',
+        'description',
         'budget_currency_id',
         'budget',
         'use_default_location',
@@ -31,7 +31,8 @@ class Listing extends Model
         'override_city',
         'override_postcode',
         'override_country_id',
-        'expiry',
+        'expiry_days',
+        'published_at',
     ];
 
     // public $timestamps = false;

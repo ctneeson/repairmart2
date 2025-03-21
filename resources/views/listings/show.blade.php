@@ -16,7 +16,7 @@
               <div class="listing-images-carousel">
                 <div class="listing-image-wrapper">
                   <img
-                    src="{{$listing->primaryAttachment->path}}"
+                    src="{{$listing->primaryAttachment?->path ?: '/img/no-photo-available.jpg' }}"
                     alt=""
                     class="listing-active-image"
                     id="activeImage"

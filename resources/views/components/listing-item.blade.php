@@ -3,7 +3,7 @@
 <div class="listing-item card">
     <a href="{{route('listings.show', $listing->id)}}">
       <img
-        src="{{$listing->primaryAttachment->path}}"
+        src="{{$listing->primaryAttachment?->path ?: '/img/no-photo-available.jpg' }}"
         alt=""
         class="listing-item-img rounded-t"
       />

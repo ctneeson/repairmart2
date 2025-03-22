@@ -127,7 +127,7 @@
                   <div class="col">
                     <div class="form-group">
                       <label>Country</label>
-                      <x-select-country-all id="country" />
+                      <x-select-country-all id="countrySelect" />
                     </div>
                   </div>
                 </div>
@@ -146,8 +146,8 @@
                   <input type="date" name="published_at" />
                 </div>
               </div>
-              <div class="form-images">
-                <div class="form-image-upload">
+              <div class="form-attachments">
+                <div class="form-attachment-upload">
                   <div class="upload-placeholder">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -165,9 +165,9 @@
                       />
                     </svg>
                   </div>
-                  <input id="listingFormImageUpload" type="file" name="attachments[]" multiple accept="image/*,video/*" />
+                  <input id="listingFormAttachmentUpload" type="file" name="attachments[]" multiple accept="image/*,video/*" />
                 </div>
-                <div id="imagePreviews" class="listing-form-images"></div>
+                <div id="attachmentPreviews" class="listing-form-attachments"></div>
                 <div id="attachmentsList" style="margin-top: 20px;"></div> <!-- Added this line -->
               </div>
             </div>
@@ -184,28 +184,4 @@
 
 <script src="{{ asset('js/listings-create-dynamic-product-select.js') }}"></script>
 <script src="{{ asset('js/listings-create-toggle-address-inputs.js') }}"></script>
-<script src="{{ asset('js/listings-create-image-preview.js') }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const imageUploadInput = document.getElementById("listingFormImageUpload");
-  console.log("File input element:", imageUploadInput);
-
-  imageUploadInput.addEventListener("change", function (event) {
-    console.log("File input changed");
-    console.log("Raw files object:", this.files);
-    console.log("Files length:", this.files.length);
-    
-    // Log each file directly from the FileList
-    for (let i = 0; i < this.files.length; i++) {
-      console.log(`Direct file ${i+1}:`, this.files[i].name);
-    }
-    
-    // Try Array.from approach
-    const filesArray = Array.from(this.files);
-    console.log("Files array:", filesArray);
-    filesArray.forEach((file, index) => {
-      console.log(`Array file ${index + 1}:`, file.name);
-    });
-  });
-});
-</script>
+{{-- <script src="{{ asset('js/listings-create-image-preview.js') }}"></script> --}}

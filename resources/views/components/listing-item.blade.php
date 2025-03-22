@@ -2,11 +2,29 @@
 
 <div class="listing-item card">
     <a href="{{route('listings.show', $listing->id)}}">
+      @php
+      $attachmentUrl = $listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+      $filePath = $listing->primaryAttachment ? Storage::disk('public')->path($listing->primaryAttachment->path) : public_path($attachmentUrl);
+      $mimeType = $listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+    @endphp
+    @if (str_starts_with($mimeType, 'image/'))
       <img
-        src="{{$listing->primaryAttachment?->path ?: '/img/no-photo-available.jpg' }}"
+        src="{{ $attachmentUrl }}"
         alt=""
         class="listing-item-img rounded-t"
       />
+    @elseif (str_starts_with($mimeType, 'video/'))
+      <video
+        src="{{ $attachmentUrl }}"
+        class="listing-item-img rounded-t"
+      ></video>
+    @else
+      <img
+        src="/img/no-photo-available.jpg"
+        alt=""
+        class="listing-item-img rounded-t"
+      />
+    @endif
     </a>
     <div class="p-medium">
       <div class="flex items-center justify-between">

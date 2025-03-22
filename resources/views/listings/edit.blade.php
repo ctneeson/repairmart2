@@ -274,8 +274,8 @@
                   </label>
                 </div>
               </div>
-              <div class="form-images">
-                <div class="form-image-upload">
+              <div class="form-attachments">
+                <div class="form-attachment-upload">
                   <div class="upload-placeholder">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -292,9 +292,9 @@
                       />
                     </svg>
                   </div>
-                  <input id="listingFormImageUpload" type="file" multiple />
+                  <input id="listingFormAttachmentUpload" type="file" multiple />
                 </div>
-                <div id="imagePreviews" class="listing-form-images"></div>
+                <div id="attachmentPreviews" class="listing-form-attachments"></div>
               </div>
             </div>
             <div class="p-medium" style="width: 100%">

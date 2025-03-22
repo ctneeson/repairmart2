@@ -38,10 +38,6 @@ class ListingController extends Controller
      */
     public function store(Request $request)
     {
-        // Check if attachments are present before validation
-        $attachments = $request->file('attachments') ?: [];
-        dd($request->all(), $attachments);
-
         // Validate the request data
         $validated = $request->validate([
             'manufacturer_id' => 'required|integer',
@@ -61,10 +57,6 @@ class ListingController extends Controller
             'product_ids.*' => 'integer|distinct',
             'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,svg,mp4,mov,ogg,qt|max:20000',
         ]);
-
-        // Check if attachments are present after validation
-        $attachments = $request->file('attachments') ?: [];
-        dd($validated, $attachments);
 
         // Create the listing
         $listing = Listing::create([
@@ -92,10 +84,10 @@ class ListingController extends Controller
 
         // Handle file uploads
         if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
+            foreach ($request->file('attachments') as $i => $file) {
                 $path = $file->store('attachments', 'public');
+                $listing->attachments()->create(['path' => $path, 'position' => $i + 1]);
                 // Save the file path to the database or perform other actions as needed
-                // Example: $listing->attachments()->create(['path' => $path]);
             }
         }
 
@@ -140,6 +132,7 @@ class ListingController extends Controller
 
     public function search(Request $request)
     {
+        dump($request->all());
         // dump($request->product_ids);
         // dump($request->manufacturer_ids);
         // dump($request->country_ids);
@@ -158,6 +151,10 @@ class ListingController extends Controller
                 'primaryAttachment',
                 'products'
             ]);
+
+        if ($manufacturers) {
+            $query->whereIn('manufacturer_id', $manufacturers);
+        }
 
         if ($products) {
             $query->whereHas('products', function ($q) use ($products) {

@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const newFiles = Array.from(imageUploadInput.files);
         allFiles = allFiles.concat(newFiles);
 
+        console.log("All files after adding new files:", allFiles); // Debugging statement
+
         imagePreviewsContainer.innerHTML = ""; // Clear previous previews
 
         allFiles.forEach((file, index) => {
@@ -48,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     const dataTransfer = new DataTransfer();
                     allFiles.forEach((file) => dataTransfer.items.add(file));
                     imageUploadInput.files = dataTransfer.files;
+                    console.log("All files after removing a file:", allFiles); // Debugging statement
+                    console.log("Updated input files:", imageUploadInput.files); // Debugging statement
                     fileWrapper.remove();
                 });
 
@@ -59,5 +63,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Clear the input value to allow re-uploading the same file if needed
         imageUploadInput.value = "";
+        console.log(
+            "Updated input files after clearing input value:",
+            imageUploadInput.files
+        ); // Debugging statement
     });
 });

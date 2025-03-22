@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Attachment extends Model
 {
@@ -35,5 +36,13 @@ class Attachment extends Model
     public function emails(): BelongsTo
     {
         return $this->belongsTo(Email::class);
+    }
+
+    public function getUrl()
+    {
+        if (str_starts_with($this->path, 'http')) {
+            return $this->path;
+        }
+        return Storage::url($this->path);
     }
 }

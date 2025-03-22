@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("address_line2"),
         document.getElementById("city"),
         document.getElementById("postcode"),
-        document.getElementById("country"),
+        document.getElementById("countrySelect"), // Ensure this targets the <select> element
         document.getElementById("phone"),
-    ];
+    ].filter((input) => input !== null); // Filter out null values
 
     function toggleAddressInputs() {
         const isDisabled = useDefaultAddressCheckbox.checked;

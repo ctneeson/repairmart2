@@ -297,11 +297,23 @@ select:disabled {
     color: var(--input-border-error-color);
 }
 
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.info-message {
+    color: #6c757d;
+    margin-top: 10px;
+}
+
 .form-group.has-error select,
 .form-group.has-error input,
 .form-group.has-error textarea {
     border-color: var(--input-border-error-color);
 }
+
 .form-group .error-message {
     display: none;
 }
@@ -1100,7 +1112,11 @@ a.pagination-item:hover {
 } */
 .listing-form-attachment-preview {
     display: inline-block;
-    margin: 5px;
+    margin: 10px;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
 }
 
 .listing-form-attachment-preview img,
@@ -1143,6 +1159,11 @@ a.pagination-item:hover {
     border-radius: 10px;
     object-fit: cover;
     border-radius: 10px;
+}
+
+.remove-attachment:hover {
+    background-color: rgba(255, 0, 0, 0.7) !important;
+    color: white;
 }
 
 .page-my-listings .btn-edit,

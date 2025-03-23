@@ -10,12 +10,14 @@ use Illuminate\View\Component;
 
 class SelectManufacturerAll extends Component
 {
+    public $value;
     public Collection $manufacturers;
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($value = null)
     {
+        $this->value = $value;
         $this->manufacturers = Manufacturer::orderBy('name', 'asc')->get();
     }
 

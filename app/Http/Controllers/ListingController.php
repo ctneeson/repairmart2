@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreListingRequest;
 use App\Models\Listing;
 use App\Models\User;
 use Hamcrest\Type\IsBoolean;
@@ -28,7 +29,7 @@ class ListingController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         return view('listings.create');
     }
@@ -36,63 +37,62 @@ class ListingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreListingRequest $request)
     {
-        // Validate the request data
-        $validated = $request->validate([
-            'manufacturer_id' => 'required|integer',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'currency_id' => 'required|integer',
-            'budget' => 'required|numeric',
-            'use_default_address' => 'required|boolean',
-            'address_line1' => 'nullable|string|max:255',
-            'address_line2' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:255',
-            'postcode' => 'nullable|string|max:255',
-            'country_id' => 'nullable|integer',
-            'expiry_days' => 'required|integer',
-            'published_at' => 'nullable|date',
-            'product_ids' => 'nullable|array',
-            'product_ids.*' => 'integer|distinct',
-            'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,svg,mp4,mov,ogg,qt|max:20000',
-        ]);
+        try {
+            // Validate the request data
+            $validated = $request->validated();
 
-        // Create the listing
-        $listing = Listing::create([
-            'user_id' => 2,
-            'status_id' => 1,
-            'manufacturer_id' => $validated['manufacturer_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'budget_currency_id' => $validated['currency_id'],
-            'budget' => $validated['budget'],
-            'use_default_location' => $validated['use_default_address'],
-            'override_address_line1' => $validated['address_line1'] ?? null,
-            'override_address_line2' => $validated['address_line2'] ?? null,
-            'override_city' => $validated['city'] ?? null,
-            'override_postcode' => $validated['postcode'] ?? null,
-            'override_country_id' => $validated['country_id'] ?? null,
-            'expiry_days' => $validated['expiry_days'],
-            'published_at' => $validated['published_at'] ?? null,
-        ]);
+            // Create the listing
+            $listing = Listing::create([
+                'user_id' => 2,
+                'status_id' => 1,
+                'manufacturer_id' => $validated['manufacturer_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'budget_currency_id' => $validated['currency_id'],
+                'budget' => $validated['budget'],
+                'use_default_location' => $validated['use_default_address'],
+                'override_address_line1' => $validated['address_line1'] ?? null,
+                'override_address_line2' => $validated['address_line2'] ?? null,
+                'override_city' => $validated['city'] ?? null,
+                'override_postcode' => $validated['postcode'] ?? null,
+                'override_country_id' => $validated['country_id'] ?? null,
+                'expiry_days' => $validated['expiry_days'],
+                'published_at' => $validated['published_at'] ?? null,
+            ]);
 
-        // Attach products to the listing
-        if (!empty($validated['product_ids'])) {
-            $listing->products()->attach($validated['product_ids']);
-        }
-
-        // Handle file uploads
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $i => $file) {
-                $path = $file->store('attachments', 'public');
-                $listing->attachments()->create(['path' => $path, 'position' => $i + 1]);
-                // Save the file path to the database or perform other actions as needed
+            // Attach products to the listing
+            if (!empty($validated['product_ids'])) {
+                $listing->products()->attach($validated['product_ids']);
             }
-        }
 
-        return redirect()->route('listings.index')
-            ->with('success', 'Listing created successfully.');
+            // Handle file uploads
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $i => $file) {
+                    $path = $file->store('attachments', 'public');
+                    $listing->attachments()->create(['path' => $path, 'position' => $i + 1]);
+                    // Save the file path to the database or perform other actions as needed
+                }
+            }
+
+            return redirect()->route('listings.index')
+                ->with('success', 'Listing created successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Error creating listing: ' . $e->getMessage());
+
+            // Check if it's a file size issue
+            if ($e instanceof \Symfony\Component\HttpFoundation\File\Exception\FileException) {
+                return redirect()->back()->withErrors([
+                    'attachments' => 'There was an issue with your file uploads. Please check the file sizes and formats.'
+                ])->withInput();
+            }
+
+            return redirect()->back()->withErrors([
+                'general' => 'An error occurred while creating your listing. Please try again.'
+            ])->withInput();
+        }
     }
 
     /**

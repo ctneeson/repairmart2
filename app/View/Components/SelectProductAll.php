@@ -10,12 +10,14 @@ use Illuminate\View\Component;
 
 class SelectProductAll extends Component
 {
+    public $value;
     public Collection $products;
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($value = [])
     {
+        $this->value = $value;
         $this->products = Product::orderBy('category', 'asc')
             ->orderBy('subcategory', 'asc')
             ->get();

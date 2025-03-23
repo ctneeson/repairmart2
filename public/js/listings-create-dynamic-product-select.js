@@ -1,16 +1,28 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const productSelect = document.querySelector(
-        ".product-select-wrapper select"
-    );
+    const productSelect = document.getElementById("productSelect");
     const addProductLink = document.getElementById("add-product-link");
     const selectedProductsContainer =
         document.getElementById("selected-products");
-    let selectedProducts = [];
+    const productHiddenInputs = document.getElementById(
+        "product-hidden-inputs"
+    );
+    const form = document.querySelector("form");
+
+    // Initialize selectedProducts with unique values from hidden inputs
+    let selectedProducts = Array.from(
+        new Set(
+            Array.from(
+                document.querySelectorAll(
+                    '#product-hidden-inputs input[name="product_ids[]"]'
+                )
+            ).map((input) => input.value)
+        )
+    ).filter(Boolean); // Remove any empty values
+
+    console.log("Initial selected products:", selectedProducts);
 
     function updateAddProductLinkVisibility() {
         const selectedValue = productSelect.value;
-        console.log("Selected value:", selectedValue); // Debugging line
-        console.log("Selected products:", selectedProducts); // Debugging line
         if (
             selectedValue !== "" &&
             !selectedProducts.includes(selectedValue) &&
@@ -20,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             addProductLink.style.display = "none";
         }
-        console.log("Add product link display:", addProductLink.style.display); // Debugging line
     }
 
     function updateSelectedProductsDisplay() {
@@ -31,26 +42,44 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             const productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
             const productElement = document.createElement("div");
-            productElement.classList.add("listing-item-badge"); // Apply the class
-            productElement.style.position = "relative"; // Ensure relative positioning
+            productElement.classList.add("listing-item-badge");
+            productElement.style.position = "relative";
             productElement.textContent = productText;
             const removeLink = document.createElement("a");
             removeLink.href = "#";
-            removeLink.textContent = " -";
-            removeLink.style.position = "absolute"; // Position absolute
-            removeLink.style.right = "10px"; // Align to the right with padding
-            removeLink.style.top = "50%"; // Center vertically
-            removeLink.style.transform = "translateY(-50%)"; // Adjust vertical alignment
+            removeLink.textContent = " Remove";
+            removeLink.style.position = "absolute";
+            removeLink.style.right = "10px";
+            removeLink.style.top = "50%";
+            removeLink.style.transform = "translateY(-50%)";
             removeLink.addEventListener("click", function (e) {
                 e.preventDefault();
                 selectedProducts = selectedProducts.filter(
                     (p) => p !== productId
                 );
+                console.log("Product removed:", productId);
+                console.log(
+                    "Selected products after removal:",
+                    selectedProducts
+                );
                 updateSelectedProductsDisplay();
                 updateAddProductLinkVisibility();
+                updateHiddenInputs();
             });
             productElement.appendChild(removeLink);
             selectedProductsContainer.appendChild(productElement);
+        });
+        console.log("Selected products displayed:", selectedProducts);
+    }
+
+    function updateHiddenInputs() {
+        productHiddenInputs.innerHTML = "";
+        selectedProducts.forEach((productId) => {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "product_ids[]";
+            hiddenInput.value = productId;
+            productHiddenInputs.appendChild(hiddenInput);
         });
     }
 
@@ -67,10 +96,38 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedProducts.length < 3
         ) {
             selectedProducts.push(selectedValue);
+            console.log("Product added:", selectedValue);
+            console.log("Selected products after addition:", selectedProducts);
             updateSelectedProductsDisplay();
             updateAddProductLinkVisibility();
+            updateHiddenInputs();
         }
     });
 
+    // Clear any existing hidden inputs before initializing
+    productHiddenInputs.innerHTML = "";
+    updateSelectedProductsDisplay();
     updateAddProductLinkVisibility();
+    updateHiddenInputs();
+
+    // Add form submit event listener
+    form.addEventListener("submit", function (e) {
+        // No need to preventDefault() as we want the form to submit
+
+        // Clean up all product_ids[] inputs before form submission
+        // This step is important to avoid duplicate entries
+        const allProductInputs = form.querySelectorAll(
+            'input[name="product_ids[]"]'
+        );
+        allProductInputs.forEach((input) => {
+            if (!productHiddenInputs.contains(input)) {
+                input.remove();
+            }
+        });
+
+        // Make sure our hidden inputs are up to date
+        updateHiddenInputs();
+
+        console.log("Form submission with product IDs:", selectedProducts);
+    });
 });

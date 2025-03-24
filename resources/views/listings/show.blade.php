@@ -4,7 +4,7 @@
         <h1 class="listing-details-page-title">{{$listing->title}}</h1>
         <div class="listing-details-region">
           @if($listing->use_default_location==0)
-          {{$listing->override_city}}, {{$listing->country->name}}
+          {{$listing->city}}, {{$listing->country->name}}
           @else
           {{$listing->customer->city}}, {{$listing->customer->country->name}}
           @endif
@@ -55,7 +55,7 @@
                     @if (str_starts_with($mimeType, 'image/'))
                       <img src="{{$attachmentUrl}}" alt="" data-mime-type="{{$mimeType}}" />
                     @elseif (str_starts_with($mimeType, 'video/'))
-                      <video src="{{$attachmentUrl}}" class="my-listings-img-thumbnail" data-mime-type="{{$mimeType}}" ></video>
+                      <video src="{{$attachmentUrl}}" class="listing-form-attachment-preview" muted data-mime-type="{{$mimeType}}" ></video>
                     @else
                       <img src="/img/no-photo-available.jpg" alt="" data-mime-type="image/jpeg" />
                     @endif
@@ -140,7 +140,7 @@
                 <tr>
                   <th>Location</th>
                   @if($listing->use_default_location==0)
-                  <td>{{$listing->override_city}}, {{$listing->country->name}}</td>
+                  <td>{{$listing->city}}, {{$listing->country->name}}</td>
                   @else
                   <td>{{$listing->customer->city}}, {{$listing->customer->country->name}}</td>
                   @endif

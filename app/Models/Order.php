@@ -18,7 +18,7 @@ class Order extends Model
         'quote_id',
         'status_id',
         'override_quote',
-        'override_amount',
+        'amount',
     ];
 
 

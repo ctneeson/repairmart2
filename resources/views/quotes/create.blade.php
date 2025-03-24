@@ -86,8 +86,8 @@
                     <div class="col">
                       <div class="form-group">
                         <label>Use my default address</label>
-                        <input type="hidden" name="use_default_address" value="0">
-                        <input type="checkbox" id="use-default-address" name="use_default_address" value="1" checked>
+                        <input type="hidden" name="use_default_location" value="0">
+                        <input type="checkbox" id="use-default-location" name="use_default_location" value="1" checked>
                       </div>
                     </div>
                   </div>

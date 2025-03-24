@@ -41,7 +41,8 @@ class AttachmentFactory extends Factory
             'order_id' => $orderId,
             'email_id' => $emailId,
             'position' => 1, // Default value, will be overridden
-            'path' => $this->faker->imageUrl(),
+            'path' => 'attachments/no-photo-available.jpg',
+            'mime_type' => 'image/jpeg',
         ];
     }
 }

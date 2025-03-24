@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->foreignIdFor(Email::class)->nullable()->constrained();
             $table->integer('position');
             $table->string('path', 255);
+            $table->string('mime_type')->nullable();
             $table->timestamp('created_at')->useCurrent(); // Set default value of current timestamp
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate(); // Set default value of current timestamp and update on change
             $table->timestamp('deleted_at')->nullable();

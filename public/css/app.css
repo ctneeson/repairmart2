@@ -1102,29 +1102,112 @@ a.pagination-item:hover {
 
 .listing-form-attachments {
     display: flex;
-    gap: 0.25rem;
     flex-wrap: wrap;
-    justify-content: start;
+    gap: 10px;
+    margin-top: 15px;
 }
 
-/* .listing-form-attachment-preview {
-    position: relative;
-} */
 .listing-form-attachment-preview {
-    display: inline-block;
-    margin: 10px;
     position: relative;
     width: 100px;
     height: 100px;
+    border-radius: 8px;
     overflow: hidden;
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: block;
 }
 
 .listing-form-attachment-preview img,
 .listing-form-attachment-preview video {
-    max-width: 100px; /* Adjust the size as needed */
-    max-height: 100px; /* Adjust the size as needed */
-    border-radius: 1rem;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.listing-form-attachment-preview video {
+    background-color: #000;
+}
+
+.listing-form-attachment-preview.video-preview::before {
+    content: "▶";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 1;
+}
+
+.listing-form-attachment-preview video::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 15px solid rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+.listing-form-attachment-preview.video-preview::before {
+    content: "▶";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 1;
+}
+
+.form-attachments .listing-form-attachments .listing-form-attachment-preview {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex !important; /* Force flex display */
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.form-attachments
+    .listing-form-attachments
+    .listing-form-attachment-preview
+    img,
+.form-attachments
+    .listing-form-attachments
+    .listing-form-attachment-preview
+    video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    margin: 0 !important; /* Ensure no margins are affecting alignment */
 }
 
 .listing-form-attachment-preview .delete-icon {

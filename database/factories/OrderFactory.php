@@ -30,7 +30,7 @@ class OrderFactory extends Factory
             'quote_id' => $quoteId,
             'status_id' => 1, // Default status is pending
             'override_quote' => $overrideQuote,
-            'override_amount' => $overrideQuote ? $this->faker->randomFloat(2, 10, 1000) : null,
+            'amount' => $overrideQuote ? $this->faker->randomFloat(2, 10, 1000) : null,
         ];
     }
 }

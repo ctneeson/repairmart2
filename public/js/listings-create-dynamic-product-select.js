@@ -8,28 +8,46 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     const form = document.querySelector("form");
 
-    // Initialize selectedProducts with unique values from hidden inputs
-    let selectedProducts = Array.from(
-        new Set(
-            Array.from(
-                document.querySelectorAll(
-                    '#product-hidden-inputs input[name="product_ids[]"]'
-                )
-            ).map((input) => input.value)
-        )
-    ).filter(Boolean); // Remove any empty values
+    // Initialize selectedProducts with values from the initialSelectedProducts array if available
+    // or from hidden inputs as a fallback
+    let selectedProducts = [];
+
+    // If initialSelectedProducts is defined (in edit mode), use it to initialize
+    if (
+        typeof initialSelectedProducts !== "undefined" &&
+        initialSelectedProducts.length > 0
+    ) {
+        selectedProducts = initialSelectedProducts.map((product) => product.id);
+        console.log(
+            "Loaded products from initialSelectedProducts:",
+            initialSelectedProducts
+        );
+    } else {
+        // Otherwise use the hidden inputs (for create mode or when returning after validation errors)
+        selectedProducts = Array.from(
+            new Set(
+                Array.from(
+                    document.querySelectorAll(
+                        '#product-hidden-inputs input[name="product_ids[]"]'
+                    )
+                ).map((input) => input.value)
+            )
+        ).filter(Boolean); // Remove any empty strings
+        console.log("Loaded products from hidden inputs:", selectedProducts);
+    }
 
     console.log("Initial selected products:", selectedProducts);
 
     function updateAddProductLinkVisibility() {
-        const selectedValue = productSelect.value;
+        const selectedValue = productSelect ? productSelect.value : "";
         if (
+            productSelect &&
             selectedValue !== "" &&
             !selectedProducts.includes(selectedValue) &&
             selectedProducts.length < 3
         ) {
             addProductLink.style.display = "inline";
-        } else {
+        } else if (addProductLink) {
             addProductLink.style.display = "none";
         }
     }
@@ -37,14 +55,37 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateSelectedProductsDisplay() {
         selectedProductsContainer.innerHTML = "";
         selectedProducts.forEach((productId) => {
-            const productOption = productSelect.querySelector(
-                `option[value="${productId}"]`
-            );
-            const productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
+            // Get product details either from initialSelectedProducts or from select options
+            let productText = "";
+
+            // First try to find in initialSelectedProducts (for edit mode)
+            if (typeof initialSelectedProducts !== "undefined") {
+                const initialProduct = initialSelectedProducts.find(
+                    (p) => p.id === productId
+                );
+                if (initialProduct) {
+                    productText = `${initialProduct.category} > ${initialProduct.subcategory}`;
+                }
+            }
+
+            // If not found in initialSelectedProducts, try to get from select options
+            if (!productText && productSelect) {
+                const productOption = productSelect.querySelector(
+                    `option[value="${productId}"]`
+                );
+                if (productOption) {
+                    productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
+                } else {
+                    // As a fallback, just show the ID
+                    productText = `Product #${productId}`;
+                }
+            }
+
             const productElement = document.createElement("div");
             productElement.classList.add("listing-item-badge");
             productElement.style.position = "relative";
             productElement.textContent = productText;
+
             const removeLink = document.createElement("a");
             removeLink.href = "#";
             removeLink.textContent = " Remove";
@@ -73,6 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateHiddenInputs() {
+        if (!productHiddenInputs) return;
+
         productHiddenInputs.innerHTML = "";
         selectedProducts.forEach((productId) => {
             const hiddenInput = document.createElement("input");
@@ -83,51 +126,61 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    productSelect.addEventListener("change", function () {
-        updateAddProductLinkVisibility();
-    });
-
-    addProductLink.addEventListener("click", function (e) {
-        e.preventDefault();
-        const selectedValue = productSelect.value;
-        if (
-            selectedValue !== "" &&
-            !selectedProducts.includes(selectedValue) &&
-            selectedProducts.length < 3
-        ) {
-            selectedProducts.push(selectedValue);
-            console.log("Product added:", selectedValue);
-            console.log("Selected products after addition:", selectedProducts);
-            updateSelectedProductsDisplay();
+    // Add event listeners only if elements exist
+    if (productSelect) {
+        productSelect.addEventListener("change", function () {
             updateAddProductLinkVisibility();
-            updateHiddenInputs();
-        }
-    });
+        });
+    }
 
-    // Clear any existing hidden inputs before initializing
-    productHiddenInputs.innerHTML = "";
+    if (addProductLink) {
+        addProductLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            const selectedValue = productSelect.value;
+            if (
+                selectedValue !== "" &&
+                !selectedProducts.includes(selectedValue) &&
+                selectedProducts.length < 3
+            ) {
+                selectedProducts.push(selectedValue);
+                console.log("Product added:", selectedValue);
+                console.log(
+                    "Selected products after addition:",
+                    selectedProducts
+                );
+                updateSelectedProductsDisplay();
+                updateAddProductLinkVisibility();
+                updateHiddenInputs();
+            }
+        });
+    }
+
+    // Initialize the UI
     updateSelectedProductsDisplay();
     updateAddProductLinkVisibility();
     updateHiddenInputs();
 
     // Add form submit event listener
-    form.addEventListener("submit", function (e) {
-        // No need to preventDefault() as we want the form to submit
+    if (form) {
+        form.addEventListener("submit", function () {
+            // Clean up all product_ids[] inputs before form submission
+            // This step is important to avoid duplicate entries
+            const allProductInputs = form.querySelectorAll(
+                'input[name="product_ids[]"]'
+            );
+            allProductInputs.forEach((input) => {
+                if (
+                    productHiddenInputs &&
+                    !productHiddenInputs.contains(input)
+                ) {
+                    input.remove();
+                }
+            });
 
-        // Clean up all product_ids[] inputs before form submission
-        // This step is important to avoid duplicate entries
-        const allProductInputs = form.querySelectorAll(
-            'input[name="product_ids[]"]'
-        );
-        allProductInputs.forEach((input) => {
-            if (!productHiddenInputs.contains(input)) {
-                input.remove();
-            }
+            // Make sure our hidden inputs are up to date
+            updateHiddenInputs();
+
+            console.log("Form submission with product IDs:", selectedProducts);
         });
-
-        // Make sure our hidden inputs are up to date
-        updateHiddenInputs();
-
-        console.log("Form submission with product IDs:", selectedProducts);
-    });
+    }
 });

@@ -18,11 +18,11 @@ class Currency extends Model
 
     public function listings(): HasMany
     {
-        return $this->hasMany(Listing::class, 'budget_currency_id', 'id');
+        return $this->hasMany(Listing::class, 'currency_id', 'id');
     }
 
     public function quotes(): HasMany
     {
-        return $this->hasMany(Quote::class, 'override_currency_id', 'id');
+        return $this->hasMany(Quote::class, 'currency_id', 'id');
     }
 }

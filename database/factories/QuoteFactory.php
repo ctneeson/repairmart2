@@ -34,11 +34,11 @@ class QuoteFactory extends Factory
             'amount' => $this->faker->randomFloat(2, 10, 1000),
             'turnaround' => $this->faker->numberBetween(5, 30),
             'use_default_location' => $useDefaultLocation,
-            'override_address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
-            'override_address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
-            'override_city' => $useDefaultLocation ? null : $this->faker->city,
-            'override_postcode' => $useDefaultLocation ? null : $this->faker->postcode,
-            'override_country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
+            'address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
+            'address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
+            'city' => $useDefaultLocation ? null : $this->faker->city,
+            'postcode' => $useDefaultLocation ? null : $this->faker->postcode,
+            'country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
         ];
     }
 }

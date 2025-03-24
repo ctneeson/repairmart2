@@ -20,11 +20,11 @@ return new class extends Migration {
             $table->decimal('amount', 10, 2);
             $table->integer('turnaround');
             $table->boolean('use_default_location')->defaultValue(true);
-            $table->string('override_address_line1', 255)->nullable();
-            $table->string('override_address_line2', 255)->nullable();
-            $table->string('override_city', 255)->nullable();
-            $table->string('override_postcode', 50)->nullable();
-            $table->foreignId('override_country_id')->constrainedTo('countries')->nullable();
+            $table->string('address_line1', 255)->nullable();
+            $table->string('address_line2', 255)->nullable();
+            $table->string('city', 255)->nullable();
+            $table->string('postcode', 50)->nullable();
+            $table->foreignId('country_id')->constrainedTo('countries')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

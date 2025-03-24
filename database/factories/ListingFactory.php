@@ -31,15 +31,16 @@ class ListingFactory extends Factory
             'title' => Product::inRandomOrder()->first()->subcategory
                 . ' ' . $this->faker->sentence,
             'description' => $this->faker->paragraph,
-            'budget_currency_id' => Currency::inRandomOrder()->first()->id,
+            'currency_id' => Currency::inRandomOrder()->first()->id,
             'budget' => $this->faker->randomFloat(2, 10, 1000),
             'use_default_location' => $useDefaultLocation,
-            'override_address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
-            'override_address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
-            'override_city' => $useDefaultLocation ? null : $this->faker->city,
-            'override_postcode' => $useDefaultLocation ? null : $this->faker->postcode,
-            'override_country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
-            'expiry_days' => $this->faker->numberBetween(7, 90),
+            'address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
+            'address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
+            'city' => $useDefaultLocation ? null : $this->faker->city,
+            'postcode' => $useDefaultLocation ? null : $this->faker->postcode,
+            'country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
+            'phone' => $useDefaultLocation ? null : $this->faker->phoneNumber,
+            'expiry_days' => $this->faker->randomElement([7, 14, 30, 60, 90]),
             'published_at' => ($this->faker->optional(0.9)->dateTimeBetween('-1 month', 'now') ?? now())->format('Y-m-d H:i:s'),
         ];
     }

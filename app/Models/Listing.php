@@ -23,14 +23,15 @@ class Listing extends Model
         'manufacturer_id',
         'title',
         'description',
-        'budget_currency_id',
+        'currency_id',
         'budget',
         'use_default_location',
-        'override_address_line1',
-        'override_address_line2',
-        'override_city',
-        'override_postcode',
-        'override_country_id',
+        'address_line1',
+        'address_line2',
+        'city',
+        'postcode',
+        'country_id',
+        'phone',
         'expiry_days',
         'published_at',
     ];
@@ -54,12 +55,12 @@ class Listing extends Model
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'budget_currency_id');
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function country(): BelongsTo
     {
-        return $this->belongsTo(Country::class, 'override_country_id');
+        return $this->belongsTo(Country::class, 'country_id');
     }
 
     public function primaryAttachment(): HasOne
@@ -70,7 +71,7 @@ class Listing extends Model
 
     public function attachments(): HasMany
     {
-        return $this->HasMany(Attachment::class, 'listing_id');
+        return $this->HasMany(Attachment::class, 'listing_id')->orderBy('position');
     }
 
     public function quotes(): HasMany

@@ -18,6 +18,7 @@ class Attachment extends Model
         'email_id',
         'position',
         'path',
+        'mime_type',
         'created_at',
         'updated_at',
         'deleted_at',

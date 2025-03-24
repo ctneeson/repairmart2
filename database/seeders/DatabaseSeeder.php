@@ -88,7 +88,7 @@ class DatabaseSeeder extends Seeder
 
         // Generate 2 quotes for each listing created for the user with email sid@penguins.com
         foreach ($sidUser->listingsCreated as $listing) {
-            $currencyId = $listing->budget_currency_id;
+            $currencyId = $listing->currency_id;
             $amount = $listing->budget;
 
             // Create the first quote with deliverymethod_id = 2

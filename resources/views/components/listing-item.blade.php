@@ -30,7 +30,7 @@
       <div class="flex items-center justify-between">
         <small class="m-0 text-muted">
           @if($listing->use_default_location==0)
-          {{$listing->override_city}}, {{$listing->country->name}}
+          {{$listing->city}}, {{$listing->country->name}}
           @else
           {{$listing->customer->city}}, {{$listing->customer->country->name}}
           @endif

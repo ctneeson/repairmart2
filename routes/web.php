@@ -17,6 +17,12 @@ Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::get('/listings/search', [ListingController::class, 'search'])->name('listings.search');
 Route::get('/listings/watchlist', [ListingController::class, 'watchlist'])->name('listings.watchlist');
 Route::resource('listings', ListingController::class);
+Route::get('/listings/{listing}/attachments', [ListingController::class, 'listingAttachments'])
+    ->name('listings.attachments');
+Route::put('/listings/{listing}/attachments', [ListingController::class, 'updateAttachments'])
+    ->name('listings.updateAttachments');
+Route::post('/listings/{listing}/attachments', [ListingController::class, 'addAttachments'])
+    ->name('listings.addAttachments');
 
 Route::resources([
     'listings' => ListingController::class,

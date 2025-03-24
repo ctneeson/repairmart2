@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreListingRequest;
 use App\Models\Listing;
 use App\Models\User;
-use Hamcrest\Type\IsBoolean;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ListingPosted;
+use Illuminate\Support\Facades\Storage;
 
 class ListingController extends Controller
 {
@@ -50,14 +50,15 @@ class ListingController extends Controller
                 'manufacturer_id' => $validated['manufacturer_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
-                'budget_currency_id' => $validated['currency_id'],
+                'currency_id' => $validated['currency_id'],
                 'budget' => $validated['budget'],
-                'use_default_location' => $validated['use_default_address'],
-                'override_address_line1' => $validated['address_line1'] ?? null,
-                'override_address_line2' => $validated['address_line2'] ?? null,
-                'override_city' => $validated['city'] ?? null,
-                'override_postcode' => $validated['postcode'] ?? null,
-                'override_country_id' => $validated['country_id'] ?? null,
+                'use_default_location' => $validated['use_default_location'],
+                'address_line1' => $validated['address_line1'] ?? null,
+                'address_line2' => $validated['address_line2'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'postcode' => $validated['postcode'] ?? null,
+                'country_id' => $validated['country_id'] ?? null,
+                'phone' => $validated['phone'] ?? null,
                 'expiry_days' => $validated['expiry_days'],
                 'published_at' => $validated['published_at'] ?? null,
             ]);
@@ -71,8 +72,12 @@ class ListingController extends Controller
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $i => $file) {
                     $path = $file->store('attachments', 'public');
-                    $listing->attachments()->create(['path' => $path, 'position' => $i + 1]);
-                    // Save the file path to the database or perform other actions as needed
+                    $listing->attachments()
+                        ->create([
+                            'path' => $path,
+                            'position' => $i + 1,
+                            'mime_type' => $file->getMimeType()
+                        ]);
                 }
             }
 
@@ -111,15 +116,23 @@ class ListingController extends Controller
      */
     public function edit(Listing $listing)
     {
-        return view('listings.edit');
+        return view('listings.edit', ['listing' => $listing]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Listing $listing)
+    public function update(StoreListingRequest $request, Listing $listing)
     {
-        //
+        $validated = $request->validated();
+        $validated['use_default_location'] = (bool) $request->use_default_location;
+        $products = $validated['product_ids'];
+
+        $listing->update($validated);
+        $listing->products()->sync($products);
+
+        return redirect()->route('listings.index')
+            ->with('success', 'Listing updated successfully.');
     }
 
     /**
@@ -127,7 +140,9 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
-        //
+        $listing->delete();
+        return redirect()->route('listings.index')
+            ->with('success', 'Listing deleted successfully.');
     }
 
     public function search(Request $request)
@@ -166,7 +181,7 @@ class ListingController extends Controller
             $query->where(function ($q) use ($countries) {
                 $q->where(function ($q) use ($countries) {
                     $q->where('use_default_location', 0)
-                        ->whereIn('override_country_id', $countries);
+                        ->whereIn('country_id', $countries);
                 })->orWhereHas('customer', function ($q) use ($countries) {
                     $q->where('use_default_location', 1)
                         ->whereIn('country_id', $countries);
@@ -206,5 +221,64 @@ class ListingController extends Controller
             ->paginate(15);
 
         return view('listings.watchlist', ['listings' => $listings]);
+    }
+
+    public function listingAttachments(Listing $listing)
+    {
+        return view('listings.attachments', ['listing' => $listing]);
+    }
+
+    public function updateAttachments(Request $request, Listing $listing)
+    {
+        $data = $request->validate([
+            'delete_attachments' => 'array',
+            'delete_attachments.*' => 'integer|exists:attachments,id',
+            'positions' => 'array',
+            'positions.*' => 'integer|exists:attachments,id',
+        ]);
+
+        $deleteAttachments = $data['delete_attachments'] ?? [];
+        $positions = $data['positions'] ?? [];
+
+        // Delete attachments
+        $attachmentsToDelete = $listing->attachments()
+            ->whereIn('id', $deleteAttachments)
+            ->get();
+
+        foreach ($attachmentsToDelete as $attachment) {
+            if (Storage::exists($attachment->path)) {
+                Storage::delete($attachment->path);
+            }
+        }
+
+        $listing->attachments()
+            ->whereIn('id', $deleteAttachments)
+            ->delete();
+
+        // Update attachment positions
+        foreach ($positions as $id => $position) {
+            $listing->attachments()->where('id', $id)->update(['position' => $position]);
+        }
+
+        return redirect()->back()->with('success', 'Attachments updated successfully.');
+    }
+
+    public function addAttachments(Request $request, Listing $listing)
+    {
+        // Get attachments from request
+        $attachments = $request->file('attachments') ?? [];
+
+        // Get max position from existing attachments
+        $position = $listing->attachments()->max('position') ?? 0;
+        foreach ($attachments as $attachment) {
+            $path = $attachment->store('attachments', 'public');
+            $listing->attachments()->create([
+                'path' => $path,
+                'position' => $position + 1,
+                'mime_type' => $attachment->getMimeType()
+            ]);
+            $position++;
+        }
+        return redirect()->back()->with('success', 'Attachments added successfully.');
     }
 }

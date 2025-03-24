@@ -22,11 +22,11 @@ class Quote extends Model
         'amount',
         'turnaround',
         'use_default_location',
-        'override_address_line1',
-        'override_address_line2',
-        'override_city',
-        'override_postcode',
-        'override_country_id',
+        'address_line1',
+        'address_line2',
+        'city',
+        'postcode',
+        'country_id',
     ];
 
     public function customer(): HasOneThrough
@@ -63,7 +63,7 @@ class Quote extends Model
 
     public function country(): BelongsTo
     {
-        return $this->belongsTo(Country::class, 'override_country_id');
+        return $this->belongsTo(Country::class, 'country_id');
     }
 
     public function deliveryMethod(): BelongsTo

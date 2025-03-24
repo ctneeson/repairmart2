@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const useDefaultAddressCheckbox = document.getElementById(
-        "use-default-address"
+        "use-default-location"
     );
     const addressInputs = [
         document.getElementById("address_line1"),

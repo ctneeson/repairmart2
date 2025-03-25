@@ -9,13 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ListingPosted;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Attachment;
 
 class ListingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $listings = User::find(2)
             ->listingsCreated()
@@ -83,6 +84,7 @@ class ListingController extends Controller
 
             return redirect()->route('listings.index')
                 ->with('success', 'Listing created successfully.');
+
         } catch (\Exception $e) {
             // Log the error
             \Log::error('Error creating listing: ' . $e->getMessage());
@@ -148,9 +150,6 @@ class ListingController extends Controller
     public function search(Request $request)
     {
         dump($request->all());
-        // dump($request->product_ids);
-        // dump($request->manufacturer_ids);
-        // dump($request->country_ids);
         $products = $request->product_ids;
         $countries = $request->country_ids;
         $manufacturers = $request->manufacturer_ids;
@@ -230,34 +229,27 @@ class ListingController extends Controller
 
     public function updateAttachments(Request $request, Listing $listing)
     {
-        $data = $request->validate([
-            'delete_attachments' => 'array',
-            'delete_attachments.*' => 'integer|exists:attachments,id',
-            'positions' => 'array',
-            'positions.*' => 'integer|exists:attachments,id',
-        ]);
+        // Handle deletions
+        if ($request->has('delete_attachments')) {
+            $attachmentsToDelete = Attachment::whereIn('id', $request->delete_attachments)
+                ->where('listing_id', $listing->id)
+                ->get();
 
-        $deleteAttachments = $data['delete_attachments'] ?? [];
-        $positions = $data['positions'] ?? [];
-
-        // Delete attachments
-        $attachmentsToDelete = $listing->attachments()
-            ->whereIn('id', $deleteAttachments)
-            ->get();
-
-        foreach ($attachmentsToDelete as $attachment) {
-            if (Storage::exists($attachment->path)) {
-                Storage::delete($attachment->path);
+            foreach ($attachmentsToDelete as $attachment) {
+                if (Storage::exists($attachment->path)) {
+                    Storage::delete($attachment->path);
+                }
+                $attachment->delete();
             }
         }
 
-        $listing->attachments()
-            ->whereIn('id', $deleteAttachments)
-            ->delete();
-
-        // Update attachment positions
-        foreach ($positions as $id => $position) {
-            $listing->attachments()->where('id', $id)->update(['position' => $position]);
+        // Handle position updates
+        if ($request->has('positions')) {
+            foreach ($request->positions as $id => $position) {
+                Attachment::where('id', $id)
+                    ->where('listing_id', $listing->id)
+                    ->update(['position' => $position]);
+            }
         }
 
         return redirect()->back()->with('success', 'Attachments updated successfully.');

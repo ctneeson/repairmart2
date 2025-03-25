@@ -170,7 +170,7 @@
           </div>
             <div class="form-attachments">
               <p>
-                Manage attachments <a href="#">here</a>
+                Manage attachments <a href="{{ route('listings.attachments', $listing) }}">here</a>
               </p>
               <div class="listing-form-attachments">
                 @foreach ($listing->attachments as $attachment)

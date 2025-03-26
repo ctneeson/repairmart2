@@ -1,6 +1,15 @@
 @props(['title' => '', 'bodyClass' => ''])
 
 <x-base-layout :title='$title' :bodyClass='$bodyClass'>
+
+    @session('success')
+    <div class="container my-large">
+        <div class="success-message">
+            {{ session('success') }}
+        </div>
+    </div>
+    @endsession
+
     <main>
         <div class="container-small page-login">
             <div class="flex" style="gap: 5rem">

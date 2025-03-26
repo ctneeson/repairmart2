@@ -1668,13 +1668,24 @@ a.pagination-item:hover {
     gap: 0.5rem; /* Adjust the gap between checkboxes as needed */
 }
 
+.checkbox-items {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
 .checkbox-item {
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .checkbox-item input[type="checkbox"] {
     margin-right: 0.5rem; /* Adjust the spacing between checkbox and label as needed */
+}
+
+.checkbox-item label {
+    cursor: pointer;
 }
 
 .button-container {

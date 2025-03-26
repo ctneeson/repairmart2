@@ -17,10 +17,6 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // session(['user' => 'John Doe']);
-        $user = $request->session()->get('user');
-        dd($request->session()->all());
-
         $listings = Listing::where('published_at', '<=', now())
             ->with([
                 'country',

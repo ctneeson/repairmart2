@@ -33,8 +33,8 @@ class User extends Authenticatable
         'address_line1',
         'address_line2',
         'city',
-        'country_id',
         'postcode',
+        'country_id',
     ];
 
     /**
@@ -131,6 +131,34 @@ class User extends Authenticatable
             'id', // Local key on the users table
             'id' // Local key on the quotes table
         );
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'users_roles');
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole($role)
+    {
+        if (is_string($role)) {
+            return $this->roles->where('name', $role)->count() > 0;
+        }
+
+        // If $role is an array, check if user has any of these roles
+        if (is_array($role)) {
+            foreach ($role as $r) {
+                if ($this->hasRole($r)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // If $role is a Role model instance
+        return $this->roles->contains('id', $role->id);
     }
 
     public function country(): BelongsTo

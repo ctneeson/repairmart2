@@ -19,11 +19,11 @@ return new class extends Migration {
             $table->string('password');
             $table->string('google_id', 45)->nullable();
             $table->string('facebook_id', 45)->nullable();
-            $table->string('address_line1', 255)->nullable();
+            $table->string('address_line1', 255);
             $table->string('address_line2', 255)->nullable();
-            $table->string('city', 255)->nullable();
-            $table->string('postcode', 50)->nullable();
-            $table->foreignId('country_id')->constrainedTo('countries')->nullable();
+            $table->string('city', 255);
+            $table->string('postcode', 50);
+            $table->foreignId('country_id')->constrainedTo('countries');
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

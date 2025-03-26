@@ -38,9 +38,10 @@
 
             Add new Listing
         </a>
+        @auth()
         <div class="navbar-menu" tabindex="-1">
             <a href="javascript:void(0)" class="navbar-menu-handler">
-            My Account
+            {{ Auth::user()->name }}
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -64,12 +65,16 @@
                 <a href="watchlist.html">Favourites</a>
             </li>
             <li>
-                <form action="#" method="post">
-                <button>Logout</button>
+                <form action="{{ route('logout') }}" method="post">
+                    @csrf
+                    <button>Logout</button>
                 </form>
             </li>
             </ul>
         </div>
+        @endauth
+
+        @guest()
         <a href="{{route('signup')}}" class="btn btn-primary btn-signup">
             <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -102,6 +107,7 @@
             </svg>
             Login
         </a>
+        @endguest
         </div>
     </div>
 </header>

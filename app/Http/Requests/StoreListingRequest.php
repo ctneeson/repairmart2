@@ -55,7 +55,7 @@ class StoreListingRequest extends FormRequest
             'required' => 'Please enter a value',
             'manufacturer_id.required' => 'Please select a manufacturer',
             'product_ids.required' => 'Please select at least one product',
-            'public_id.required' => 'Please select a date',
+            'published_at.required' => 'Please select a date',
             'phone.regex' => 'Phone number may only contain numbers, spaces, and the following characters: +, -, (, )',
         ];
     }

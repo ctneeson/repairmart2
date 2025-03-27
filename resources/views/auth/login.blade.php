@@ -16,8 +16,8 @@
       </div>
     </div>
     <div class="text-right mb-medium">
-      <a href="/password-reset.html" class="auth-page-password-reset"
-        >Reset Password</a
+      <a href="{{ route('password.reset-request') }}" class="auth-page-password-reset"
+        >Forgot password?</a
       >
     </div>
 

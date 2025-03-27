@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SignupController;
@@ -13,9 +14,19 @@ Route::view('/about', 'about')->name('about');
 
 Route::get('/signup', [SignupController::class, 'create'])->name('signup');
 Route::post('/signup', [SignupController::class, 'store'])->name('signup.store');
+
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])
+    ->name('password.reset-request');
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])
+    ->name('password.reset-email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])
+    ->name('password.reset');
+Route::post('/reset-password/{token}', [PasswordResetController::class, 'resetPassword'])
+    ->name('password.update');
 
 Route::get('/listings/search', [ListingController::class, 'search'])->name('listings.search');
 Route::get('/listings/watchlist', [ListingController::class, 'watchlist'])->name('listings.watchlist');

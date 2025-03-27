@@ -17,7 +17,7 @@
                   receive quotes from repair specialists and extend your product's life.
                 </p>
 
-                <button class="btn btn-hero-slider" href="/listings/create">Create a request</button>
+                <button class="btn btn-hero-slider" href="/listings/create">Create a listing</button>
               </div>
             </div>
             <div class="slide-image">

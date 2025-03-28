@@ -59,10 +59,10 @@
             </a>
             <ul class="submenu">
             <li>
-                <a href="my_listings.html">My Listings</a>
+                <a href="{{ route('listings.index') }}">My Listings</a>
             </li>
             <li>
-                <a href="watchlist.html">Favourites</a>
+                <a href="{{ route('listings.watchlist') }}">Favourites</a>
             </li>
             <li>
                 <form action="{{ route('logout') }}" method="post">

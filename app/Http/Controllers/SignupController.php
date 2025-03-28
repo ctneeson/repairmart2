@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use \Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
 
 class SignupController extends Controller
 {
@@ -69,8 +71,12 @@ class SignupController extends Controller
         $selectedRoles = Role::whereIn('name', $request->role)->get();
         $user->roles()->attach($selectedRoles);
 
+        // Send verification email
+        event(new Registered($user));
 
-        return redirect()->route('login')
-            ->with('success', 'Account created successfully.');
+        Auth::login($user);
+
+        return redirect()->route('home')
+            ->with('success', 'Account created. Please check your email to verify your account.');
     }
 }

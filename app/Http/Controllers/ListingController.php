@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ListingPosted;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Attachment;
 
@@ -18,7 +19,7 @@ class ListingController extends Controller
      */
     public function index(Request $request)
     {
-        $listings = User::find(2)
+        $listings = $request->user()
             ->listingsCreated()
             ->with(['primaryAttachment', 'manufacturer', 'products'])
             ->orderBy('created_at', 'desc')
@@ -46,7 +47,7 @@ class ListingController extends Controller
 
             // Create the listing
             $listing = Listing::create([
-                'user_id' => 2,
+                'user_id' => Auth::id(),
                 'status_id' => 1,
                 'manufacturer_id' => $validated['manufacturer_id'],
                 'title' => $validated['title'],
@@ -118,6 +119,10 @@ class ListingController extends Controller
      */
     public function edit(Listing $listing)
     {
+        // Authentication
+        if ($listing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
         return view('listings.edit', ['listing' => $listing]);
     }
 
@@ -126,6 +131,11 @@ class ListingController extends Controller
      */
     public function update(StoreListingRequest $request, Listing $listing)
     {
+        // Authentication
+        if ($listing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
+
         $validated = $request->validated();
         $validated['use_default_location'] = (bool) $request->use_default_location;
         $products = $validated['product_ids'];
@@ -142,14 +152,21 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
+        // Authentication
+        if ($listing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
+
         $listing->delete();
         return redirect()->route('listings.index')
             ->with('success', 'Listing deleted successfully.');
     }
 
+    /**
+     * Search for listings based on filters.
+     */
     public function search(Request $request)
     {
-        dump($request->all());
         $products = $request->product_ids;
         $countries = $request->country_ids;
         $manufacturers = $request->manufacturer_ids;
@@ -198,15 +215,15 @@ class ListingController extends Controller
         $listings = $query->paginate(15)
             ->withQueryString();
 
-        // $listingCount = $query->count();
-        // $listings = $query->limit(30)->get();
-
         return view('listings.search', ['listings' => $listings]);
     }
 
+    /**
+     * Add a listing to the user's watchlist.
+     */
     public function watchlist()
     {
-        $listings = User::find(2)
+        $listings = Auth::user()
             ->watchlistListings()
             ->with([
                 'country',
@@ -222,13 +239,24 @@ class ListingController extends Controller
         return view('listings.watchlist', ['listings' => $listings]);
     }
 
+    /**
+     * Show the attachments for a listing.
+     */
     public function listingAttachments(Listing $listing)
     {
         return view('listings.attachments', ['listing' => $listing]);
     }
 
+    /**
+     * Update the attachments for a listing.
+     */
     public function updateAttachments(Request $request, Listing $listing)
     {
+        // Authentication
+        if ($listing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
+
         // Handle deletions
         if ($request->has('delete_attachments')) {
             $attachmentsToDelete = Attachment::whereIn('id', $request->delete_attachments)
@@ -255,8 +283,16 @@ class ListingController extends Controller
         return redirect()->back()->with('success', 'Attachments updated successfully.');
     }
 
+    /**
+     * Add attachments to a listing.
+     */
     public function addAttachments(Request $request, Listing $listing)
     {
+        // Authentication
+        if ($listing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
+
         // Get attachments from request
         $attachments = $request->file('attachments') ?? [];
 

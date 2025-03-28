@@ -8,38 +8,70 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\EmailVerifyController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::view('/about', 'about')->name('about');
 
-Route::get('/signup', [SignupController::class, 'create'])->name('signup');
-Route::post('/signup', [SignupController::class, 'store'])->name('signup.store');
-
-Route::get('/login', [LoginController::class, 'create'])->name('login');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-
-Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])
-    ->name('password.reset-request');
-Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])
-    ->name('password.reset-email');
-Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])
-    ->name('password.reset');
-Route::post('/reset-password/{token}', [PasswordResetController::class, 'resetPassword'])
-    ->name('password.update');
-
+// Logged in or logged out
 Route::get('/listings/search', [ListingController::class, 'search'])->name('listings.search');
-Route::get('/listings/watchlist', [ListingController::class, 'watchlist'])->name('listings.watchlist');
-Route::resource('listings', ListingController::class);
-Route::get('/listings/{listing}/attachments', [ListingController::class, 'listingAttachments'])
-    ->name('listings.attachments');
-Route::put('/listings/{listing}/attachments', [ListingController::class, 'updateAttachments'])
-    ->name('listings.updateAttachments');
-Route::post('/listings/{listing}/attachments', [ListingController::class, 'addAttachments'])
-    ->name('listings.addAttachments');
+
+// User cannot be logged in
+Route::middleware(['guest'])->group(function () {
+
+    Route::get('/signup', [SignupController::class, 'create'])->name('signup');
+    Route::post('/signup', [SignupController::class, 'store'])->name('signup.store');
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])
+        ->name('password.reset-request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])
+        ->name('password.reset-email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])
+        ->name('password.reset');
+    Route::post('/reset-password/{token}', [PasswordResetController::class, 'resetPassword'])
+        ->name('password.update');
+
+});
+
+// User must be logged in
+Route::middleware(['auth'])->group(function () {
+
+    // Logout
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    // Account must be verified
+    Route::middleware(['verified'])->group(function () {
+        // Listings
+        Route::resource('listings', ListingController::class)
+            ->except(['index', 'show']);
+        Route::get('/listings/watchlist', [ListingController::class, 'watchlist'])->name('listings.watchlist');
+        Route::get('/listings/{listing}/attachments', [ListingController::class, 'listingAttachments'])
+            ->name('listings.attachments');
+        Route::put('/listings/{listing}/attachments', [ListingController::class, 'updateAttachments'])
+            ->name('listings.updateAttachments');
+        Route::post('/listings/{listing}/attachments', [ListingController::class, 'addAttachments'])
+            ->name('listings.addAttachments');
+    });
+
+});
+
+Route::get('/listings', [ListingController::class, 'index'])->name('listings.index');
+Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
+
+// Verify signup email
+Route::get('/email/verify/{id}/{hash}', [EmailVerifyController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
+Route::get('/email/verify', [EmailVerifyController::class, 'notice'])
+    ->middleware(['auth'])
+    ->name('verification.notice');
+Route::post('/email/verification-notification', [EmailVerifyController::class, 'send'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
 
 Route::resources([
-    'listings' => ListingController::class,
     'orders' => OrderController::class,
 ]);
 

@@ -15,12 +15,16 @@
               @endif
             </div>
             <div class="listing-items-listing">
-                @forelse ($listings as $listing)
+                @foreach ($listings as $listing)
                     <x-listing-item :listing="$listing" :isInWatchlist="true"/>
-                @empty
-                    <p>No listings have been added to your watchlist.</p>
-                @endforelse
+                @endforeach
             </div>
+
+            @if($listings->count() === 0)
+              <div class="text-center p-large">
+                <p>You have no listings in your watchlist.</p>
+              </div>
+            @endif
   
             {{ $listings->onEachSide(3)->links()}}
           </div>

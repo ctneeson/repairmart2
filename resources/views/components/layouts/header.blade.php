@@ -59,15 +59,18 @@
             </a>
             <ul class="submenu">
             <li>
+                <a href="{{ route('profile.index') }}">My Account</a>
+            </li>
+            <li>
                 <a href="{{ route('listings.index') }}">My Listings</a>
             </li>
             <li>
-                <a href="{{ route('listings.watchlist') }}">Favourites</a>
+                <a href="{{ route('listings.watchlist') }}">Watchlist</a>
             </li>
             <li>
                 <form action="{{ route('logout') }}" method="post">
                     @csrf
-                    <button>Logout</button>
+                    <button>Log out</button>
                 </form>
             </li>
             </ul>

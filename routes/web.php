@@ -8,6 +8,8 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerifyController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -41,6 +43,13 @@ Route::middleware(['auth'])->group(function () {
     // Logout
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
+    // User Profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.updatePassword');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     // Account must be verified
     Route::middleware(['verified'])->group(function () {
         // Listings
@@ -53,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('listings.updateAttachments');
         Route::post('/listings/{listing}/attachments', [ListingController::class, 'addAttachments'])
             ->name('listings.addAttachments');
+
     });
 
 });
@@ -70,6 +80,10 @@ Route::get('/email/verify', [EmailVerifyController::class, 'notice'])
 Route::post('/email/verification-notification', [EmailVerifyController::class, 'send'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
+// Socialite login
+Route::get('/login/oauth/{provider}', [SocialiteController::class, 'redirectToProvider'])
+    ->name('login.oauth');
+Route::get('/callback/oauth/{provider}', [SocialiteController::class, 'handleProviderCallback']);
 
 Route::resources([
     'orders' => OrderController::class,

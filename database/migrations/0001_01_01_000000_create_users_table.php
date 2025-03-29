@@ -16,13 +16,13 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->string('phone', 45)->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('google_id', 45)->nullable();
             $table->string('facebook_id', 45)->nullable();
-            $table->string('address_line1', 255);
+            $table->string('address_line1', 255)->nullable();
             $table->string('address_line2', 255)->nullable();
-            $table->string('city', 255);
-            $table->string('postcode', 50);
+            $table->string('city', 255)->nullable();
+            $table->string('postcode', 50)->nullable();
             $table->foreignId('country_id')->constrainedTo('countries');
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();

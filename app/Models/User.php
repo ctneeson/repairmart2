@@ -170,6 +170,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function watchlistListings(): BelongsToMany
     {
-        return $this->belongsToMany(Listing::class, 'favourite_listings');
+        return $this->belongsToMany(Listing::class, 'favourite_listings')
+            ->withPivot('id')
+            ->orderBy('favourite_listings.id', 'desc');
+    }
+
+    public function isOauthUser(): bool
+    {
+        return $this->google_id !== null || $this->facebook_id !== null;
     }
 }

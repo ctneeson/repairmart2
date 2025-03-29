@@ -95,7 +95,7 @@
           <h2>Latest Listings</h2>
           <div class="listing-items-listing">
             @foreach($listings as $listing)
-              <x-listing-item :listing="$listing"/>
+              <x-listing-item :listing="$listing" :isInWatchlist="$listing->watchlistUsers->contains(Auth::user())"/>
             @endforeach
             </div>
           </div>

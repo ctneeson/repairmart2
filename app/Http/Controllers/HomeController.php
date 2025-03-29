@@ -25,7 +25,8 @@ class HomeController extends Controller
                 'manufacturer',
                 'currency',
                 'primaryAttachment',
-                'products'
+                'products',
+                'watchlistUsers'
             ])
             ->orderBy('published_at', 'desc')
             ->limit(30)

@@ -4,7 +4,7 @@
         <section>
           <div class="container">
             <div class="flex justify-between items-center">
-              <h2>My Listings Watchlist</h2>
+              <h2>Listings - Watchlist</h2>
               @if($listings->total() > 0)
                 <div class="pagination-summary">
                   <p>

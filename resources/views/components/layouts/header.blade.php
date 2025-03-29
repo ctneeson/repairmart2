@@ -65,7 +65,7 @@
                 <a href="{{ route('listings.index') }}">My Listings</a>
             </li>
             <li>
-                <a href="{{ route('listings.watchlist') }}">Watchlist</a>
+                <a href="{{ route('watchlist.index') }}">Watchlist</a>
             </li>
             <li>
                 <form action="{{ route('logout') }}" method="post">

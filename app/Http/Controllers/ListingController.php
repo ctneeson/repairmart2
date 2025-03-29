@@ -219,27 +219,6 @@ class ListingController extends Controller
     }
 
     /**
-     * Add a listing to the user's watchlist.
-     */
-    public function watchlist()
-    {
-        $listings = Auth::user()
-            ->watchlistListings()
-            ->with([
-                'country',
-                'customer',
-                'customer.country',
-                'manufacturer',
-                'currency',
-                'primaryAttachment',
-                'products'
-            ])
-            ->paginate(15);
-
-        return view('listings.watchlist', ['listings' => $listings]);
-    }
-
-    /**
      * Show the attachments for a listing.
      */
     public function listingAttachments(Listing $listing)

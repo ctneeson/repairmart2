@@ -65,7 +65,7 @@
                 @if($listings->count())
                 <div class="listing-items-listing">
                   @foreach($listings as $listing)
-                    <x-listing-item :$listing/>
+                    <x-listing-item :$listing :isInWatchlist="$listing->watchlistUsers->contains(Auth::user())"/>
                   @endforeach
                 </div>
                 @else

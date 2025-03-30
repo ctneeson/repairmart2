@@ -21,13 +21,9 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <!-- <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css"
-      rel="stylesheet"
-    /> -->
 
-    <link rel="stylesheet" href="/css/app.css" />
-    <!-- <link rel="stylesheet" href="css/output.css" /> -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
   </head>
   <body @if($bodyClass)class="{{$bodyClass}}"@endif>
 
@@ -39,6 +35,5 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script src="/js/app.js"></script>
   </body>
 </html>

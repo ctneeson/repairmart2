@@ -217,7 +217,10 @@
             </form>
         </div>
     </main>
-</x-app-layout>
 
-<script src="{{ asset('js/listings-create-dynamic-product-select.js') }}"></script>
-<script src="{{ asset('js/listings-create-toggle-address-inputs.js') }}"></script>
+    @vite([
+        'resources/js/listings-create-dynamic-product-select.js',
+        'resources/js/listings-create-toggle-address-inputs.js',
+    ])
+
+</x-app-layout>

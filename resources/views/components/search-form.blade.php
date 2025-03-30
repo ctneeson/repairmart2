@@ -25,5 +25,3 @@
         </form>
     </div>
 </section>
-<!--/ Find a listing form -->
-<script src="{{ asset('js/listings-search-dropdown.js') }}"></script>

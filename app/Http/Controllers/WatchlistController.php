@@ -41,11 +41,17 @@ class WatchlistController extends Controller
         if ($listingExists) {
             // Remove from watchlist
             $user->watchlistListings()->detach($listing);
-            return back()->with('success', 'Listing removed from watchlist.');
+            return response()->json([
+                'added' => false,
+                'message' => 'Listing removed from watchlist.'
+            ]);
         } else {
             // Add to watchlist
             $user->watchlistListings()->attach($listing);
-            return back()->with('success', 'Listing added to watchlist.');
+            return response()->json([
+                'added' => true,
+                'message' => 'Listing added to watchlist.'
+            ]);
         }
     }
 }

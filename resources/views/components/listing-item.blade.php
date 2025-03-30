@@ -35,9 +35,8 @@
           {{$listing->customer->city}}, {{$listing->customer->country->name}}
           @endif
       </small>
-      <form action="{{ route('watchlist.storeDestroy', $listing) }}" method="POST">
-        @csrf
-        <button class="btn-heart text-primary">
+        <button class="btn-heart text-primary"
+          data-url="{{ route('watchlist.storeDestroy', $listing) }}">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -71,7 +70,6 @@
             />
           </svg>
         </button>
-      </form>
       </div>
       <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->title}}</h2>
       <p class="listing-item-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreListingRequest;
 use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ListingPosted;
 use Illuminate\Support\Facades\Auth;
@@ -119,10 +120,8 @@ class ListingController extends Controller
      */
     public function edit(Listing $listing)
     {
-        // Authentication
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'Unauthorised action.');
-        }
+        Gate::authorize('update-listing', $listing);
+
         return view('listings.edit', ['listing' => $listing]);
     }
 
@@ -131,10 +130,7 @@ class ListingController extends Controller
      */
     public function update(StoreListingRequest $request, Listing $listing)
     {
-        // Authentication
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'Unauthorised action.');
-        }
+        Gate::authorize('update-listing', $listing);
 
         $validated = $request->validated();
         $validated['use_default_location'] = (bool) $request->use_default_location;
@@ -152,10 +148,7 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
-        // Authentication
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'Unauthorised action.');
-        }
+        Gate::authorize('delete-listing', $listing);
 
         $listing->delete();
         return redirect()->route('listings.index')
@@ -180,7 +173,8 @@ class ListingController extends Controller
                 'manufacturer',
                 'currency',
                 'primaryAttachment',
-                'products'
+                'products',
+                'watchlistUsers'
             ]);
 
         if ($manufacturers) {

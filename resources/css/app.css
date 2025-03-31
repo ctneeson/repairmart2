@@ -964,17 +964,21 @@ a.pagination-item:hover {
     width: 44px;
 }
 
-.listing-details-phone {
+.listing-details-phone,
+.listing-details-email,
+.listing-details-createquote,
+.listing-details-edit {
     position: relative;
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 1rem;
     font-size: 14px;
-    border: 1px solid var(--primary-color);
+    border: 1px solid var(--primary-button-border-color);
     border-radius: 1rem;
     text-decoration: none;
     font-weight: bold;
+    margin-bottom: 0.1rem;
 }
 
 .listing-details-phone-view {
@@ -988,49 +992,29 @@ a.pagination-item:hover {
     font-weight: normal;
     color: var(--text-color);
     transition: all 0.3s;
+    cursor: pointer;
+    background: transparent;
+    border: none;
 }
 
-.listing-details-phone-view:hover {
+.listing-details-phone-view:hover,
+.listing-details-email:hover,
+.listing-details-createquote:hover,
+.listing-details-edit:hover {
     border-top-right-radius: 1rem;
     border-bottom-right-radius: 1rem;
     background-color: rgba(0, 0, 0, 0.1);
-}
-
-.listing-details-email {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    font-size: 14px;
-    border: 1px solid var(--primary-color);
-    border-radius: 1rem;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.listing-details-email-view {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    padding: 0.5rem;
-    display: inline-block;
-    width: 80px;
-    font-weight: normal;
-    color: var(--text-color);
-    transition: all 0.3s;
-}
-
-.listing-details-email-view:hover {
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-    background-color: rgba(0, 0, 0, 0.1);
+    color: #0056b3;
 }
 
 .listing-details-title {
     margin-top: 0;
     margin-bottom: 1rem;
+}
+
+.listing-details-phone-number {
+    color: var(--primary-color);
+    transition: all 0.3s;
 }
 
 .listing-detailed-description {
@@ -1756,4 +1740,29 @@ a.pagination-item:hover {
 .btn.move-down.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+#address-fields.disabled-fields input,
+#address-fields.disabled-fields select {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    border-color: #ddd;
+    color: #666;
+}
+
+#address-fields input[readonly],
+#address-fields select[disabled],
+input#phone[readonly] {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    border-color: #ddd;
+    color: #666;
+}
+
+.fields-readonly input,
+.fields-readonly select {
+    background-color: #f5f5f5 !important;
+    cursor: not-allowed !important;
+    border-color: #ddd !important;
+    color: #666 !important;
 }

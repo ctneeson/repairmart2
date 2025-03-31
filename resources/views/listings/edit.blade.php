@@ -106,59 +106,90 @@
                          {{ old('use_default_location', $listing->use_default_location) ? 'checked' : '' }} />
                 </div>
               </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('address_line1') has-error @enderror">
-                          <label>Address Line 1</label>
-                          <input id="address_line1" placeholder="Address Line 1" name="address_line1" value="{{ old('address_line1', $listing->address_line1) }}" />
-                          <p class="error-message">{{ $errors->first('address_line1') }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('address_line2') has-error @enderror">
-                          <label>Address Line 2</label>
-                          <input id="address_line2" placeholder="Address Line 2" name="address_line2" value="{{ old('address_line2', $listing->address_line2) }}" />
-                          <p class="error-message">{{ $errors->first('address_line2') }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('city') has-error @enderror">
-                          <label>Town/City</label>
-                          <input id="city" placeholder="Town/City" name="city" value="{{ old('city', $listing->city) }}"/>
-                          <p class="error-message">{{ $errors->first('city') }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('postcode') has-error @enderror">
-                          <label>Postcode</label>
-                          <input id="postcode" placeholder="Postcode" name="postcode" value="{{ old('postcode', $listing->postcode) }}" />
-                          <p class="error-message">{{ $errors->first('postcode') }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('country_id') has-error @enderror">
-                          <label>Country</label>
-                          <x-select-country-all id="countrySelect" :value="old('country_id', $listing->country_id)" />
-                          <p class="error-message">{{ $errors->first('country_id') }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col">
-                      <div class="form-group @error('phone') has-error @enderror">
-                          <label>Phone</label>
-                          <input id="phone" placeholder="Phone" name="phone" value="{{ old('phone', $listing->phone) }}" />
-                          <p class="error-message">{{ $errors->first('phone') }}</p>
-                      </div>
-                  </div>
+              <div id="address-fields">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('address_line1') has-error @enderror">
+                            <label>Address Line 1</label>
+                            <input id="address_line1" 
+                                  placeholder="Address Line 1" 
+                                  name="address_line1" 
+                                  value="{{ old('address_line1', $listing->address_line1) }}"
+                                  data-original="{{ $listing->address_line1 }}"
+                                  data-user="{{ auth()->user()->address_line1 }}" />
+                            <p class="error-message">{{ $errors->first('address_line1') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('address_line2') has-error @enderror">
+                            <label>Address Line 2</label>
+                            <input id="address_line2" 
+                                  placeholder="Address Line 2" 
+                                  name="address_line2" 
+                                  value="{{ old('address_line2', $listing->address_line2) }}"
+                                  data-original="{{ $listing->address_line2 }}"
+                                  data-user="{{ auth()->user()->address_line2 }}" />
+                            <p class="error-message">{{ $errors->first('address_line2') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('city') has-error @enderror">
+                            <label>Town/City</label>
+                            <input id="city" 
+                                  placeholder="Town/City" 
+                                  name="city" 
+                                  value="{{ old('city', $listing->city) }}"
+                                  data-original="{{ $listing->city }}"
+                                  data-user="{{ auth()->user()->city }}"/>
+                            <p class="error-message">{{ $errors->first('city') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('postcode') has-error @enderror">
+                            <label>Postcode</label>
+                            <input id="postcode" 
+                                  placeholder="Postcode" 
+                                  name="postcode" 
+                                  value="{{ old('postcode', $listing->postcode) }}"
+                                  data-original="{{ $listing->postcode }}"
+                                  data-user="{{ auth()->user()->postcode }}" />
+                            <p class="error-message">{{ $errors->first('postcode') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('country_id') has-error @enderror">
+                            <label>Country</label>
+                            <x-select-country-all 
+                                  id="countrySelect" 
+                                  :value="old('country_id', $listing->country_id)" 
+                                  data-original="{{ $listing->country_id }}"
+                                  data-user="{{ auth()->user()->country_id }}" />
+                            <p class="error-message">{{ $errors->first('country_id') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('phone') has-error @enderror">
+                            <label>Phone</label>
+                            <input id="phone" 
+                                  placeholder="Phone" 
+                                  name="phone" 
+                                  value="{{ old('phone', $listing->phone) }}"
+                                  data-original="{{ $listing->phone }}"
+                                  data-user="{{ auth()->user()->phone }}" />
+                            <p class="error-message">{{ $errors->first('phone') }}</p>
+                        </div>
+                    </div>
+                </div>
               </div>
               <div class="form-group @error('published_at') has-error @enderror">
                   <label class="checkbox">
@@ -189,8 +220,9 @@
           </div>
           <div class="p-medium" style="width: 100%">
             <div class="flex justify-end gap-1">
-              <button type="button" class="btn btn-default">Reset</button>
-              <button class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-default">Cancel</button>
+                <button type="button" class="btn btn-default">Reset</button>
+                <button class="btn btn-primary">Submit</button>
             </div>
           </div>
         </form>
@@ -206,10 +238,10 @@
     style="display: none;"
     ></div>
 
-  @vite([
-    'resources/js/listings-edit.js',
-    'resources/js/listings-create-dynamic-product-select.js',
-    'resources/js/listings-create-toggle-address-inputs.js',
-  ])
+    @vite([
+        'resources/js/listings-edit.js',
+        'resources/js/listings-create-dynamic-product-select.js',
+        'resources/js/listings-edit-toggle-address-inputs.js',
+      ])
 
 </x-app-layout>

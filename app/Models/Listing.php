@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class Listing extends Model
 {
@@ -138,5 +139,10 @@ class Listing extends Model
     public function watchlistUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favourite_listings');
+    }
+
+    public function isInWatchlist(): bool
+    {
+        return $this->watchlistUsers->contains(Auth::user());
     }
 }

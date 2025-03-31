@@ -34,6 +34,7 @@ class ListingController extends Controller
      */
     public function create(Request $request)
     {
+        Gate::authorize('create', Listing::class);
         return view('listings.create');
     }
 
@@ -42,6 +43,8 @@ class ListingController extends Controller
      */
     public function store(StoreListingRequest $request)
     {
+        Gate::authorize('create', Listing::class);
+
         try {
             // Validate the request data
             $validated = $request->validated();
@@ -120,7 +123,7 @@ class ListingController extends Controller
      */
     public function edit(Listing $listing)
     {
-        Gate::authorize('update-listing', $listing);
+        Gate::authorize('update', $listing);
 
         return view('listings.edit', ['listing' => $listing]);
     }
@@ -130,7 +133,7 @@ class ListingController extends Controller
      */
     public function update(StoreListingRequest $request, Listing $listing)
     {
-        Gate::authorize('update-listing', $listing);
+        Gate::authorize('update', $listing);
 
         $validated = $request->validated();
         $validated['use_default_location'] = (bool) $request->use_default_location;
@@ -148,7 +151,7 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
-        Gate::authorize('delete-listing', $listing);
+        Gate::authorize('delete', $listing);
 
         $listing->delete();
         return redirect()->route('listings.index')
@@ -217,6 +220,7 @@ class ListingController extends Controller
      */
     public function listingAttachments(Listing $listing)
     {
+        Gate::authorize('update', $listing);
         return view('listings.attachments', ['listing' => $listing]);
     }
 
@@ -225,10 +229,7 @@ class ListingController extends Controller
      */
     public function updateAttachments(Request $request, Listing $listing)
     {
-        // Authentication
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'Unauthorised action.');
-        }
+        Gate::authorize('update', $listing);
 
         // Handle deletions
         if ($request->has('delete_attachments')) {
@@ -261,10 +262,7 @@ class ListingController extends Controller
      */
     public function addAttachments(Request $request, Listing $listing)
     {
-        // Authentication
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'Unauthorised action.');
-        }
+        Gate::authorize('update', $listing);
 
         // Get attachments from request
         $attachments = $request->file('attachments') ?? [];
@@ -281,5 +279,17 @@ class ListingController extends Controller
             $position++;
         }
         return redirect()->back()->with('success', 'Attachments added successfully.');
+    }
+
+    /**
+     * Show the phone number for a listing.
+     */
+    public function showPhone(Listing $listing)
+    {
+        \Log::info('Phone number requested for listing: ' . $listing->id);
+        return response()->json([
+            'phone' => $listing->phone,
+            'success' => true
+        ]);
     }
 }

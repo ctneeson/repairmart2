@@ -5,6 +5,8 @@ import "./bootstrap";
 import "./listings-search-dropdown";
 
 document.addEventListener("DOMContentLoaded", function () {
+    console.log("This is a test log message");
+
     const initSlider = () => {
         const slides = document.querySelectorAll(".hero-slide");
         let currentIndex = 0; // Track the current slide
@@ -287,6 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!carousel) {
             return;
         }
+
         const thumbnails = document.querySelectorAll(
             ".listing-attachment-thumbnails img, .listing-attachment-thumbnails video"
         );
@@ -296,16 +299,19 @@ document.addEventListener("DOMContentLoaded", function () {
         const prevButton = document.getElementById("prevButton");
         const nextButton = document.getElementById("nextButton");
 
+        // Exit early if necessary elements don't exist
+        if (!activeAttachmentContainer || thumbnails.length === 0) {
+            return;
+        }
+
         let currentIndex = 0;
 
         // Initialize active thumbnail class
         thumbnails.forEach((thumbnail, index) => {
-            if (
-                thumbnail.src ===
-                activeAttachmentContainer.querySelector(
-                    ".listing-active-attachment"
-                ).src
-            ) {
+            const activeAttachment = activeAttachmentContainer.querySelector(
+                ".listing-active-attachment"
+            );
+            if (activeAttachment && thumbnail.src === activeAttachment.src) {
                 thumbnail.classList.add("active-thumbnail");
                 currentIndex = index;
             }
@@ -313,39 +319,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Function to update the active attachment and thumbnail
         const updateActiveAttachment = (index) => {
-            const thumbnail = thumbnails[index];
-            const mimeType = thumbnail.getAttribute("data-mime-type");
-            const attachmentUrl = thumbnail.getAttribute("src");
-
-            activeAttachmentContainer.innerHTML = ""; // Clear the current active attachment
-
-            if (mimeType.startsWith("image/")) {
-                const img = document.createElement("img");
-                img.src = attachmentUrl;
-                img.alt = "";
-                img.classList.add("listing-active-attachment");
-                img.id = "activeAttachment";
-                activeAttachmentContainer.appendChild(img);
-            } else if (mimeType.startsWith("video/")) {
-                const video = document.createElement("video");
-                video.src = attachmentUrl;
-                video.classList.add("listing-active-attachment");
-                video.id = "activeAttachment";
-                video.controls = true;
-                activeAttachmentContainer.appendChild(video);
-            } else {
-                const img = document.createElement("img");
-                img.src = "/img/no-photo-available.jpg";
-                img.alt = "";
-                img.classList.add("listing-active-attachment");
-                img.id = "activeAttachment";
-                activeAttachmentContainer.appendChild(img);
-            }
-
-            thumbnails.forEach((thumbnail) =>
-                thumbnail.classList.remove("active-thumbnail")
-            );
-            thumbnails[index].classList.add("active-thumbnail");
+            // Your existing updateActiveAttachment function code...
         };
 
         // Add click event listeners to thumbnails
@@ -356,18 +330,22 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Add click event listener to the previous button
-        prevButton.addEventListener("click", () => {
-            currentIndex =
-                (currentIndex - 1 + thumbnails.length) % thumbnails.length;
-            updateActiveAttachment(currentIndex);
-        });
+        // Add click event listener to the previous button (only if it exists)
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                currentIndex =
+                    (currentIndex - 1 + thumbnails.length) % thumbnails.length;
+                updateActiveAttachment(currentIndex);
+            });
+        }
 
-        // Add click event listener to the next button
-        nextButton.addEventListener("click", () => {
-            currentIndex = (currentIndex + 1) % thumbnails.length;
-            updateActiveAttachment(currentIndex);
-        });
+        // Add click event listener to the next button (only if it exists)
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                currentIndex = (currentIndex + 1) % thumbnails.length;
+                updateActiveAttachment(currentIndex);
+            });
+        }
     };
 
     const initMobileFilters = () => {
@@ -465,6 +443,90 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
+    const initShowPhoneNumber = () => {
+        const viewButton = document.querySelector(
+            ".listing-details-phone-view"
+        );
+        if (!viewButton) {
+            console.log("View button not found on page");
+            return;
+        }
+
+        console.log("Phone view button found:", viewButton);
+
+        viewButton.addEventListener("click", (ev) => {
+            console.log("View button clicked!");
+            ev.preventDefault();
+
+            // Show a loading state
+            const phoneElement = document.getElementById("phone-number");
+            if (!phoneElement) {
+                console.error("Phone element not found");
+                return;
+            }
+
+            console.log("Phone element found:", phoneElement);
+
+            const originalText = phoneElement.textContent;
+            console.log("Original phone text:", originalText);
+            phoneElement.textContent = "Loading...";
+
+            // Get the URL for the Axios request
+            const url = viewButton.getAttribute("data-url");
+            console.log("Request URL:", url);
+
+            if (!url) {
+                console.error("No URL provided for phone number");
+                phoneElement.textContent = originalText;
+                return;
+            }
+
+            console.log("Testing direct API call");
+            const testUrl = viewButton.getAttribute("data-url");
+            if (testUrl) {
+                axios
+                    .get(testUrl)
+                    .then((response) =>
+                        console.log("Test API call succeeded:", response.data)
+                    )
+                    .catch((error) =>
+                        console.error("Test API call failed:", error)
+                    );
+            }
+
+            // Fetch the phone number via Axios
+            console.log("Making Axios request to:", url);
+            axios
+                .get(url)
+                .then((response) => {
+                    console.log("Axios response:", response);
+                    if (response.data && response.data.phone) {
+                        // Update the phone number element
+                        console.log(
+                            "Phone number received:",
+                            response.data.phone
+                        );
+                        phoneElement.textContent = response.data.phone;
+
+                        // Hide the view button
+                        viewButton.style.display = "none";
+                    } else {
+                        // If no phone number was returned
+                        console.error(
+                            "Response missing phone data:",
+                            response.data
+                        );
+                        phoneElement.textContent = originalText;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Axios error:", error);
+                    // Restore original text on error
+                    phoneElement.textContent = originalText;
+                });
+        });
+    };
+
     initSlider();
     initAttachmentPicker();
     initMobileNavbar();
@@ -474,6 +536,8 @@ document.addEventListener("DOMContentLoaded", function () {
     initCascadingDropdown("#stateSelect", "#citySelect");
     initSortingDropdown();
     initAddToWatchlist();
+    console.log("DOM loaded, initializing phone number viewer");
+    initShowPhoneNumber();
 
     ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
         delay: 200,

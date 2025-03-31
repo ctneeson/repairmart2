@@ -34,7 +34,7 @@
           @else
           {{$listing->customer->city}}, {{$listing->customer->country->name}}
           @endif
-      </small>
+        </small>
         <button class="btn-heart text-primary"
           data-url="{{ route('watchlist.storeDestroy', $listing) }}">
           <svg

@@ -179,4 +179,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->google_id !== null || $this->facebook_id !== null;
     }
+
+    public function hasAddress(): bool
+    {
+        return !empty($this->address_line1) &&
+            !empty($this->city) &&
+            !empty($this->postcode) &&
+            !empty($this->country_id);
+    }
 }

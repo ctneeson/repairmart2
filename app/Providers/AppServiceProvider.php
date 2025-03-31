@@ -28,26 +28,26 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('pagination');
         View::share("year", date('Y'));
 
-        Gate::before(function (User $user, string $ability) {
-            if ($user->hasRole('admin')) {
-                return Response::allow();
-            }
+        // Gate::before(function (User $user, string $ability) {
+        //     if ($user->hasRole('admin')) {
+        //         return Response::allow();
+        //     }
 
-            // if ($user->isGuest()) {
-            //     return Response::deny('You must be logged in to perform this action.');
-            // }
-        });
+        // if ($user->isGuest()) {
+        //     return Response::deny('You must be logged in to perform this action.');
+        // }
+        // });
 
-        Gate::define('update-listing', function (User $user, Listing $listing) {
-            return $user->id === $listing->user_id || $user->hasRole('admin')
-                ? Response::allow()
-                : Response::denyWithStatus(404);
-        });
+        // Gate::define('update-listing', function (User $user, Listing $listing) {
+        //     return $user->id === $listing->user_id || $user->hasRole('admin')
+        //         ? Response::allow()
+        //         : Response::denyWithStatus(404);
+        // });
 
-        Gate::define('delete-listing', function (User $user, Listing $listing) {
-            return $user->id === $listing->user_id || $user->hasRole('admin')
-                ? Response::allow()
-                : Response::denyWithStatus(404);
-        });
+        // Gate::define('delete-listing', function (User $user, Listing $listing) {
+        //     return $user->id === $listing->user_id || $user->hasRole('admin')
+        //         ? Response::allow()
+        //         : Response::denyWithStatus(404);
+        // });
     }
 }

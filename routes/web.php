@@ -28,6 +28,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.updatePassword');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Listing - show phone number
+    Route::get('/listings/{listing}/phone', [ListingController::class, 'showPhone'])
+        ->name('listings.showPhone');
 
     // Account must be verified
     Route::middleware(['verified'])->group(function () {

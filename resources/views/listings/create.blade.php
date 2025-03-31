@@ -97,64 +97,72 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                    <div class="form-group">
-                                        <label>Use my default address</label>
-                                        <input type="hidden" name="use_default_location" value="0">
-                                        <input type="checkbox" id="use-default-location" name="use_default_location" value="1" {{ old('use_default_location', 1) ? 'checked' : '' }} />
+                                <div class="form-group">
+                                    <label>Use my default address</label>
+                                    <input type="hidden" name="use_default_location" value="0">
+                                    <input type="checkbox" id="use-default-location" name="use_default_location" value="1" 
+                                        {{ old('use_default_location', 1) ? 'checked' : '' }} />
+                                </div>
+                            </div>
+                        </div>
+                        <div id="address-fields">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('address_line1') has-error @enderror">
+                                        <label>Address Line 1</label>
+                                        <input id="address_line1" placeholder="Address Line 1" name="address_line1" 
+                                            value="{{ old('address_line1', auth()->user()->address_line1) }}" />
+                                        <p class="error-message">{{ $errors->first('address_line1') }}</p>
                                     </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('address_line1') has-error @enderror">
-                                    <label>Address Line 1</label>
-                                    <input id="address_line1" placeholder="Address Line 1" name="address_line1" value="{{ old('address_line1') }}" />
-                                    <p class="error-message">{{ $errors->first('address_line1') }}</p>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('address_line2') has-error @enderror">
-                                    <label>Address Line 2</label>
-                                    <input id="address_line2" placeholder="Address Line 2" name="address_line2" value="{{ old('address_line2') }}" />
-                                    <p class="error-message">{{ $errors->first('address_line2') }}</p>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('address_line2') has-error @enderror">
+                                        <label>Address Line 2</label>
+                                        <input id="address_line2" placeholder="Address Line 2" name="address_line2" 
+                                            value="{{ old('address_line2', auth()->user()->address_line2) }}" />
+                                        <p class="error-message">{{ $errors->first('address_line2') }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('city') has-error @enderror">
-                                    <label>Town/City</label>
-                                    <input id="city" placeholder="Town/City" name="city" value="{{ old('city') }}"/>
-                                    <p class="error-message">{{ $errors->first('city') }}</p>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('city') has-error @enderror">
+                                        <label>Town/City</label>
+                                        <input id="city" placeholder="Town/City" name="city" 
+                                            value="{{ old('city', auth()->user()->city) }}"/>
+                                        <p class="error-message">{{ $errors->first('city') }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('postcode') has-error @enderror">
-                                    <label>Postcode</label>
-                                    <input id="postcode" placeholder="Postcode" name="postcode" value="{{ old('postcode') }}" />
-                                    <p class="error-message">{{ $errors->first('postcode') }}</p>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('postcode') has-error @enderror">
+                                        <label>Postcode</label>
+                                        <input id="postcode" placeholder="Postcode" name="postcode" 
+                                            value="{{ old('postcode', auth()->user()->postcode) }}" />
+                                        <p class="error-message">{{ $errors->first('postcode') }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('country_id') has-error @enderror">
-                                    <label>Country</label>
-                                    <x-select-country-all id="countrySelect" :value="old('country_id')" />
-                                    <p class="error-message">{{ $errors->first('country_id') }}</p>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('country_id') has-error @enderror">
+                                        <label>Country</label>
+                                        <x-select-country-all id="countrySelect" :value="old('country_id', auth()->user()->country_id)" />
+                                        <p class="error-message">{{ $errors->first('country_id') }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('phone') has-error @enderror">
-                                    <label>Phone</label>
-                                    <input id="phone" placeholder="Phone" name="phone" value="{{ old('phone') }}" />
-                                    <p class="error-message">{{ $errors->first('phone') }}</p>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('phone') has-error @enderror">
+                                        <label>Phone</label>
+                                        <input id="phone" placeholder="Phone" name="phone" 
+                                            value="{{ old('phone', auth()->user()->phone) }}" />
+                                        <p class="error-message">{{ $errors->first('phone') }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -210,6 +218,7 @@
                 </div>
                 <div class="p-medium" style="width: 100%">
                     <div class="flex justify-end gap-1">
+                        <button type="button" class="btn btn-default">Cancel</button>
                         <button type="button" class="btn btn-default">Reset</button>
                         <button class="btn btn-primary">Submit</button>
                     </div>
@@ -218,9 +227,10 @@
         </div>
     </main>
 
+    @include('js.listings-create-toggle-address-inputs')
+
     @vite([
         'resources/js/listings-create-dynamic-product-select.js',
-        'resources/js/listings-create-toggle-address-inputs.js',
     ])
 
 </x-app-layout>

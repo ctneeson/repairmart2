@@ -35,6 +35,8 @@
           {{$listing->customer->city}}, {{$listing->customer->country->name}}
           @endif
         </small>
+
+        @auth
         <button class="btn-heart text-primary"
           data-url="{{ route('watchlist.storeDestroy', $listing) }}">
           <svg
@@ -70,6 +72,7 @@
             />
           </svg>
         </button>
+        @endauth
       </div>
       <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->title}}</h2>
       <p class="listing-item-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>

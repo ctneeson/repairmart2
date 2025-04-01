@@ -104,6 +104,8 @@
           <div class="listing-details card">
             <div class="flex items-center justify-between">
               <p class="listing-details-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
+
+              @auth
               <button class="btn-heart text-primary"
                 data-url="{{ route('watchlist.storeDestroy', $listing) }}">
                 <svg
@@ -138,7 +140,8 @@
                   clip-rule="evenodd"
                 />
               </svg>
-                  </button>
+            </button>
+            @endauth
             </div>
 
             <hr />

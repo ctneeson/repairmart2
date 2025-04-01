@@ -93,12 +93,18 @@
       <section>
         <div class="container">
           <h2>Latest Listings</h2>
+          @if ($listings->count()>0)
           <div class="listing-items-listing">
             @foreach($listings as $listing)
               <x-listing-item :listing="$listing" :isInWatchlist="$listing->watchlistUsers->contains(Auth::user())"/>
             @endforeach
             </div>
           </div>
+          @else
+          <div class="text-center p-large">
+            <p>There are no listings published yet.</p>
+          </div>
+          @endif
         </div>
       </section>
       <!--/ New Listings -->

@@ -34,7 +34,10 @@ class ListingController extends Controller
      */
     public function create(Request $request)
     {
-        Gate::authorize('create', Listing::class);
+        if (!Gate::allows('create', Listing::class)) {
+            return redirect()->route('profile.index')
+                ->with('warning', 'Please add an address to your profile before creating a listing.');
+        }
         return view('listings.create');
     }
 
@@ -43,7 +46,10 @@ class ListingController extends Controller
      */
     public function store(StoreListingRequest $request)
     {
-        Gate::authorize('create', Listing::class);
+        if (!Gate::allows('create', Listing::class)) {
+            return redirect()->route('profile.index')
+                ->with('warning', 'Please add an address to your profile before creating a listing.');
+        }
 
         try {
             // Validate the request data

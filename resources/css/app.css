@@ -1368,6 +1368,13 @@ a.pagination-item:hover {
     color: white;
 }
 
+.warning-message {
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    background-color: var(--default-button-border-color);
+    color: var(--error-color);
+}
+
 @media screen and (max-width: 1200px) {
     .listing-items-listing {
         grid-template-columns: repeat(4, minmax(0, 1fr));

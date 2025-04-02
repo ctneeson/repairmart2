@@ -20,4 +20,6 @@
     @endsession
 
     {{$slot}}
+
+    @stack('scripts')
 </x-base-layout>

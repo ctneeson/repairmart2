@@ -47,7 +47,11 @@
                         />
                       @endif
                     </td>
-                    <td>{{$listing->title}}</td>
+                    <td>
+                      <a href="{{ route('listings.show', $listing) }}"
+                         class="text-blue-600 hover:text-blue-800 hover:underline">{{$listing->title}}
+                      </a>
+                    </td>
                     <td>{{$listing->manufacturer->name}}</td>
                     <td>
                       @foreach($listing->products as $product)

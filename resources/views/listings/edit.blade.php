@@ -220,7 +220,7 @@
           </div>
           <div class="p-medium" style="width: 100%">
             <div class="flex justify-end gap-1">
-                <button type="button" class="btn btn-default">Cancel</button>
+                <a href="{{ route('listings.show', $listing) }}" class="btn btn-default">Cancel</a>
                 <button type="button" class="btn btn-default">Reset</button>
                 <button class="btn btn-primary">Submit</button>
             </div>
@@ -243,5 +243,37 @@
         'resources/js/listings-create-dynamic-product-select.js',
         'resources/js/listings-edit-toggle-address-inputs.js',
       ])
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Reset button script loaded');
+    
+    const resetButton = document.querySelector('.btn.btn-default[type="button"]');
+    if (!resetButton) return;
+    
+    resetButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (confirm('Are you sure you want to reset all changes?')) {
+            // This uses the native form reset functionality and then triggers address toggle
+            document.querySelector('form.add-new-listing-form').reset();
+            
+            // Trigger change event on use_default_location checkbox to update address fields visibility
+            const useDefaultLocation = document.getElementById('use-default-location');
+            if (useDefaultLocation) {
+                const event = new Event('change', { bubbles: true });
+                useDefaultLocation.dispatchEvent(event);
+            }
+            
+            // Re-trigger product selection from original data
+            if (typeof resetProductSelection === 'function') {
+                resetProductSelection();
+            }
+        }
+    });
+});
+</script>
+@endpush
 
 </x-app-layout>

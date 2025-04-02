@@ -17,7 +17,7 @@
                   receive quotes from repair specialists and extend your product's life.
                 </p>
 
-                <button class="btn btn-hero-slider" href="/listings/create">Create a listing</button>
+                <a href="{{ route('listings.create') }}" class="btn btn-hero-slider" href="/listings/create">Create a listing</a>
               </div>
             </div>
             <div class="slide-image">
@@ -39,7 +39,7 @@
                   multiple search criteria: Product Type, Manufacturer, Location, etc...
                 </p>
 
-                <button class="btn btn-hero-slider" href="/listings/search">Find requests</button>
+                <a href="{{ route('listings.search') }}" class="btn btn-hero-slider" href="/listings/search">Find requests</a>
               </div>
             </div>
             <div class="slide-image">

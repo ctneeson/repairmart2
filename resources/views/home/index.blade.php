@@ -5,46 +5,45 @@
       <div class="hero-slides">
         <!-- Item 1 -->
         <div class="hero-slide">
-          <div class="container">
+          <div class="flex container">
             <div class="slide-content">
-              <h1 class="hero-slider-title">
-                Buy <strong>The Best Cars</strong> <br />
-                in your region
-              </h1>
+              <h2 class="hero-slider-title">
+                <strong>For Customers</strong></br>
+                Repair your electronics
+              </h2>
               <div class="hero-slider-content">
                 <p>
-                  Use powerful search tool to find your desired cars based on
-                  multiple search criteria: Maker, Model, Year, Price Range, Car
-                  Type, etc...
+                  Avoid e-waste! Submit a repair request here for your electronics:
+                  receive quotes from repair specialists and extend your product's life.
                 </p>
 
-                <button class="btn btn-hero-slider">Find the car</button>
+                <a href="{{ route('listings.create') }}" class="btn btn-hero-slider" href="/listings/create">Create a listing</a>
               </div>
             </div>
             <div class="slide-image">
-              <img src="/img/car-png-39071.png" alt="" class="img-responsive" />
+              <img src="/img/electronics-repair.png" alt="" class="img-responsive" />
             </div>
           </div>
         </div>
         <!-- Item 2 -->
         <div class="hero-slide">
-          <div class="flex container">
+          <div class="container">
             <div class="slide-content">
-              <h2 class="hero-slider-title">
-                Do you want to <br />
-                <strong>sell your car?</strong>
-              </h2>
+              <h1 class="hero-slider-title">
+                <strong>For Repair Specialists</strong> <br />
+                Search electronics repair requests
+              </h1>
               <div class="hero-slider-content">
                 <p>
-                  Submit your car in our user friendly interface, describe it,
-                  upload photos and the perfect buyer will find it...
+                  Find repair requests from customers based on
+                  multiple search criteria: Product Type, Manufacturer, Location, etc...
                 </p>
 
-                <button class="btn btn-hero-slider">Add Your Car</button>
+                <a href="{{ route('listings.search') }}" class="btn btn-hero-slider" href="/listings/search">Find requests</a>
               </div>
             </div>
             <div class="slide-image">
-              <img src="/img/car-png-39071.png" alt="" class="img-responsive" />
+              <img src="/img/electronics-repair.png" alt="" class="img-responsive" />
             </div>
           </div>
         </div>
@@ -90,19 +89,25 @@
 
   <main>
     <x-search-form action="/search" method="GET" />
-    <!-- New Cars -->
+    <!-- New Listings -->
       <section>
         <div class="container">
-          <h2>Latest Added Cars</h2>
-          <div class="car-items-listing">
+          <h2>Latest Listings</h2>
+          @if ($listings->count()>0)
+          <div class="listing-items-listing">
             @foreach($listings as $listing)
-              <x-listing-item : $listing/>
+              <x-listing-item :listing="$listing" :isInWatchlist="$listing->watchlistUsers->contains(Auth::user())"/>
             @endforeach
             </div>
           </div>
+          @else
+          <div class="text-center p-large">
+            <p>There are no listings published yet.</p>
+          </div>
+          @endif
         </div>
       </section>
-      <!--/ New Cars -->
+      <!--/ New Listings -->
   </main>
 </x-app-layout>
 

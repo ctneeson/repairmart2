@@ -1,5 +1,13 @@
 https://youtu.be/0M84Nk7iWkA?t=14608
-https://youtu.be/0M84Nk7iWkA?t=31983
+https://youtu.be/0M84Nk7iWkA?t=37421
+https://youtu.be/0M84Nk7iWkA?t=37363
+https://www.itsolutionstuff.com/post/laravel-10-google-autocomplete-address-exampleexample.html
+https://thecodeholic.teachable.com/courses/laravel-11-for-beginners/lectures/57069033
+
+https://github.com/barryvdh/laravel-debugbar
+https://mailtrap.io/inboxes/3514435/messages/4761101409
+
+30 Days to Learn Laravel, Ep 25 - Queues Are Easier Than You Think https://www.youtube.com/watch?v=OhQ_3yaUQRQ
 
 >>> Dissertation
 - US right to repair
@@ -9,3 +17,4 @@ https://www.404media.co/all-50-states-have-now-introduced-right-to-repair-legisl
   https://www.youtube.com/watch?v=2WjMrh7ZHIA
 
 
+https://laracasts.com/series/30-days-to-learn-laravel-11/episodes/12

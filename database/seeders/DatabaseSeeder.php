@@ -2,18 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\CarType;
-use App\Models\FuelType;
-use App\Models\State;
-use App\Models\City;
-use App\Models\Maker;
-use App\Models\Car;
-use App\Models\CarImage;
-use App\Models\Model as CarModel;
 use Illuminate\Database\Eloquent\Factories\Sequence;
+use App\Models\User;
+use App\Models\Product;
+use App\Models\Listing;
+use App\Models\Attachment;
+use App\Models\Email;
+use App\Models\Quote;
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,108 +25,95 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        // $this->call(UserSeeder::class);
+        $this->call(CountriesSeeder::class);
+        $this->call(CurrenciesSeeder::class);
+        $this->call(DeliveryMethodsSeeder::class);
+        $this->call(FeedbackTypesSeeder::class);
+        $this->call(ListingStatusesSeeder::class);
+        $this->call(ManufacturersSeeder::class);
+        $this->call(OrderStatusesSeeder::class);
+        $this->call(ProductsSeeder::class);
+        $this->call(QuoteStatusesSeeder::class);
 
-        // >> Create car types with the following data using Factories
-        CarType::factory()
-            ->sequence(
-                ['name' => 'Sedan'],
-                ['name' => 'SUV'],
-                ['name' => 'Hatchback'],
-                ['name' => 'Coupe'],
-                ['name' => 'Convertible'],
-                ['name' => 'Wagon'],
-                ['name' => 'Van'],
-                ['name' => 'Truck'],
-            )
-            ->count(8)
-            ->create();
+        // Create system user
+        $systemUser = User::factory()->create([
+            'name' => 'RepairMart',
+            'email' => 'system@repairmart.net',
+        ]);
 
-        // >> Create fuel types
-        FuelType::factory()
-            ->sequence(
-                ['name' => 'Petrol'],
-                ['name' => 'Electric'],
-                ['name' => 'Diesel'],
-                ['name' => 'Hybrid'],
-                ['name' => 'Hydrogen']
-            )
-            ->count(5)
-            ->create();
-
-        // >> Create States with Cities
-        $states = [
-            'California' => ['Los Angeles', 'San Francisco', 'San Diego'],
-            'Texas' => ['Houston', 'Dallas', 'Austin'],
-            'New York' => ['New York City', 'Buffalo', 'Rochester'],
-            'Florida' => ['Miami', 'Orlando', 'Tampa'],
-            'Illinois' => ['Chicago', 'Springfield', 'Peoria'],
-            'Pennsylvania' => ['Philadelphia', 'Pittsburgh', 'Allentown'],
-            'Ohio' => ['Columbus', 'Cleveland', 'Cincinnati'],
-            'Georgia' => ['Atlanta', 'Savannah', 'Augusta'],
-            'North Carolina' => ['Charlotte', 'Raleigh', 'Greensboro'],
-        ];
-
-        foreach ($states as $state => $cities) {
-            State::factory()
-                ->state(['name' => $state])
-                ->has(
-                    City::factory()
-                        ->count(count($cities))
-                        ->sequence(...array_map(fn($city) => ['name' => $city], $cities))
-                )->create();
-        }
-
-        // >> Create makers with corresponding models
-        $makers = [
-            'Toyota' => ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Sienna'],
-            'Honda' => ['Accord', 'Civic', 'CR-V', 'Pilot', 'Odyssey'],
-            'Ford' => ['F-150', 'Escape', 'Explorer', 'Mustang', 'Expedition'],
-            'Chevrolet' => ['Silverado', 'Equinox', 'Traverse', 'Tahoe', 'Suburban'],
-            'Nissan' => ['Altima', 'Sentra', 'Rogue', 'Pathfinder', 'Armada'],
-            'Jeep' => ['Wrangler', 'Grand Cherokee', 'Cherokee', 'Compass', 'Renegade'],
-            'Hyundai' => ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade'],
-        ];
-
-        foreach ($makers as $maker => $models) {
-            Maker::factory()
-                ->state(['name' => $maker])
-                ->has(
-                    CarModel::factory()
-                        ->count(count($models))
-                        ->sequence(...array_map(fn($model) => ['name' => $model], $models))
-                )->create();
-        }
-
-
-        // >> Create users, cars with images & features
-        // >> Create 3 users first, then 2 more users
-        // >> For each user create 50 cars with images & features
-        // >> Add these to the favourite cars of the 2 users
-        User::factory()
-            ->count(3)
-            ->create();
-
-        User::factory()
-            ->count(2)
+        // Create a user with 5 listings
+        $sidUser = User::factory()
             ->has(
-                Car::factory()
-                    ->count(50)
+                Listing::factory()
+                    ->count(5)
                     ->has(
-                        CarImage::factory()
-                            ->count(5)
-                            ->sequence(fn(Sequence $sequence) => ['position' => $sequence->index % 5 + 1]),
-                        // ->sequence(
-                        //     ['position' => 1],
-                        //     ['position' => 2],
-                        //     ['position' => 3],
-                        //     ['position' => 4],
-                        //     ['position' => 5]
-                        // ),
-                        'images'
-                    )
-                    ->hasFeatures(),
-                'favouriteCars'
-            )->create();
+                        Attachment::factory()->count(2)->state(new Sequence(
+                            ['position' => 1],
+                            ['position' => 2]
+                        )),
+                        'attachments'
+                    ), // Create 2 attachments for each listing with alternating positions
+                'listingsCreated'
+            )
+            ->create([
+                'email' => 'sid@penguins.com',
+            ]);
+
+        // Get all product IDs
+        $productIds = Product::pluck('id')->toArray();
+
+        // Attach 2 existing products to each listing
+        foreach ($sidUser->listingsCreated as $listing) {
+            $randomProductIds = array_rand($productIds, 2);
+            $listing->products()->attach([
+                $productIds[$randomProductIds[0]],
+                $productIds[$randomProductIds[1]]
+            ]);
+
+            // Create an email from the system user to the user for each listing
+            $email = Email::create([
+                'from_id' => $systemUser->id,
+                'subject' => 'Re: Listing ' . $listing->id,
+                'content' => 'This is a notification regarding your listing.',
+            ]);
+
+            // Create an entry in the emails_recipients table
+            $email->recipients()->attach($sidUser->id);
+        }
+
+        // Create a new user with email connor@oilers.ca
+        $connorUser = User::factory()->create([
+            'email' => 'connor@oilers.ca',
+        ]);
+
+        // Generate 2 quotes for each listing created for the user with email sid@penguins.com
+        foreach ($sidUser->listingsCreated as $listing) {
+            $currencyId = $listing->currency_id;
+            $amount = $listing->budget;
+
+            // Create the first quote with deliverymethod_id = 2
+            Quote::create([
+                'user_id' => $connorUser->id,
+                'listing_id' => $listing->id,
+                'status_id' => 1,
+                'currency_id' => $currencyId,
+                'deliverymethod_id' => 2,
+                'turnaround' => 10,
+                'use_default_location' => true,
+                'amount' => $amount,
+            ]);
+
+            // Create the second quote with deliverymethod_id = 3 and amount 10 units greater
+            Quote::create([
+                'user_id' => $connorUser->id,
+                'listing_id' => $listing->id,
+                'status_id' => 1,
+                'currency_id' => $currencyId,
+                'deliverymethod_id' => 3,
+                'turnaround' => 15,
+                'use_default_location' => true,
+                'amount' => $amount + 10,
+            ]);
+        }
     }
 }

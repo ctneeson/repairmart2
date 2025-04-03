@@ -1,28 +1,65 @@
+@php
+  $isInWatchlist = $listing->isInWatchlist(Auth::user())
+@endphp
+
 <x-app-layout>
-    <main>
-        <div class="container">
-          <h1 class="car-details-page-title">Lexus NX200t - 2016</h1>
-          <div class="car-details-region">New Jersey - 2 days ago</div>
-  
-          <div class="car-details-content">
-            <div class="car-images-and-description">
-              <div class="car-images-carousel">
-                <div class="car-image-wrapper">
-                  <img
-                    src="/img/cars/Lexus-RX200t-2016/1.jpeg"
-                    alt=""
-                    class="car-active-image"
-                    id="activeImage"
-                  />
-                </div>
-                <div class="car-image-thumbnails">
-                  <img src="/img/cars/Lexus-RX200t-2016/1.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/2.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/3.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/4.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/5.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/6.jpeg" alt="" />
-                  <img src="/img/cars/Lexus-RX200t-2016/7.jpeg" alt="" />
+  <main>
+      <div class="container">
+        <h1 class="listing-details-page-title">{{$listing->title}}</h1>
+        <div class="listing-details-region">
+          {{$listing->city}}, {{$listing->country->name}}
+           - {{$listing->published_at}}
+        </div>
+
+        <div class="listing-details-content">
+          <div class="listing-attachments-and-description">
+            <div class="listing-attachments-carousel">
+              <div class="listing-attachment-wrapper">
+                @php
+                $attachmentUrl = $listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+                $filePath = $listing->primaryAttachment ? Storage::disk('public')->path($listing->primaryAttachment->path) : public_path($attachmentUrl);
+                $mimeType = $listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+              @endphp
+              @if (str_starts_with($mimeType, 'image/'))
+                <img
+                  src="{{ $attachmentUrl }}"
+                  alt=""
+                  class="listing-active-attachment"
+                  id="activeAttachment"
+                />
+              @elseif (str_starts_with($mimeType, 'video/'))
+                <video
+                  src="{{ $attachmentUrl }}"
+                  class="listing-active-attachment"
+                  id="activeAttachment"
+                  controls
+                ></video>
+              @else
+                <img
+                  src="/img/no-photo-available.jpg"
+                  alt=""
+                  class="listing-active-attachment"
+                  id="activeAttachment"
+                />
+              @endif
+
+              </div>
+              @if($listing->attachments->count() > 1)
+                <div class="listing-attachment-thumbnails">
+                  @foreach ($listing->attachments as $attachment)
+                    @php
+                      $attachmentUrl = $attachment->getUrl();
+                      $filePath = Storage::disk('public')->path($attachment->path);
+                      $mimeType = mime_content_type($filePath);
+                    @endphp
+                    @if (str_starts_with($mimeType, 'image/'))
+                      <img src="{{$attachmentUrl}}" alt="" data-mime-type="{{$mimeType}}" />
+                    @elseif (str_starts_with($mimeType, 'video/'))
+                      <video src="{{$attachmentUrl}}" class="listing-form-attachment-preview" muted data-mime-type="{{$mimeType}}" ></video>
+                    @else
+                      <img src="/img/no-photo-available.jpg" alt="" data-mime-type="image/jpeg" />
+                    @endif
+                  @endforeach
                 </div>
                 <button class="carousel-button prev-button" id="prevButton">
                   <svg
@@ -56,305 +93,146 @@
                     />
                   </svg>
                 </button>
-              </div>
-  
-              <div class="card car-detailed-description">
-                <h2 class="car-details-title">Detailed Description</h2>
-                <p>
-                  Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                  Mollitia delectus, vitae blanditiis praesentium doloremque
-                  corporis aliquam eligendi dolorum cum ad, laudantium aut
-                  reprehenderit iste, ratione vero amet at dolor. Non. Lorem ipsum
-                  dolor sit amet consectetur adipisicing elit. Fugiat, labore
-                  nesciunt tenetur excepturi corrupti molestiae odio. Asperiores
-                  eligendi repellat aliquam nulla neque delectus in, harum
-                  exercitationem quae facere, illum obcaecati.
-                </p>
-                <p>
-                  Step inside the luxurious cabin, where comfort meets
-                  sophistication. The Silverstream X-200 envelops you in plush
-                  leather seats with ergonomic design, ensuring every journey is a
-                  retreat of indulgence. Equipped with state-of-the-art
-                  infotainment and navigation systems, along with advanced
-                  driver-assist features, this car offers a seamless blend of
-                  convenience and safety. Whether cruising through city streets or
-                  embarking on a cross-country adventure, the Silverstream X-200
-                  promises an exhilarating driving experience like no other.
-                </p>
-              </div>
-  
-              <div class="card car-detailed-description">
-                <h2 class="car-details-title">Car Specifications</h2>
-  
-                <ul class="car-specifications">
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Air Conditioning
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Power Windows
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Power Door Locks
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    ABS
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: red"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-  
-                    Cruise Control
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: red"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-  
-                    Bluetooth Connectivity
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: red"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-  
-                    Remote Start
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    GPS Navigation System
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Heated Seats
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: rgb(0, 192, 102)"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Climate Control
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: red"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-  
-                    Rear Parking Sensors
-                  </li>
-                  <li>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style="color: red"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-  
-                    Leather Seats
-                  </li>
-                </ul>
-              </div>
+              @endif
             </div>
-            <div class="car-details card">
-              <div class="flex items-center justify-between">
-                <p class="car-details-price">$25,000</p>
-                <button class="btn-heart">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    style="width: 20px"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                    />
-                  </svg>
-                </button>
-              </div>
-  
-              <hr />
-              <table class="car-details-table">
-                <tbody>
-                  <tr>
-                    <th>Maker</th>
-                    <td>Lexus</td>
-                  </tr>
-                  <tr>
-                    <th>Model</th>
-                    <td>NX200t</td>
-                  </tr>
-                  <tr>
-                    <th>Year</th>
-                    <td>2016</td>
-                  </tr>
-                  <tr>
-                    <th>Car Type</th>
-                    <td>SUV</td>
-                  </tr>
-                  <tr>
-                    <th>Fuel Type</th>
-                    <td>Hybrid</td>
-                  </tr>
-                </tbody>
-              </table>
-              <hr />
-  
-              <div class="flex gap-1 my-medium">
-                <img
-                  src="/img/avatar.png"
-                  alt=""
-                  class="car-details-owner-image"
-                />
-                <div>
-                  <h3 class="car-details-owner">John Smith</h3>
-                  <div class="text-muted">5 cars</div>
-                </div>
-              </div>
-              <a href="tel:+995557123***" class="car-details-phone">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  style="width: 16px"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-                  />
-                </svg>
-  
-                +995557123***
-                <span class="car-details-phone-view">view full number</span>
-              </a>
+
+            <div class="card listing-detailed-description">
+              <h2 class="listing-details-title">Detailed Description</h2>
+                {!!$listing->description!!}
             </div>
           </div>
+          <div class="listing-details card">
+            <div class="flex items-center justify-between">
+              <p class="listing-details-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
+
+              @auth
+              <button class="btn-heart text-primary"
+                data-url="{{ route('watchlist.storeDestroy', $listing) }}">
+                <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                style="width: 16px"
+                @class([
+                  'hidden' => $isInWatchlist
+                ])
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.563.563 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+                />
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style="width: 16px"
+                @class([
+                  'hidden' => !$isInWatchlist
+                ])
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+            @endauth
+            </div>
+
+            <hr />
+            <table class="listing-details-table">
+              <tbody>
+                <tr>
+                  <th>Manufacturer</th>
+                    <td>{{$listing->manufacturer->name}}</td>
+                </tr>
+                <tr>
+                  <th>Product Categories</th>
+                  @foreach($listing->products as $product)
+                  <tr>
+                    <td colspan="2">{{$product->category}} > {{$product->subcategory}}</td>
+                  </tr>
+                  @endforeach
+                </tr>
+                <tr>
+                  <th>Location</th>
+                  <td>{{$listing->city}}, {{$listing->country->name}}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <hr />
+
+            <div class="flex gap-1 my-medium">
+              <img
+                src="/img/avatar.png"
+                alt=""
+                class="listing-details-owner-image"
+              />
+              <div>
+                <h3 class="listing-details-owner">{{$listing->customer->name}}</h3>
+                <div class="text-muted">{{$listing->customer->listingsCreated()->count()}} listings</div>
+              </div>
+            </div>
+            {{-- Hide if current listing has no phone number --}}
+            @if ($listing->phone && !empty($listing->phone))
+            <div class="listing-details-phone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79
+                    0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 
+                    2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0
+                    1 22 16.92z"></path>
+                </svg>
+                <span id="phone-number" class="listing-details-phone-number">{{Str::mask($listing->phone, '*', -5)}}</span>
+                <span class="listing-details-phone-view"
+                    data-url="{{ route('listings.showPhone', $listing) }}">
+                    view full number
+                </span>
+            </div>
+            @endif
+            {{-- Hide if current user is looking at their own listing --}}
+            @if (auth()->id() !== $listing->user_id)
+            <a href="mailto:{{$listing->customer->email}}" class="listing-details-email btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              Message Customer
+            </a>
+            @endif
+            {{-- Hide unless current user is a specialist or admin --}}
+            @if (auth()->check() && auth()->user()->roles->whereIn('name', ['specialist', 'admin'])->count() > 0
+                && auth()->id() !== $listing->user_id)
+            <a href="{{route('quotes.create', $listing->id)}}" class="listing-details-createquote btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Create Quote
+            </a>
+            @endif
+            {{-- Hide unless current user is looking at their own listing --}}
+            @if (auth()->id() === $listing->user_id)
+            <a href="{{route('listings.edit', $listing->id)}}" class="listing-details-edit btn">
+              <svg xmlns="http://www.w3.org/2000/svg"
+               width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+               <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path>
+               <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
+              </svg>
+              Edit Listing
+            </a>
+            @endif
+          </div>
         </div>
-    </main>
+      </div>
+  </main>
 </x-app-layout>

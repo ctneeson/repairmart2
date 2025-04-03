@@ -3,13 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Carbon\Carbon;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -28,6 +32,12 @@ class User extends Authenticatable
         'password',
         'google_id',
         'facebook_id',
+        'address_line1',
+        'address_line2',
+        'city',
+        'postcode',
+        'country_id',
+        'email_verified_at',
     ];
 
     /**
@@ -53,14 +63,134 @@ class User extends Authenticatable
         ];
     }
 
-    public function favouriteCars(): BelongsToMany
+    public function emailsSent(): HasMany
     {
-        return $this->belongsToMany(Car::class, 'favourite_cars', 'user_id', 'car_id');
-        // ->withTimestamps();
+        return $this->hasMany(Email::class, 'from_id');
     }
 
-    public function cars(): HasMany
+    public function emailsReceived(): BelongsToMany
     {
-        return $this->hasMany(Car::class);
+        return $this->belongsToMany(
+            Email::class, // The related model
+            'emails_recipients', // The pivot table
+            'recipient_id', // Foreign key on the pivot table for the current model
+            'email_id' // Foreign key on the pivot table for the related model
+        );
+    }
+
+    public function listingsCreated(): HasMany
+    {
+        return $this->hasMany(Listing::class);
+    }
+
+    public function listingsQuoted(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Listing::class, // The final model we want to access
+            Quote::class, // The intermediate model
+            'user_id', // Foreign key on the quotes table
+            'listing_id', // Foreign key on the listings table
+            'id', // Local key on the users table
+            'id' // Local key on the quotes table
+        );
+    }
+
+    public function quotesCreated(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function quotesReceived(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Quote::class, // The final model we want to access
+            Listing::class, // The intermediate model
+            'user_id', // Foreign key on the listings table
+            'listing_id', // Foreign key on the quotes table
+            'id', // Local key on the users table
+            'id' // Local key on the listings table
+        );
+    }
+
+    public function customerOrders(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Order::class, // The final model we want to access
+            Quote::class, // The intermediate model
+            'listing_id', // Foreign key on the quotes table
+            'quote_id', // Foreign key on the orders table
+            'id', // Local key on the users table
+            'id' // Local key on the listings table
+        );
+    }
+
+    public function repairSpecialistOrders(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Order::class, // The final model we want to access
+            Quote::class, // The intermediate model
+            'user_id', // Foreign key on the quotes table
+            'quote_id', // Foreign key on the orders table
+            'id', // Local key on the users table
+            'id' // Local key on the quotes table
+        );
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'users_roles');
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole($role)
+    {
+        if (is_string($role)) {
+            return $this->roles->where('name', $role)->count() > 0;
+        }
+
+        // If $role is an array, check if user has any of these roles
+        if (is_array($role)) {
+            foreach ($role as $r) {
+                if ($this->hasRole($r)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // If $role is a Role model instance
+        return $this->roles->contains('id', $role->id);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    public function watchlistListings(): BelongsToMany
+    {
+        return $this->belongsToMany(Listing::class, 'favourite_listings')
+            ->withPivot('id')
+            ->orderBy('favourite_listings.id', 'desc');
+    }
+
+    public function isOauthUser(): bool
+    {
+        return $this->google_id !== null || $this->facebook_id !== null;
+    }
+
+    public function hasAddress(): bool
+    {
+        return !empty($this->address_line1) &&
+            !empty($this->city) &&
+            !empty($this->postcode) &&
+            !empty($this->country_id);
+    }
+
+    public function getCreatedDate(): string
+    {
+        return (new Carbon($this->created_at))->format('Y-m-d');
     }
 }

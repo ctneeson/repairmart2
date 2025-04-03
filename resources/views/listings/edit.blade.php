@@ -1,309 +1,279 @@
 <x-app-layout>
-    <main>
-        <div class="container-small">
-          <h1 class="car-details-page-title">Add new car</h1>
-          <form
-            action=""
-            method="POST"
-            enctype="multipart/form-data"
-            class="card add-new-car-form"
-          >
-            <div class="form-content">
-              <div class="form-details">
-                <div class="row">
+  <main>
+    <div class="container-small">
+      <h1 class="listing-details-page-title">Edit Listing</h1>
+        <form
+          action="{{ route('listings.update', $listing) }}"
+          method="POST"
+          enctype="multipart/form-data"
+          class="card add-new-listing-form"
+        >
+        @csrf
+        @method('PUT')
+          <div class="form-content">
+            <div class="form-details">
+              <div class="row">
                   <div class="col">
-                    <div class="form-group">
-                      <label>Maker</label>
-                      <select>
-                        <option value="">Maker</option>
-                        <option value="bmw">BMW</option>
-                        <option value="lexus">Lexus</option>
-                        <option value="mercedes">Mercedes</option>
-                      </select>
-                      <p class="error-message">This field is required</p>
-                    </div>
+                      <div class="form-group @error('title') has-error @enderror">
+                          <label>Title</label>
+                          <input placeholder="Title" name="title" value="{{ old('title', $listing->title) }}" />
+                          <p class="error-message">{{ $errors->first('title') }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="form-group @error('product_ids') has-error @enderror @error('product_ids.*') has-error @enderror">
+                          <label>Product/s (max. 3)</label>
+                              <div id="product-select-container" style="position: relative;">
+                                  <a href="#" id="add-product-link" style="display: none; position: absolute; right: 0; top: -25px;">Add</a>
+                                  <div class="product-select-wrapper">
+                                    @php
+                                        $selectedProductIds = old('product_ids', $listing->products->pluck('id')->toArray());
+                                        $selectedProductIds = is_array($selectedProductIds) ? array_unique($selectedProductIds) : [$selectedProductIds];
+                                        $selectedProductIds = array_filter($selectedProductIds); // Remove any empty values
+                                    @endphp
+                                    <x-select-product-all :value="$selectedProductIds" />
+                                  </div>
+                                  <div id="selected-products"></div>
+                                  <div id="product-hidden-inputs">
+                                      @foreach ($selectedProductIds as $productId)
+                                          <input type="hidden" name="product_ids[]" value="{{ $productId }}">
+                                      @endforeach
+                                  </div>
+                              </div>
+                          <p class="error-message">{{ $errors->first('product_ids') }}</p>
+                          <p class="error-message">{{ $errors->first('product_ids.*') }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="form-group @error('manufacturer_id') has-error @enderror">
+                          <label>Manufacturer</label>
+                          <x-select-manufacturer-all :value="old('manufacturer_id', $listing->manufacturer_id)" />
+                          <p class="error-message">{{ $errors->first('manufacturer_id') }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="form-group @error('description') has-error @enderror">
+                          <label>Detailed Description</label>
+                          <textarea rows="10" name="description">{{ old('description', $listing->description) }}</textarea>
+                          <p class="error-message">{{ $errors->first('description') }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="form-group @error('expiry_days') has-error @enderror">
+                          <label>Expiry (Days)</label>
+                          <select name="expiry_days">
+                              <option value="7" {{ old('expiry_days', $listing->expiry_days) == '7' ? 'selected' : '' }}>7 days</option>
+                              <option value="14" {{ old('expiry_days', $listing->expiry_days) == '14' ? 'selected' : '' }}>14 days</option>
+                              <option value="30" {{ old('expiry_days', $listing->expiry_days) == '30' ? 'selected' : '' }}>30 days</option>
+                              <option value="60" {{ old('expiry_days', $listing->expiry_days) == '60' ? 'selected' : '' }}>60 days</option>
+                              <option value="90" {{ old('expiry_days', $listing->expiry_days) == '90' ? 'selected' : '' }}>90 days</option>
+                          </select>
+                          <p class="error-message">{{ $errors->first('expiry_days') }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="form-group @error('currency_id') has-error @enderror">
+                          <label>Budget Currency</label>
+                          <x-select-currency-all :value="old('currency_id', $listing->currency_id)" />
+                          <p class="error-message">{{ $errors->first('currency_id') }}</p>
+                      </div>
                   </div>
                   <div class="col">
-                    <div class="form-group">
-                      <label>Model</label>
-                      <select>
-                        <option value="">Model</option>
-                      </select>
-                    </div>
+                      <div class="form-group @error('budget') has-error @enderror">
+                          <label>Budget Amount</label>
+                          <input type="number" placeholder="Budget" name="budget"  value="{{ old('budget', $listing->budget) }}" />
+                          <p class="error-message">{{ $errors->first('budget') }}</p>
+                      </div>
                   </div>
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Year</label>
-                      <select>
-                        <option value="">Year</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
-                        <option value="2017">2017</option>
-                        <option value="2016">2016</option>
-                        <option value="2015">2015</option>
-                        <option value="2014">2014</option>
-                        <option value="2013">2013</option>
-                        <option value="2012">2012</option>
-                        <option value="2011">2011</option>
-                        <option value="2010">2010</option>
-                        <option value="2009">2009</option>
-                        <option value="2008">2008</option>
-                        <option value="2007">2007</option>
-                        <option value="2006">2006</option>
-                        <option value="2005">2005</option>
-                        <option value="2004">2004</option>
-                        <option value="2003">2003</option>
-                        <option value="2002">2002</option>
-                        <option value="2001">2001</option>
-                        <option value="2000">2000</option>
-                        <option value="1999">1999</option>
-                        <option value="1998">1998</option>
-                        <option value="1997">1997</option>
-                        <option value="1996">1996</option>
-                        <option value="1995">1995</option>
-                        <option value="1994">1994</option>
-                        <option value="1993">1993</option>
-                        <option value="1992">1992</option>
-                        <option value="1991">1991</option>
-                        <option value="1990">1990</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+              </div>
+              <div class="row">
                 <div class="form-group">
-                  <label>Car Type</label>
-                  <div class="row">
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="car_type" value="sedan" />
-                        Sedan
-                      </label>
-                    </div>
-  
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="car_type" value="hatchback" />
-                        Hatchback
-                      </label>
-                    </div>
-  
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="car_type" value="suv" />
-                        SUV (Sport Utility Vehicle)
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Price</label>
-                      <input type="number" placeholder="Price" />
-                    </div>
-                  </div>
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Vin Code</label>
-                      <input placeholder="Vin Code" />
-                    </div>
-                  </div>
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Mileage (ml)</label>
-                      <input placeholder="Mileage" />
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Fuel Type</label>
-                  <div class="row">
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="fuel_type" value="gasoline" />
-                        Gasoline
-                      </label>
-                    </div>
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="fuel_type" value="diesel" />
-                        Diesel
-                      </label>
-                    </div>
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="fuel_type" value="electric" />
-                        Electric
-                      </label>
-                    </div>
-                    <div class="col">
-                      <label class="inline-radio">
-                        <input type="radio" name="fuel_type" value="hybrid" />
-                        Hybrid
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <div class="form-group">
-                      <label>State/Region</label>
-                      <select>
-                        <option value="">State/Region</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col">
-                    <div class="form-group">
-                      <label>City</label>
-                      <select>
-                        <option value="">City</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Address</label>
-                      <input placeholder="Address" />
-                    </div>
-                  </div>
-                  <div class="col">
-                    <div class="form-group">
-                      <label>Phone</label>
-                      <input placeholder="Phone" />
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col">
-                      <label class="checkbox">
-                        <input
-                          type="checkbox"
-                          name="air_conditioning"
-                          value="1"
-                        />
-                        Air Conditioning
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="power_windows" value="1" />
-                        Power Windows
-                      </label>
-  
-                      <label class="checkbox">
-                        <input
-                          type="checkbox"
-                          name="power_door_locks"
-                          value="1"
-                        />
-                        Power Door Locks
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="abs" value="1" />
-                        ABS
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="cruise_control" value="1" />
-                        Cruise Control
-                      </label>
-  
-                      <label class="checkbox">
-                        <input
-                          type="checkbox"
-                          name="bluetooth_connectivity"
-                          value="1"
-                        />
-                        Bluetooth Connectivity
-                      </label>
-                    </div>
-                    <div class="col">
-                      <label class="checkbox">
-                        <input type="checkbox" name="remote_start" value="1" />
-                        Remote Start
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="gps_navigation" value="1" />
-                        GPS Navigation System
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="heated_seats" value="1" />
-                        Heated Seats
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="climate_control" value="1" />
-                        Climate Control
-                      </label>
-  
-                      <label class="checkbox">
-                        <input
-                          type="checkbox"
-                          name="rear_parking_sensors"
-                          value="1"
-                        />
-                        Rear Parking Sensors
-                      </label>
-  
-                      <label class="checkbox">
-                        <input type="checkbox" name="leather_seats" value="1" />
-                        Leather Seats
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Detailed Description</label>
-                  <textarea rows="10"></textarea>
-                </div>
-                <div class="form-group">
-                  <label class="checkbox">
-                    <input type="checkbox" name="published" />
-                    Published
-                  </label>
+                  <label>Use my default address</label>
+                  <!-- Hidden field will always be submitted -->
+                  <input type="hidden" name="use_default_location" value="0">
+                  <!-- Checkbox will override the hidden field only when checked -->
+                  <input type="checkbox" id="use-default-location" name="use_default_location" value="1" 
+                         {{ old('use_default_location', $listing->use_default_location) ? 'checked' : '' }} />
                 </div>
               </div>
-              <div class="form-images">
-                <div class="form-image-upload">
-                  <div class="upload-placeholder">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      style="width: 48px"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                      />
-                    </svg>
-                  </div>
-                  <input id="carFormImageUpload" type="file" multiple />
+              <div id="address-fields">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('address_line1') has-error @enderror">
+                            <label>Address Line 1</label>
+                            <input id="address_line1" 
+                                  placeholder="Address Line 1" 
+                                  name="address_line1" 
+                                  value="{{ old('address_line1', $listing->address_line1) }}"
+                                  data-original="{{ $listing->address_line1 }}"
+                                  data-user="{{ auth()->user()->address_line1 }}" />
+                            <p class="error-message">{{ $errors->first('address_line1') }}</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="imagePreviews" class="car-form-images"></div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('address_line2') has-error @enderror">
+                            <label>Address Line 2</label>
+                            <input id="address_line2" 
+                                  placeholder="Address Line 2" 
+                                  name="address_line2" 
+                                  value="{{ old('address_line2', $listing->address_line2) }}"
+                                  data-original="{{ $listing->address_line2 }}"
+                                  data-user="{{ auth()->user()->address_line2 }}" />
+                            <p class="error-message">{{ $errors->first('address_line2') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('city') has-error @enderror">
+                            <label>Town/City</label>
+                            <input id="city" 
+                                  placeholder="Town/City" 
+                                  name="city" 
+                                  value="{{ old('city', $listing->city) }}"
+                                  data-original="{{ $listing->city }}"
+                                  data-user="{{ auth()->user()->city }}"/>
+                            <p class="error-message">{{ $errors->first('city') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('postcode') has-error @enderror">
+                            <label>Postcode</label>
+                            <input id="postcode" 
+                                  placeholder="Postcode" 
+                                  name="postcode" 
+                                  value="{{ old('postcode', $listing->postcode) }}"
+                                  data-original="{{ $listing->postcode }}"
+                                  data-user="{{ auth()->user()->postcode }}" />
+                            <p class="error-message">{{ $errors->first('postcode') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('country_id') has-error @enderror">
+                            <label>Country</label>
+                            <x-select-country-all 
+                                  id="countrySelect" 
+                                  :value="old('country_id', $listing->country_id)" 
+                                  data-original="{{ $listing->country_id }}"
+                                  data-user="{{ auth()->user()->country_id }}" />
+                            <p class="error-message">{{ $errors->first('country_id') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group @error('phone') has-error @enderror">
+                            <label>Phone</label>
+                            <input id="phone" 
+                                  placeholder="Phone" 
+                                  name="phone" 
+                                  value="{{ old('phone', $listing->phone) }}"
+                                  data-original="{{ $listing->phone }}"
+                                  data-user="{{ auth()->user()->phone }}" />
+                            <p class="error-message">{{ $errors->first('phone') }}</p>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <div class="form-group @error('published_at') has-error @enderror">
+                  <label class="checkbox">
+                      Publish on:
+                  </label>
+                  <input type="date" name="published_at" value="{{ old('published_at', $listing->published_at) }}" />
+                  <p class="error-message">{{ $errors->first('published_at') }}</p>
+              </div>
+          </div>
+            <div class="form-attachments">
+              <p>
+                Manage attachments <a href="{{ route('listings.attachments', $listing) }}">here</a>
+              </p>
+              <div class="listing-form-attachments">
+                @foreach ($listing->attachments as $attachment)
+                <a href="#" class="listing-form-attachment-preview" data-type="{{ $attachment->mime_type }}">
+                  @if(Str::startsWith($attachment->mime_type, 'image/'))
+                    <img src="{{ $attachment->getUrl() }}" alt="" />
+                  @elseif(Str::startsWith($attachment->mime_type, 'video/'))
+                    <video src="{{ $attachment->getUrl() }}" muted></video>
+                  @else
+                    <div>Unknown type: {{ $attachment->mime_type }}</div>
+                  @endif
+                </a>
+                @endforeach
               </div>
             </div>
-            <div class="p-medium" style="width: 100%">
-              <div class="flex justify-end gap-1">
+          </div>
+          <div class="p-medium" style="width: 100%">
+            <div class="flex justify-end gap-1">
+                <a href="{{ route('listings.show', $listing) }}" class="btn btn-default">Cancel</a>
                 <button type="button" class="btn btn-default">Reset</button>
                 <button class="btn btn-primary">Submit</button>
-              </div>
             </div>
-          </form>
-        </div>
-    </main>
+          </div>
+        </form>
+    </div>
+  </main>
+
+  <div id="product-data" 
+    data-products="{{ json_encode($listing->products->map(fn($p) => [
+        'id' => $p->id,
+        'category' => $p->category,
+        'subcategory' => $p->subcategory
+        ])) }}"
+    style="display: none;"
+    ></div>
+
+    @vite([
+        'resources/js/listings-edit.js',
+        'resources/js/listings-create-dynamic-product-select.js',
+        'resources/js/listings-edit-toggle-address-inputs.js',
+      ])
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Reset button script loaded');
+    
+    const resetButton = document.querySelector('.btn.btn-default[type="button"]');
+    if (!resetButton) return;
+    
+    resetButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (confirm('Are you sure you want to reset all changes?')) {
+            // This uses the native form reset functionality and then triggers address toggle
+            document.querySelector('form.add-new-listing-form').reset();
+            
+            // Trigger change event on use_default_location checkbox to update address fields visibility
+            const useDefaultLocation = document.getElementById('use-default-location');
+            if (useDefaultLocation) {
+                const event = new Event('change', { bubbles: true });
+                useDefaultLocation.dispatchEvent(event);
+            }
+            
+            // Re-trigger product selection from original data
+            if (typeof resetProductSelection === 'function') {
+                resetProductSelection();
+            }
+        }
+    });
+});
+</script>
+@endpush
+
 </x-app-layout>

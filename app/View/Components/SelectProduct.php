@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Cache;
 
 class SelectProduct extends Component
 {
@@ -17,10 +18,12 @@ class SelectProduct extends Component
      */
     public function __construct()
     {
-        $this->products = Product::whereHas('listings')
-            ->orderBy('category', 'asc')
-            ->orderBy('subcategory', 'asc')
-            ->get();
+        $this->products = Cache::remember('products', now()->addMinute(), function () {
+            return Product::whereHas('listings')
+                ->orderBy('category', 'asc')
+                ->orderBy('subcategory', 'asc')
+                ->get();
+        });
     }
 
     /**

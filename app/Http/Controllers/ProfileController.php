@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Role;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
@@ -108,4 +109,38 @@ class ProfileController extends Controller
 
         return redirect()->route('home')->with('success', 'Account deleted successfully.');
     }
+
+    /**
+     * Search for users based on filters.
+     */
+    public function search(Request $request)
+    {
+        $roles = $request->role_ids;
+        $sort = $request->input('sort', '-created_at');
+
+        $query = User::with([
+            'name',
+            'email',
+            'roles'
+        ]);
+
+        if ($roles) {
+            $query->whereHas('roles', function ($q) use ($roles) {
+                $q->whereIn('role_id', $roles);
+            });
+        }
+
+        if (str_starts_with($sort, '-')) {
+            $sort = substr($sort, 1);
+            $query->orderBy($sort, 'desc');
+        } else {
+            $query->orderBy($sort, 'asc');
+        }
+
+        $users = $query->paginate(15)
+            ->withQueryString();
+
+        return view('profile.search', ['users' => $users]);
+    }
+
 }

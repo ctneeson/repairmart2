@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Cache;
 
 class SelectProductAll extends Component
 {
@@ -18,9 +19,15 @@ class SelectProductAll extends Component
     public function __construct($value = [])
     {
         $this->value = $value;
-        $this->products = Product::orderBy('category', 'asc')
-            ->orderBy('subcategory', 'asc')
-            ->get();
+        // $this->products = Product::orderBy('category', 'asc')
+        //     ->orderBy('subcategory', 'asc')
+        //     ->get();
+
+        $this->products = Cache::rememberForever('products-all', function () {
+            return Product::orderBy('category', 'asc')
+                ->orderBy('subcategory', 'asc')
+                ->get();
+        });
     }
 
     /**

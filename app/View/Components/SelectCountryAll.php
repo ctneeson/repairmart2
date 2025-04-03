@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Cache;
 
 class SelectCountryAll extends Component
 {
@@ -16,7 +17,11 @@ class SelectCountryAll extends Component
      */
     public function __construct()
     {
-        $this->countries = Country::orderBy('name', 'asc')->get();
+        // $this->countries = Country::orderBy('name', 'asc')->get();
+
+        $this->countries = Cache::rememberForever('countries-all', function () {
+            return Country::orderBy('name', 'asc')->get();
+        });
     }
 
     /**

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Carbon\Carbon;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -186,5 +187,10 @@ class User extends Authenticatable implements MustVerifyEmail
             !empty($this->city) &&
             !empty($this->postcode) &&
             !empty($this->country_id);
+    }
+
+    public function getCreatedDate(): string
+    {
+        return (new Carbon($this->created_at))->format('Y-m-d');
     }
 }

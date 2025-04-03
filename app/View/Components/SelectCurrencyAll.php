@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Cache;
 
 class SelectCurrencyAll extends Component
 {
@@ -16,7 +17,11 @@ class SelectCurrencyAll extends Component
      */
     public function __construct()
     {
-        $this->currencies = Currency::orderBy('iso_code', 'asc')->get();
+
+        // $this->currencies = Currency::orderBy('iso_code', 'asc')->get();
+        $this->currencies = Cache::rememberForever('currencies-all', function () {
+            return Currency::orderBy('iso_code', 'asc')->get();
+        });
     }
 
     /**

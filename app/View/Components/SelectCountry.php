@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Cache;
 
 class SelectCountry extends Component
 {
@@ -17,12 +18,11 @@ class SelectCountry extends Component
      */
     public function __construct()
     {
-        $this->countries = Country::whereHas('listings', function ($query) {
-            $query->where('use_default_location', 0)
-                ->orWhereHas('customer', function ($query) {
-                    $query->where('use_default_location', 1);
-                });
-        })->orderBy('name', 'asc')->get();
+        $this->countries = Cache::remember('countries', now()->addMinute(), function () {
+            return Country::whereHas('listings')
+                ->orderBy('name', 'asc')
+                ->get();
+        });
     }
 
     /**

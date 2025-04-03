@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/listings/{listing}/phone', [ListingController::class, 'showPhone'])
         ->name('listings.showPhone');
 
-    // Account must be verified
+    // *** Account must be verified ***
     Route::middleware(['verified'])->group(function () {
         // Listings
         Route::resource('listings', ListingController::class)
@@ -49,6 +49,14 @@ Route::middleware(['auth'])->group(function () {
             ->name('watchlist.index');
         Route::post('/watchlist/{listing}', [WatchlistController::class, 'storeDestroy'])
             ->name('watchlist.storeDestroy');
+
+
+        // *** Admin Only ***
+        Route::middleware(['role:admin'])->group(function () {
+            // Profile search
+            Route::get('/profile/search', [ProfileController::class, 'search'])->name('profile.search');
+        });
+
     });
 
 });

@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
 use App\Models\Manufacturer;
+use Illuminate\Support\Facades\Cache;
 
 class SelectManufacturer extends Component
 {
@@ -17,9 +18,11 @@ class SelectManufacturer extends Component
      */
     public function __construct()
     {
-        $this->manufacturers = Manufacturer::whereHas('listings')
-            ->orderBy('name', 'asc')
-            ->get();
+        $this->manufacturers = Cache::remember('manufacturers', now()->addMinute(), function () {
+            return Manufacturer::whereHas('listings')
+                ->orderBy('name', 'asc')
+                ->get();
+        });
     }
 
     /**

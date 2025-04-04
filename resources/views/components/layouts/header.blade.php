@@ -61,6 +61,11 @@
             <li>
                 <a href="{{ route('profile.index') }}">My Account</a>
             </li>
+            @if(Auth::user()->roles->contains('name', 'admin'))
+            <li>
+                <a href="{{ route('profile.search') }}">User Accounts</a>
+            </li>
+            @endif
             <li>
                 <a href="{{ route('listings.index') }}">My Listings</a>
             </li>

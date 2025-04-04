@@ -2,8 +2,10 @@
     <main>
         <div class="container-small">
             <h1 class="listing-details-page-title">My Account</h1>
-            <form action="{{ route('profile.update') }}" method="POST"
-                class="card p-large my-large">
+            <form action="{{ isset($isAdminEdit) 
+                ? route('profile.admin.update', ['user' => $user->id]) 
+                : route('profile.update') }}" 
+                method="POST" class="card p-large my-large">
                 @csrf
                 @method('PUT')
 
@@ -15,26 +17,47 @@
                 </div>
                 <div class="form-group @error('email') has-error @enderror">
                     <label>Email Address</label>
-                    <input type="text" name="email" placeholder="Email"
-                        value="{{ old('email', $user->email) }}" required
-                        @disabled($user->isOauthUser())>
+                    
+                    @if($user->isOauthUser())
+                        <div class="input-wrapper">
+                            <input type="text" value="{{ $user->email }}" disabled 
+                                   class="opacity-75" style="background-color: #f3f4f6;">
+                            <input type="hidden" name="email" value="{{ $user->email }}">
+                            <span class="text-sm text-gray-500 mt-1 block">
+                                Email cannot be changed for accounts linked to external providers.
+                            </span>
+                        </div>
+                    @else
+                        <input type="text" name="email" placeholder="Email"
+                            value="{{ old('email', $user->email) }}" required>
+                    @endif
+                    
                     <p class="error-message">{{ $errors->first('email') }}</p>
                 </div>
                 <div class="form-group @error('role') has-error @enderror">
                     <label class="block mb-2">Role(s):</label>
                     <div class="checkbox-items">
-                      <div class="checkbox-item" style="width: 100%;">
-                        <input type="checkbox" id="customer-checkbox" name="role[]" value="customer" 
-                        {{ (old('role') && in_array('customer', old('role'))) || 
-                           (empty(old('role')) && $user->roles->contains('name', 'customer')) ? 'checked' : '' }}>                    
-                        <label for="customer-checkbox">Customer</label>
-                      </div>
-                      <div class="checkbox-item" style="width: 100%;">
-                        <input type="checkbox" id="specialist-checkbox" name="role[]" value="specialist" 
-                        {{ (old('role') && in_array('specialist', old('role'))) || 
-                           (empty(old('role')) && $user->roles->contains('name', 'specialist')) ? 'checked' : '' }}>                    
-                        <label for="specialist-checkbox">Repair Specialist</label>
-                      </div>
+                        @if(Auth::user()->roles->contains('name', 'admin') && $user->roles->contains('name', 'admin'))
+                        <div class="checkbox-item" style="width: 100%;">
+                          <input type="checkbox" id="admin-checkbox" name="role[]" value="admin" 
+                            checked disabled>
+                          <label for="admin-checkbox">Administrator</label>
+                          <!-- Hidden input to ensure the admin role is submitted even if the checkbox is disabled -->
+                          <input type="hidden" name="role[]" value="admin">
+                        </div>
+                        @endif
+                        <div class="checkbox-item" style="width: 100%;">
+                          <input type="checkbox" id="customer-checkbox" name="role[]" value="customer" 
+                          {{ (old('role') && in_array('customer', old('role'))) || 
+                             (empty(old('role')) && $user->roles->contains('name', 'customer')) ? 'checked' : '' }}>                    
+                          <label for="customer-checkbox">Customer</label>
+                        </div>
+                        <div class="checkbox-item" style="width: 100%;">
+                          <input type="checkbox" id="specialist-checkbox" name="role[]" value="specialist" 
+                          {{ (old('role') && in_array('specialist', old('role'))) || 
+                             (empty(old('role')) && $user->roles->contains('name', 'specialist')) ? 'checked' : '' }}>                    
+                          <label for="specialist-checkbox">Repair Specialist</label>
+                        </div>
                     </div>
                     <div class="error-message">
                       {{ $errors->first('role') }}

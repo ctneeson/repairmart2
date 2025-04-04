@@ -142,26 +142,33 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if the user has a specific role.
+     * Check if the user has any of the specified roles.
+     * 
+     * @param string|array $roles
+     * @return bool
      */
-    public function hasRole($role)
+    public function hasRole($roles): bool
     {
-        if (is_string($role)) {
-            return $this->roles->where('name', $role)->count() > 0;
-        }
+        // Debug log
+        \Log::debug('Checking roles: ' . json_encode($roles));
+        \Log::debug('User roles: ' . json_encode($this->roles->pluck('name')));
 
-        // If $role is an array, check if user has any of these roles
-        if (is_array($role)) {
-            foreach ($role as $r) {
-                if ($this->hasRole($r)) {
-                    return true;
-                }
+        // Convert to array if it's a single role
+        $roles = is_array($roles) ? $roles : [$roles];
+
+        // Get all the user's role names
+        $userRoleNames = $this->roles->pluck('name')->toArray();
+
+        // Check for intersection
+        foreach ($roles as $role) {
+            if (in_array($role, $userRoleNames)) {
+                \Log::debug('Role match found: ' . $role);
+                return true;
             }
-            return false;
         }
 
-        // If $role is a Role model instance
-        return $this->roles->contains('id', $role->id);
+        \Log::debug('No role match found');
+        return false;
     }
 
     public function country(): BelongsTo

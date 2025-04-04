@@ -11,29 +11,67 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    public function index()
+    /**
+     * Show the user's profile.
+     *
+     * @param User|null $user
+     * @return \Illuminate\View\View
+     */
+    public function index(User $user = null)
     {
-        return view('profile.index', ['user' => Auth::user()]);
+        $currentUser = Auth::user();
+
+        // If no specific user is requested or the user is not an admin, show their own profile
+        if ($user === null || !$currentUser->roles->contains('name', 'admin')) {
+            return view('profile.index', ['user' => $currentUser]);
+        }
+
+        // If an admin is requesting another user's profile
+        if ($currentUser->roles->contains('name', 'admin')) {
+            // Optionally, you can pass a flag to the view to indicate we're in "admin edit mode"
+            return view('profile.index', [
+                'user' => $user,
+                'isAdminEdit' => true
+            ]);
+        }
+
+        // Fallback (this should never be reached but added for safety)
+        return view('profile.index', ['user' => $currentUser]);
     }
 
-    public function update(Request $request)
+    /**
+     * Update the user's profile.
+     *
+     * @param Request $request
+     * @param User|null $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, User $user = null)
     {
-        $user = $request->user();
+        // Determine which user to update
+        $targetUser = $user ?? auth()->user();
 
+        // Authorization check - only admins can update other users
+        if ($targetUser->id !== auth()->id() && !auth()->user()->roles->contains('name', 'admin')) {
+            abort(403, 'You do not have permission to update this profile.');
+        }
+
+        // Validation rules
         $rules = [
-            'name' => 'required|string|max:255',
-            'phone' => ['nullable', 'string', 'max:45', 'regex:/^[0-9\+\-\(\)\s]+$/', 'unique:users,phone,' . $user->id],
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:45', 'regex:/^[0-9\+\-\(\)\s]+$/', 'unique:users,phone,' . $targetUser->id],
             'address_line1' => 'required|string|max:255',
             'address_line2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
             'postcode' => 'required|string|max:50',
             'country_id' => 'required|exists:countries,id',
             'role' => 'required|array|min:1',
-            'role.*' => 'in:customer,specialist',
+            'role.*' => 'in:customer,specialist,admin',
         ];
 
-        if (!$user->isOauthUser()) {
-            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id];
+        // Only validate email if user is not an OAuth user
+        if (!$targetUser->isOauthUser()) {
+            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $targetUser->id];
         }
 
         $messages = [
@@ -44,37 +82,46 @@ class ProfileController extends Controller
             'role.min' => 'Please select at least one role (Customer or Repair Specialist)',
         ];
 
-        $data = request()->validate($rules, $messages);
+        $validated = $request->validate($rules, $messages);
 
-        // Remove role data from user update array
-        $roleData = $data['role'];
-        unset($data['role']);
+        // Extract role data before removing it from the attributes to update
+        $selectedRoles = $validated['role'] ?? [];
+        unset($validated['role']);
 
-        // Update user data
-        $user->fill($data);
+        // Update user basic attributes
+        $targetUser->update($validated);
 
-        // Sync roles
-        // 1. Get the role IDs from the database based on submitted role names
-        $roleIds = Role::whereIn('name', $roleData)->pluck('id')->toArray();
+        // Update user roles - first retrieve existing admin status
+        $wasAdmin = $targetUser->roles->contains('name', 'admin');
 
-        // 2. Sync the roles (this will add new ones and remove old ones not in the array)
-        $user->roles()->sync($roleIds);
+        // Get role IDs from names
+        $roleIds = Role::whereIn('name', $selectedRoles)->pluck('id')->toArray();
 
-        $successMessage = 'Profile updated successfully.';
-
-        // If email is changed, user must re-validate it
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-            $user->save();
-            // Send verification email
-            $user->sendEmailVerificationNotification();
-            $successMessage = 'Profile updated successfully. Please verify your new email address.';
+        // If user was admin and is still admin according to form, make sure admin role is included
+        if ($wasAdmin && auth()->user()->id === $targetUser->id) {
+            $adminRoleId = Role::where('name', 'admin')->first()->id;
+            if (!in_array($adminRoleId, $roleIds)) {
+                $roleIds[] = $adminRoleId; // Prevent removing admin role from self
+            }
         }
 
-        // Save the user
-        $user->save();
+        // Only admins can modify admin role assignments
+        if (in_array('admin', $selectedRoles) && !auth()->user()->roles->contains('name', 'admin')) {
+            return redirect()->back()->with('error', 'You do not have permission to assign admin privileges.');
+        }
 
-        return redirect()->route('profile.index')->with('success', $successMessage);
+        // Sync roles - this will add new roles and remove ones not in the array
+        $targetUser->roles()->sync($roleIds);
+
+        if ($targetUser->id !== auth()->id()) {
+            // Admin updating someone else, redirect back to admin view
+            return redirect()->route('profile.admin.index', ['user' => $targetUser->id])
+                ->with('success', 'Profile updated successfully');
+        }
+
+        // User updating themselves, redirect to profile
+        return redirect()->route('profile.index')
+            ->with('success', 'Profile updated successfully');
     }
 
     public function updatePassword(Request $request)
@@ -100,14 +147,45 @@ class ProfileController extends Controller
         return back()->with('success', 'Password updated successfully.');
     }
 
-    public function destroy()
+    /**
+     * Delete the user account.
+     *
+     * @param User|null $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(User $user = null)
     {
-        $user = Auth::user();
+        dump($user);
+        // When a user is deleting their own account (non-admin flow)
+        if ($user === null) {
+            $user = Auth::user();
+            dd($user);
+            $user->delete();
+
+            Auth::logout();
+            return redirect()->route('home')->with('success', 'Account deleted successfully.');
+        }
+
+        // Admin flow - deleting another user's account
+        $currentUser = Auth::user();
+
+        // Check if the current user is an admin
+        if (!$currentUser->roles->contains('name', 'admin')) {
+            return redirect()->back()->with('error', 'You do not have permission to delete other users.');
+        }
+
+        // Admin safety check - prevent self-deletion
+        if ($currentUser->id === $user->id) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Proceed with deletion
+        $userName = $user->name;
         $user->delete();
 
-        Auth::logout();
-
-        return redirect()->route('home')->with('success', 'Account deleted successfully.');
+        // Redirect admin back to user search without logging them out
+        return redirect()->route('profile.search')
+            ->with('success', "User '{$userName}' has been deleted successfully.");
     }
 
     /**
@@ -115,32 +193,20 @@ class ProfileController extends Controller
      */
     public function search(Request $request)
     {
-        $roles = $request->role_ids;
-        $sort = $request->input('sort', '-created_at');
+        $query = $request->input('q');
 
-        $query = User::with([
-            'name',
-            'email',
-            'roles'
-        ]);
+        $usersQuery = User::with('roles')
+            ->when($query, function ($builder) use ($query) {
+                $builder->where(function ($builder) use ($query) {
+                    $builder->where('name', 'like', "%{$query}%")
+                        ->orWhere('email', 'like', "%{$query}%");
+                });
+            })
+            ->orderBy('name');
 
-        if ($roles) {
-            $query->whereHas('roles', function ($q) use ($roles) {
-                $q->whereIn('role_id', $roles);
-            });
-        }
+        $users = $usersQuery->paginate(15)->withQueryString();
 
-        if (str_starts_with($sort, '-')) {
-            $sort = substr($sort, 1);
-            $query->orderBy($sort, 'desc');
-        } else {
-            $query->orderBy($sort, 'asc');
-        }
-
-        $users = $query->paginate(15)
-            ->withQueryString();
-
-        return view('profile.search', ['users' => $users]);
+        return view('profile.search', compact('users'));
     }
 
 }

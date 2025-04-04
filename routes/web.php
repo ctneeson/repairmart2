@@ -53,8 +53,11 @@ Route::middleware(['auth'])->group(function () {
 
         // *** Admin Only ***
         Route::middleware(['role:admin'])->group(function () {
-            // Profile search
+            // Profile management
             Route::get('/profile/search', [ProfileController::class, 'search'])->name('profile.search');
+            Route::get('/profile/{user}', [ProfileController::class, 'index'])->name('profile.admin.index');
+            Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.admin.update');
+            Route::delete('/profile/{user}', [ProfileController::class, 'destroy'])->name('profile.admin.destroy');
         });
 
     });

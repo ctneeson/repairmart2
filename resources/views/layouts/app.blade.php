@@ -1,6 +1,6 @@
 @props(['title' => '', 'bodyClass' => null, 'footerLinks' => ''])
 
-<x-base-layout :title :$bodyClass>
+<x-base-layout :$title :$bodyClass>
     <x-layouts.header/>
 
     @session('success')

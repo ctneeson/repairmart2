@@ -76,7 +76,7 @@ class EmailFactory extends Factory
         }
 
         return [
-            'from_id' => $fromId,
+            'sender_id' => $fromId,
             'listing_id' => $listingId,
             'quote_id' => $quoteId,
             'order_id' => $orderId,

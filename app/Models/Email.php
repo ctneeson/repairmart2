@@ -13,13 +13,21 @@ class Email extends Model
     use HasFactory;
 
     protected $fillable = [
+        'sender_id',
         'subject',
         'content',
+        'read_at'
+    ];
+
+    protected $dates = [
+        'read_at',
+        'created_at',
+        'updated_at',
     ];
 
     public function sender(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'from_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
     public function recipients(): BelongsToMany
@@ -49,5 +57,10 @@ class Email extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function isRead()
+    {
+        return !is_null($this->read_at);
     }
 }

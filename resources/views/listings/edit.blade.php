@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Edit Listing">
   <main>
     <div class="container-small">
       <h1 class="listing-details-page-title">Edit Listing</h1>

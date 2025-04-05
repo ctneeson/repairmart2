@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
 
             // Create an email from the system user to the user for each listing
             $email = Email::create([
-                'from_id' => $systemUser->id,
+                'sender_id' => $systemUser->id,
                 'subject' => 'Re: Listing ' . $listing->id,
                 'content' => 'This is a notification regarding your listing.',
             ]);

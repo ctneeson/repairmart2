@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Search Listings">
     <main>
         <!-- Found Listings -->
         <section>
@@ -13,7 +13,7 @@
                   </svg>
                   Filters
                 </button>
-                <h2>Define your search criteria</h2>
+                <h2>Search Criteria</h2>
               </div>
     
               <select class="sort-dropdown">

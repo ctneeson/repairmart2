@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('emails', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('from_id')->constrainedTo('users');
+            $table->foreignId('sender_id')->constrainedTo('users');
             $table->foreignId('listing_id')->constrainedTo('users')->nullable();
             $table->foreignId('quote_id')->constrainedTo('listings')->nullable();
             $table->foreignId('order_id')->constrainedTo('orders')->nullable();
@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->text('content');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('read_at')->nullable();
         });
     }
 

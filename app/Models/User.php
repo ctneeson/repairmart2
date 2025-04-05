@@ -65,7 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function emailsSent(): HasMany
     {
-        return $this->hasMany(Email::class, 'from_id');
+        return $this->hasMany(Email::class, 'sender_id');
     }
 
     public function emailsReceived(): BelongsToMany

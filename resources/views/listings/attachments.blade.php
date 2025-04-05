@@ -1,4 +1,4 @@
-<x-app-layout bodyClass="page-my-listings">
+<x-app-layout  title="Listing Attachments" bodyClass="page-my-listings">
   <main>
     <div>
       <div class="container">

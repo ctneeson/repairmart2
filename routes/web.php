@@ -10,6 +10,8 @@ use App\Http\Controllers\ProfileController;
 
 // Auth routes for signup, login, password reset, and socialite
 require_once __DIR__ . '/auth.php';
+// Auth routes for emails
+require_once __DIR__ . '/email.php';
 
 
 // Logged in or logged out

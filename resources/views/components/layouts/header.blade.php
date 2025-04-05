@@ -73,6 +73,9 @@
                 <a href="{{ route('watchlist.index') }}">Watchlist</a>
             </li>
             <li>
+                <a href="{{ route('email.index') }}">My Messages</a>
+            </li>
+            <li>
                 <form action="{{ route('logout') }}" method="post">
                     @csrf
                     <button>Log out</button>

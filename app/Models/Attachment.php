@@ -34,7 +34,7 @@ class Attachment extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function emails(): BelongsTo
+    public function email(): BelongsTo
     {
         return $this->belongsTo(Email::class);
     }

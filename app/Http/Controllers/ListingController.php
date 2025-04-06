@@ -97,7 +97,7 @@ class ListingController extends Controller
                 ->with('success', 'Listing created successfully.');
 
         } catch (\Exception $e) {
-            // Log the error
+
             \Log::error('Error creating listing: ' . $e->getMessage());
 
             // Check if it's a file size issue

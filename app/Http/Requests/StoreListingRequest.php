@@ -21,7 +21,7 @@ class StoreListingRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             // 'user_id' => 'required|integer|exists:users,id',
             // 'status_id' => 'required|integer|exists:listing_statuses,id',
             'manufacturer_id' => 'required|integer',
@@ -37,11 +37,19 @@ class StoreListingRequest extends FormRequest
             'country_id' => 'required_if:use_default_location,0|integer|exists:countries,id',
             'phone' => ['nullable', 'string', 'max:45', 'regex:/^[0-9\+\-\(\)\s]+$/'],
             'expiry_days' => 'required|integer',
-            'published_at' => 'required|date',
             'product_ids' => 'required|array|min:1|max:3',
             'product_ids.*' => 'integer|distinct|exists:products,id',
             'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,svg,mp4,mov,ogg,qt|max:20000',
         ];
+
+        // For create requests, ensure published_at is today or in the future
+        if ($this->isMethod('post')) {
+            $rules['published_at'] = 'required|date|after_or_equal:today';
+        } else {
+            $rules['published_at'] = 'required|date';
+        }
+
+        return $rules;
     }
 
     /**
@@ -56,6 +64,7 @@ class StoreListingRequest extends FormRequest
             'manufacturer_id.required' => 'Please select a manufacturer',
             'product_ids.required' => 'Please select at least one product',
             'published_at.required' => 'Please select a date',
+            'published_at.after_or_equal' => 'Publication date must be today or in the future',
             'phone.regex' => 'Phone number may only contain numbers, spaces, and the following characters: +, -, (, )',
         ];
     }

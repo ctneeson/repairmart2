@@ -20,26 +20,38 @@ class EmailController extends Controller
      */
     public function create(Request $request)
     {
-        $listing = null;
-        $recipient = null;
-        $subject = null;
-        $prefilled = false;
+        $users = User::where('id', '!=', auth()->id())->get();
 
-        // Check if we're coming from a listing
-        if ($request->has('listing_id') && $request->has('recipient_id')) {
+        // Initialize variables
+        $recipient = null;
+        $subject = '';
+        $prefilled = false;
+        $listing = null;
+
+        // Check if we're creating an email for a specific listing
+        if ($request->has('listing_id')) {
             $listing = Listing::findOrFail($request->listing_id);
-            $recipient = User::findOrFail($request->recipient_id);
-            $subject = "RepairMart Listing {$listing->id}: {$listing->title}";
+            $subject = "RE: {$listing->title}";
             $prefilled = true;
         }
 
-        // Get all users for dropdown (if not prefilled)
-        $users = !$prefilled ? User::where('id', '!=', auth()->id())->orderBy('name')->get() : [];
+        // Check for pre-selected recipient(s)
+        if ($request->has('recipient_ids')) {
+            // Handle as array
+            $recipientIds = is_array($request->recipient_ids) ? $request->recipient_ids : [$request->recipient_ids];
+            $recipients = User::whereIn('id', $recipientIds)->get();
 
-        return view(
-            'email.create',
-            compact('users', 'recipient', 'subject', 'prefilled', 'listing')
-        );
+            // If there's only one recipient, use the existing mechanism
+            if ($recipients->count() == 1) {
+                $recipient = $recipients->first();
+            }
+            // Otherwise, we'll need to pass all recipients to the view
+            else {
+                return view('email.create', compact('recipients', 'subject', 'prefilled', 'listing', 'users'));
+            }
+        }
+
+        return view('email.create', compact('recipient', 'subject', 'prefilled', 'listing', 'users'));
     }
 
     /**
@@ -51,16 +63,16 @@ class EmailController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'recipient_id' => 'required|exists:users,id',
+            'recipient_ids' => 'required|array|min:1',
+            'recipient_ids.*' => 'exists:users,id',
             'subject' => 'required|string|max:100',
             'content' => 'required|string',
-            'attachments.*' => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,pdf,doc,docx,txt',
+            'attachments.*'
+            => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,pdf,doc,docx,txt,mp4,mov,ogg,qt',
         ]);
 
-        // Use a transaction for atomicity
         DB::beginTransaction();
         try {
-            // Create the email
             $email = Email::create([
                 'sender_id' => auth()->id(),
                 'subject' => $validated['subject'],
@@ -68,28 +80,38 @@ class EmailController extends Controller
                 'read_at' => null,
             ]);
 
-            // Attach the recipient
-            $email->recipients()->attach($validated['recipient_id']);
+            // Attach all recipients
+            $email->recipients()->attach($validated['recipient_ids']);
 
             // Handle attachments if any
             if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('message-attachments', 'public');
+                foreach ($request->file('attachments') as $i => $file) {
+                    $path = $file->store('attachments', 'public');
 
-                    Attachment::create([
-                        'email_id' => $email->id,
+                    // Create the attachment record with the correct file information
+                    $email->attachments()->create([
                         'path' => $path,
                         'filename' => $file->getClientOriginalName(),
+                        'position' => $i + 1,
                         'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize(),
+                        'size' => $file->getSize()
                     ]);
                 }
             }
 
             DB::commit();
-            return redirect()->route('email.index')->with('success', 'Message sent successfully');
+            return redirect()->route('email.index')->with('success', 'Message sent successfully to ' . count($validated['recipient_ids']) . ' recipient' . (count($validated['recipient_ids']) > 1 ? 's' : ''));
 
         } catch (\Exception $e) {
+            \Log::error('Error creating message: ' . $e->getMessage());
+
+            // Check if it's a file size issue
+            if ($e instanceof \Symfony\Component\HttpFoundation\File\Exception\FileException) {
+                return redirect()->back()->withErrors([
+                    'attachments' => 'There was an issue with your file uploads. Please check the file sizes and formats.'
+                ])->withInput();
+            }
+
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
@@ -122,7 +144,14 @@ class EmailController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10, ['*'], 'sent');
 
-        return view('email.index', compact('receivedEmails', 'sentEmails'));
+        // Count unread messages
+        $unreadCount = Email::whereHas('recipients', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })
+            ->whereNull('read_at')
+            ->count();
+
+        return view('email.index', compact('receivedEmails', 'sentEmails', 'unreadCount'));
     }
 
     /**
@@ -196,7 +225,8 @@ class EmailController extends Controller
         $email->read_at = null;
         $email->save();
 
-        return back()->with('success', 'Message marked as unread');
+        // Redirect to inbox instead of going back to the message
+        return redirect()->route('email.index')->with('success', 'Message marked as unread');
     }
 
     /**
@@ -224,19 +254,39 @@ class EmailController extends Controller
     /**
      * Download an email attachment
      *
-     * @param Attachment $attachment
+     * @param int $attachmentId
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
     public function downloadAttachment($attachmentId)
     {
-        $attachment = Attachment::findOrFail($attachmentId);
+        // Load attachment with its related email including recipients and sender
+        $attachment = Attachment::with(['email.recipients', 'email.sender'])->findOrFail($attachmentId);
+
+        // Make sure the attachment has an associated email
+        if (!$attachment->email) {
+            abort(404, 'Attachment not found or email has been deleted.');
+        }
 
         // Check if user is authorized to download this attachment
         $email = $attachment->email;
-        if (!$email->recipients->contains('id', auth()->id()) && $email->sender_id !== auth()->id()) {
+        $currentUserId = auth()->id();
+
+        // Check if current user is sender or a recipient
+        $isAuthorized = ($email->sender_id === $currentUserId) ||
+            $email->recipients->contains('id', $currentUserId);
+
+        if (!$isAuthorized) {
             abort(403, 'You do not have permission to download this attachment.');
         }
 
-        return Storage::download($attachment->path, $attachment->filename);
+        // Check if file exists in storage
+        if (!Storage::disk('public')->exists($attachment->path)) {
+            abort(404, 'The attachment file could not be found.');
+        }
+
+        // Log successful download attempt
+        \Log::info("User {$currentUserId} downloaded attachment {$attachmentId} from email {$email->id}");
+
+        return Storage::disk('public')->download($attachment->path, $attachment->filename);
     }
 }

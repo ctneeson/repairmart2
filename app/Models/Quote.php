@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Models\Attachment;
 
 class Quote extends Model
 {
@@ -27,6 +28,7 @@ class Quote extends Model
         'city',
         'postcode',
         'country_id',
+        'phone',
     ];
 
     public function customer(): HasOneThrough
@@ -74,5 +76,10 @@ class Quote extends Model
     public function emails(): HasMany
     {
         return $this->HasMany(Email::class, 'quote_id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class, 'quote_id');
     }
 }

@@ -170,7 +170,13 @@
                             <label class="checkbox">
                                 Publish on:
                             </label>
-                            <input type="date" name="published_at" value="{{ old('published_at') }}" />
+                            <input 
+                                type="date" 
+                                name="published_at" 
+                                id="published_at"
+                                min="{{ now()->format('Y-m-d') }}" 
+                                value="{{ old('published_at', now()->format('Y-m-d')) }}" 
+                            />
                             <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
                     </div>
@@ -193,7 +199,15 @@
                                     />
                                 </svg>
                             </div>
-                            <input id="listingFormAttachmentUpload" type="file" name="attachments[]" multiple accept="image/*,video/*" />
+                            <input 
+                                id="listingFormAttachmentUpload" 
+                                type="file" 
+                                name="attachments[]" 
+                                multiple 
+                                accept="image/*,video/*" 
+                                data-max-post-size="{{ ini_get('post_max_size') }}"
+                                data-max-file-size="{{ ini_get('upload_max_filesize') }}"
+                            />
                         </div>
 
                         @error('attachments')
@@ -231,6 +245,7 @@
 
     @vite([
         'resources/js/listings-create-dynamic-product-select.js',
+        'resources/js/listings-create-reset-form.js',
     ])
 
 </x-app-layout>

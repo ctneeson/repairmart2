@@ -67,13 +67,13 @@
             </li>
             @endif
             <li>
+                <a href="{{ route('email.index') }}">My Messages</a>
+            </li>
+            <li>
                 <a href="{{ route('listings.index') }}">My Listings</a>
             </li>
             <li>
                 <a href="{{ route('watchlist.index') }}">Watchlist</a>
-            </li>
-            <li>
-                <a href="{{ route('email.index') }}">My Messages</a>
             </li>
             <li>
                 <form action="{{ route('logout') }}" method="post">

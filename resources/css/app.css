@@ -702,6 +702,8 @@ main {
 .find-a-listing-inputs {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: column; /* Display elements vertically */
+    gap: 1rem; /* Adjust the gap between dropdowns as needed */
 }
 
 .find-a-listing-inputs > div {
@@ -1583,27 +1585,21 @@ a.pagination-item:hover {
     }
 }
 
-.find-a-listing-inputs {
-    display: flex;
-    flex-direction: column; /* Display elements vertically */
-    gap: 1rem; /* Adjust the gap between dropdowns as needed */
-}
-
 .dropdown-container {
-    width: 90%; /* Set the width to 90% of the container */
-    max-width: 100%; /* Ensure the dropdown does not exceed the container width */
+    width: 90%;
+    max-width: 100%;
 }
 
 .dropdown {
     position: relative;
-    display: block; /* Ensure each dropdown is displayed as a block element */
-    width: 100%; /* Ensure the dropdown takes the full width of its container */
+    display: block;
+    width: 100%;
 }
 
 .dropdown label {
     display: block;
-    margin-bottom: 0.5rem; /* Adjust the spacing as needed */
-    font-weight: bold; /* Make the label bold */
+    margin-bottom: 0.5rem;
+    font-weight: bold;
 }
 
 .dropdown-toggle-wrapper {
@@ -1617,11 +1613,11 @@ a.pagination-item:hover {
     padding: 0.5rem 1rem;
     cursor: pointer;
     border-radius: 0.25rem;
-    width: 100%; /* Ensure the button takes the full width of its container */
-    text-align: left; /* Align text to the left */
-    white-space: nowrap; /* Prevent text from wrapping */
-    overflow: hidden; /* Hide overflow text */
-    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     flex-grow: 1;
 }
 
@@ -1636,20 +1632,20 @@ a.pagination-item:hover {
 .reset-icon {
     width: 1rem;
     height: 1rem;
-    stroke: #dc3545; /* Red color for the icon */
+    stroke: #dc3545;
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
     background-color: #fff;
-    width: 100%; /* Ensure the dropdown menu takes the full width of its container */
+    width: 100%;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     padding: 1rem;
     z-index: 1;
     border-radius: 0.25rem;
-    max-height: 200px; /* Set a maximum height for the dropdown menu */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .dropdown-menu.show {
@@ -1772,4 +1768,58 @@ input#phone[readonly] {
     cursor: not-allowed !important;
     border-color: #ddd !important;
     color: #666 !important;
+}
+
+.page-email-index .card-header {
+    padding-top: 15px !important;
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0;
+}
+
+.page-email-index .nav-tabs .nav-item {
+    margin-top: 5px;
+}
+
+.page-email-index .nav-tabs .nav-link {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: #718096;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s ease;
+}
+
+.page-email-index .nav-tabs .nav-link.active {
+    color: #3490dc;
+    border-bottom: 2px solid #3490dc;
+    background-color: transparent;
+}
+
+.page-email-index .card-header-tabs {
+    margin-right: 0;
+    margin-bottom: -1px;
+    margin-left: 0;
+}
+
+.page-email-index .nav-tabs {
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+.page-email-index .badge.rounded-pill {
+    color: white;
+    background-color: #3490dc;
+    margin-left: 5px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    display: inline-block;
 }

@@ -20,11 +20,11 @@
                 <div class="message-header mb-medium pb-medium" style="border-bottom: 1px solid #e2e8f0;">
                     <h1 class="message-subject">{{ $email->subject }}</h1>
                     
-                    <div class="message-meta d-flex justify-content-between align-items-top mt-small">
-                        <div class="message-participants">
+                    <div class="message-meta d-flex justify-content-between align-items-start mt-small">
+                        <div class="message-participants" style="flex: 1;">
                             <div class="message-from mb-small">
                                 <span class="font-weight-bold">From:</span> 
-                                <span class="message-sender">{{ $email->sender->name }} <span class="text-muted">&lt;{{ $email->sender->email }}&gt;</span></span>
+                                <span class="message-sender">{{ $email->sender->name }}</span>
                             </div>
                             
                             <div class="message-to">
@@ -36,8 +36,13 @@
                         </div>
                         
                         @if($isSender)
-                            <div class="message-status">
-                                <span class="badge" style="background-color: {{ $email->read_at ? '#38a169' : '#718096' }}; color: white; padding: 5px 10px; border-radius: 9999px;">
+                            <div class="message-status" style="min-width: 120px; text-align: right; margin-left: 15px;">
+                                <span class="badge"
+                                    style="background-color: {{ $email->read_at ? '#38a169' : '#718096' }};
+                                        color: white;
+                                        padding: 5px 10px;
+                                        border-radius: 9999px;
+                                        display: inline-block;">
                                     {{ $email->read_at ? 'Read ' . $email->read_at->format('M d, Y') : 'Unread' }}
                                 </span>
                             </div>
@@ -90,17 +95,16 @@
                     </div>
                 @endif
 
-                <!-- Action Buttons -->
                 <div class="message-actions" style="display: flex; gap: 10px; margin-top: 20px;">
-                    <!-- Reply Button -->
-                    <a href="{{ route('email.reply', $email->id) }}" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px; vertical-align: middle;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                        </svg>
-                        Reply
-                    </a>
-                    
+                    <!-- Reply Button - only visible to recipients -->
                     @if($isRecipient)
+                        <a href="{{ route('email.reply', $email->id) }}" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px; vertical-align: middle;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                            </svg>
+                            Reply
+                        </a>
+                        
                         <!-- Mark as Unread Button (only for recipients) -->
                         @if($email->read_at)
                             <form action="{{ route('email.mark-unread', $email->id) }}" method="POST" style="margin: 0;">
@@ -110,23 +114,28 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px; vertical-align: middle;">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51l-4.66-2.51m0 0l-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0l-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z" />
                                     </svg>
-                                    Mark as Unread
+                                    Mark as Unread & Return to Inbox
                                 </button>
                             </form>
                         @endif
+                        
+                        <!-- Delete Button - only visible to recipients -->
+                        <form action="{{ route('email.destroy', $email->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px; vertical-align: middle;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                                Delete
+                            </button>
+                        </form>
+                    @else
+                        <!-- Message for senders - optional info text -->
+                        <div class="text-muted">
+                            <small>You sent this message. Recipients can reply to or delete it.</small>
+                        </div>
                     @endif
-                    
-                    <!-- Delete Button -->
-                    <form action="{{ route('email.destroy', $email->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this message?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px; vertical-align: middle;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                            Delete
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>

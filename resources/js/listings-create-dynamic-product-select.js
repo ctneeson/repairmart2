@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const productHiddenInputs = document.getElementById(
         "product-hidden-inputs"
     );
+    const resetButton = document.querySelector(".btn-default:nth-of-type(2)");
     const form = document.querySelector("form");
 
     // Initialize selectedProducts with values from the initialSelectedProducts array if available
@@ -38,6 +39,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Initial selected products:", selectedProducts);
 
+    // Function to reset product selections
+    window.resetProductSelections = function () {
+        // Clear the selectedProducts array
+        selectedProducts = [];
+
+        // Update UI
+        updateSelectedProductsDisplay();
+        updateHiddenInputs();
+        updateAddProductLinkVisibility();
+
+        // Reset dropdown product selections if they exist
+        if (productSelect) {
+            productSelect.selectedIndex = 0;
+        }
+
+        // Reset product checkboxes from select-product component
+        document
+            .querySelectorAll('.product-menu input[type="checkbox"]')
+            .forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+
+        // Update dropdown button text
+        const productToggle = document.querySelector(".product-toggle");
+        if (productToggle) {
+            productToggle.textContent = "Select Products";
+        }
+
+        console.log("Products reset. Selected products:", selectedProducts);
+    };
+
     function updateAddProductLinkVisibility() {
         const selectedValue = productSelect ? productSelect.value : "";
         if (
@@ -53,6 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateSelectedProductsDisplay() {
+        if (!selectedProductsContainer) return;
+
         selectedProductsContainer.innerHTML = "";
         selectedProducts.forEach((productId) => {
             // Get product details either from initialSelectedProducts or from select options
@@ -126,6 +160,52 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Handle select-product-all component checkbox changes
+    document
+        .querySelectorAll('.product-menu input[type="checkbox"]')
+        .forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                const productId = this.value;
+
+                if (this.checked) {
+                    // Add product if not already in the list and under limit
+                    if (
+                        !selectedProducts.includes(productId) &&
+                        selectedProducts.length < 3
+                    ) {
+                        selectedProducts.push(productId);
+                        updateSelectedProductsDisplay();
+                        updateHiddenInputs();
+                    } else if (selectedProducts.length >= 3) {
+                        // Uncheck if we're at the limit
+                        this.checked = false;
+                        alert("You can only select up to 3 products.");
+                    }
+                } else {
+                    // Remove product
+                    selectedProducts = selectedProducts.filter(
+                        (id) => id !== productId
+                    );
+                    updateSelectedProductsDisplay();
+                    updateHiddenInputs();
+                }
+
+                // Update toggle button text
+                const checkedCount = document.querySelectorAll(
+                    '.product-menu input[type="checkbox"]:checked'
+                ).length;
+                const productToggle = document.querySelector(".product-toggle");
+                if (productToggle) {
+                    productToggle.textContent =
+                        checkedCount > 0
+                            ? `${checkedCount} product${
+                                  checkedCount > 1 ? "s" : ""
+                              } selected`
+                            : "Select Products";
+                }
+            });
+        });
+
     // Add event listeners only if elements exist
     if (productSelect) {
         productSelect.addEventListener("change", function () {
@@ -154,6 +234,29 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Reset button functionality
+    if (resetButton) {
+        resetButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.resetProductSelections();
+        });
+    }
+
+    // For the product reset button in select-product component
+    document.querySelectorAll(".reset-button").forEach((button) => {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // If this is the product reset button (check parent to confirm)
+            if (
+                this.closest(".dropdown") &&
+                this.closest(".dropdown").querySelector(".product-toggle")
+            ) {
+                window.resetProductSelections();
+            }
+        });
+    });
 
     // Initialize the UI
     updateSelectedProductsDisplay();

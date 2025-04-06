@@ -3,22 +3,32 @@
         <div class="container-small">
             <div class="d-flex justify-content-between align-items-center mb-medium">
                 <h1 class="page-title">Messages</h1>
-                <a href="{{ route('email.create') }}" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    New Message
-                </a>
+                
+                @if(auth()->user()->hasRole('admin'))
+                    <a href="{{ route('email.create') }}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        New Message
+                    </a>
+                @endif
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs">
+                <div class="card-header" style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0;">
+                    <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#inbox" data-toggle="tab">Inbox</a>
+                            <a class="nav-link active" href="#inbox">
+                                Inbox
+                                @if($unreadCount > 0)
+                                    <span class="badge rounded-pill" style="color: white; background-color: #3490dc; margin-left: 5px;">
+                                        ({{ $unreadCount }})
+                                    </span>
+                                @endif
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#sent" data-toggle="tab">Sent</a>
+                            <a class="nav-link" href="#sent">Sent</a>
                         </li>
                     </ul>
                 </div>
@@ -134,9 +144,12 @@
                                 </svg>
                                 <h3>No sent messages</h3>
                                 <p class="text-muted">You haven't sent any messages yet.</p>
-                                <a href="{{ route('email.create') }}" class="btn btn-primary mt-medium">
-                                    Compose New Message
-                                </a>
+                                
+                                @if(auth()->user()->hasRole('admin'))
+                                    <a href="{{ route('email.create') }}" class="btn btn-primary mt-medium">
+                                        Compose New Message
+                                    </a>
+                                @endif
                             </div>
                         @endif
                     </div>
@@ -148,29 +161,47 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle tab switching
+            // Get all elements
             const tabs = document.querySelectorAll('.nav-link');
             const tabContents = document.querySelectorAll('.tab-pane');
             
+            // Make sure "Inbox" tab is active by default
+            showTab('inbox');
+            
+            // Add click handlers to each tab
             tabs.forEach(tab => {
                 tab.addEventListener('click', function(e) {
                     e.preventDefault();
                     
-                    // Remove active class from all tabs and tab contents
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => {
-                        c.classList.remove('show', 'active');
-                    });
-                    
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-                    
-                    // Show corresponding tab content
-                    const target = this.getAttribute('href').substring(1);
-                    document.getElementById(target).classList.add('show', 'active');
+                    // Get the target tab ID from the href attribute
+                    const targetId = this.getAttribute('href').substring(1);
+                    showTab(targetId);
                 });
             });
+            
+            function showTab(tabId) {
+                // Hide all tab contents
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                    content.classList.remove('show', 'active');
+                });
+                
+                // Remove active class from all tabs
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show the selected tab content
+                const selectedTab = document.getElementById(tabId);
+                selectedTab.style.display = 'block';
+                selectedTab.classList.add('show', 'active');
+                
+                // Add active class to the selected tab
+                const activeTabLink = document.querySelector(`.nav-link[href="#${tabId}"]`);
+                activeTabLink.classList.add('active');
+            }
         });
     </script>
     @endpush
+
 </x-app-layout>

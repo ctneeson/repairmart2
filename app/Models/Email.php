@@ -42,8 +42,9 @@ class Email extends Model
 
     public function attachments(): HasMany
     {
-        return $this->hasMany(Attachment::class, 'email_id');
+        return $this->hasMany(Attachment::class, 'email_id')->orderBy('position');
     }
+
     public function listing(): BelongsTo
     {
         return $this->belongsTo(Listing::class, 'listing_id');

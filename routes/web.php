@@ -12,6 +12,8 @@ use App\Http\Controllers\ProfileController;
 require_once __DIR__ . '/auth.php';
 // Auth routes for emails
 require_once __DIR__ . '/email.php';
+// Auth routes for quotes
+require_once __DIR__ . '/quote.php';
 
 
 // Logged in or logged out

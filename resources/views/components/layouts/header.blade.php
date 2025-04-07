@@ -73,6 +73,9 @@
                 <a href="{{ route('listings.index') }}">My Listings</a>
             </li>
             <li>
+                <a href="{{ route('quotes.index') }}">My Quotes</a>
+            </li>
+            <li>
                 <a href="{{ route('watchlist.index') }}">Watchlist</a>
             </li>
             <li>

@@ -1,0 +1,467 @@
+<x-app-layout title="Edit Quote">
+    <main>
+        <div class="container-small">
+            <form action="{{ route('quotes.update', $quote->id) }}" method="POST" id="editQuoteForm">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="listing_id" value="{{ $quote->listing_id }}">
+                <input type="hidden" name="user_id" value="{{ $quote->user_id }}">
+                <input type="hidden" name="status_id" value="{{ $quote->status_id }}">
+                
+                <!-- Header & Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="mb-0">Edit Quote #{{ $quote->id }}</h1>
+                    <div class="action-buttons">
+                        <a href="{{ route('quotes.show', $quote->id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+                
+                <!-- Listing Summary Section -->
+                <div class="form-section mb-large">
+                    <h2 class="mb-small">Listing Details</h2>
+                    <div class="listing-summary card p-medium mb-medium">
+                        <div class="row g-0">
+                            <!-- Left Column: Listing Details -->
+                            <div class="col-md-6" style="padding-right: 15px;">
+                                <h3>{{ $quote->listing->title }}</h3>
+                                
+                                <!-- Listing Thumbnail -->
+                                @if($quote->listing->primaryAttachment)
+                                <div class="listing-thumbnail mb-small">
+                                    @if(Str::contains($quote->listing->primaryAttachment->mime_type, 'image'))
+                                    <img src="{{ Storage::url($quote->listing->primaryAttachment->path) }}"
+                                        alt="{{ $quote->listing->title }}"
+                                        class="img-fluid"
+                                        style="max-height: 150px; max-width: 100%; object-fit: contain;">
+                                    @elseif(Str::contains($quote->listing->primaryAttachment->mime_type, 'video'))
+                                    <video controls class="img-fluid"
+                                        style="max-height: 150px; max-width: 100%;">
+                                        <source src="{{ Storage::url($quote->listing->primaryAttachment->path) }}"
+                                                type="{{ $quote->listing->primaryAttachment->mime_type }}">
+                                            Your browser doesn't support video playback.
+                                    </video>
+                                    @endif
+                                </div>
+                                @endif
+
+                                <p>{{ \Illuminate\Support\Str::limit($quote->listing->description, 150) }}</p>
+                            
+                                <div class="listing-meta">
+                                    <span class="badge bg-info">{{ $quote->listing->manufacturer->name }}</span>
+                                    @foreach($quote->listing->products as $product)
+                                        <span class="badge bg-secondary">{{ $product->category }} > {{ $product->subcategory }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        
+                            <!-- Right Column: Customer Information -->
+                            <div class="col-md-6" style="padding-left: 15px; border-left: 1px solid #eee;">
+                                <div class="customer-details">
+                                    <h4>Customer Information</h4>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Name:</strong> {{ $quote->customer->name }}</li>
+                                        @if($quote->customer->city)
+                                        <li><strong>City:</strong> {{ $quote->customer->city }}</li>
+                                        @endif
+                                        @if($quote->customer->country)
+                                        <li><strong>Country:</strong> {{ $quote->customer->country->name }}</li>
+                                        @endif
+                                        @if($quote->customer->phone)
+                                        <li><strong>Phone:</strong> {{ $quote->customer->phone }}</li>
+                                        @endif
+                                    </ul>
+                                </div>
+                                <a href="{{ route('listings.show', $quote->listing->id) }}" class="btn btn-outline-secondary btn-sm mt-2">View Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quote Details Section -->
+                <div class="form-section mb-large">
+                    <h2 class="mb-small">Quote Details</h2>
+                
+                    <div class="form-details">
+                        <!-- First row: Currency and Amount -->
+                        <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <!-- Currency Dropdown (2/3 width) -->
+                            <div style="flex: 2;">
+                                <div class="form-group @error('currency_id') has-error @enderror">
+                                    <label for="currency_id">Currency</label>
+                                    <x-select-currency-all name="currency_id" value="{{ old('currency_id', $quote->currency_id) }}" />
+                                    @error('currency_id')
+                                        <p class="error-message">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <!-- Amount Input (1/3 width) -->
+                            <div style="flex: 1;">
+                                <div class="form-group @error('amount') has-error @enderror">
+                                    <label for="amount">Amount</label>
+                                    <input type="number" 
+                                        name="amount" 
+                                        id="amount"  
+                                        value="{{ old('amount', $quote->amount) }}" 
+                                        step="0.01" 
+                                        min="0.01" 
+                                        required>
+                                    @error('amount')
+                                        <p class="error-message">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Second row: Delivery Method and Turnaround -->
+                        <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <!-- Delivery Method Dropdown (2/3 width) -->
+                            <div style="flex: 2;">
+                                <div class="form-group @error('deliverymethod_id') has-error @enderror">
+                                    <label for="deliverymethod_id">Delivery Method</label>
+                                    <select name="deliverymethod_id" id="deliverymethod_id" required>
+                                        <option value="">Select a delivery method</option>
+                                        @foreach($deliveryMethods as $method)
+                                            <option value="{{ $method->id }}" {{ old('deliverymethod_id', $quote->deliverymethod_id) == $method->id ? 'selected' : '' }}>
+                                                {{ $method->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('deliverymethod_id')
+                                        <p class="error-message">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <!-- Turnaround Time Input (1/3 width) -->
+                            <div style="flex: 1;">
+                                <div class="form-group @error('turnaround') has-error @enderror">
+                                    <label for="turnaround">Turnaround (Days)</label>
+                                    <input type="number" 
+                                        name="turnaround" 
+                                        id="turnaround" 
+                                        value="{{ old('turnaround', $quote->turnaround) }}" 
+                                        min="1" 
+                                        step="1" 
+                                        required>
+                                    @error('turnaround')
+                                        <p class="error-message">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Third row: Quote Details -->
+                        <div class="form-row" style="margin-bottom: 15px;">
+                            <div class="form-group @error('details') has-error @enderror">
+                                <label for="details">Quote Details</label>
+                                <textarea
+                                    name="details"
+                                    id="details"
+                                    rows="4"
+                                    placeholder="Describe your repair service, approach, and any other information the customer should know">{{ old('details', $quote->details) }}</textarea>
+                                @error('details')
+                                    <p class="error-message">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <!-- Location Information -->
+                        <div class="form-group mt-4">
+                            <div class="checkbox">
+                                <input type="hidden" name="use_default_location" value="0">
+                                <input
+                                    type="checkbox"
+                                    name="use_default_location"
+                                    id="use-default-location"
+                                    value="1"
+                                    {{ old('use_default_location', $quote->use_default_location) ? 'checked' : '' }}
+                                >
+                                <label for="use-default-location">Use My Default Address</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Address Fields -->
+                        <div id="address-fields" class="{{ old('use_default_location', $quote->use_default_location) ? 'opacity-50' : '' }}">
+                            <!-- Address Line 1 and Postcode row -->
+                            <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                <div style="flex: 2;">
+                                    <div class="form-group @error('address_line1') has-error @enderror">
+                                        <label for="address_line1">Address Line 1</label>
+                                        <input
+                                            type="text"
+                                            name="address_line1"
+                                            id="address_line1"
+                                            value="{{ old('address_line1', $quote->address_line1) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
+                                            required>
+                                        @error('address_line1')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="form-group @error('postcode') has-error @enderror">
+                                        <label for="postcode">Postcode</label>
+                                        <input
+                                            type="text"
+                                            name="postcode"
+                                            id="postcode"
+                                            value="{{ old('postcode', $quote->postcode) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
+                                            required>
+                                        @error('postcode')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Address Line 2 and Country row -->
+                            <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                <div style="flex: 2;">
+                                    <div class="form-group @error('address_line2') has-error @enderror">
+                                        <label for="address_line2">Address Line 2</label>
+                                        <input
+                                            type="text"
+                                            name="address_line2"
+                                            id="address_line2"
+                                            value="{{ old('address_line2', $quote->address_line2) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}>
+                                        @error('address_line2')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="form-group @error('country_id') has-error @enderror">
+                                        <label for="country_id">Country</label>
+                                        <!-- Always include a hidden country_id field for default location -->
+                                        <input type="hidden" 
+                                            name="country_id" 
+                                            id="hidden_country_id" 
+                                            value="{{ old('country_id', $quote->country_id) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) != true ? 'disabled' : '' }}>
+                                        
+                                        <x-select-country-all 
+                                            name="{{ old('use_default_location', $quote->use_default_location) ? '_country_id' : 'country_id' }}"
+                                            id="visible_country_id"
+                                            value="{{ old('country_id', $quote->country_id) }}" 
+                                            :disabled="old('use_default_location', $quote->use_default_location) ? true : false"
+                                            required="true" />
+                                        @error('country_id')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- City and Phone row -->
+                            <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                <div style="flex: 2;">
+                                    <div class="form-group @error('city') has-error @enderror">
+                                        <label for="city">City</label>
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            id="city"
+                                            value="{{ old('city', $quote->city) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
+                                            required>
+                                        @error('city')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="form-group @error('phone') has-error @enderror">
+                                        <label for="phone">Phone <small>(Optional)</small></label>
+                                        <input
+                                            type="text"
+                                            name="phone"
+                                            id="phone"
+                                            value="{{ old('phone', $quote->phone) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}>
+                                        @error('phone')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Attachments Section -->
+                <div class="form-section mb-large">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="mb-0">Attachments</h2>
+                        <a href="{{ route('quotes.attachments', $quote->id) }}" class="btn btn-secondary btn-sm">
+                            Manage Attachments
+                        </a>
+                    </div>
+                    
+                    <div class="card p-medium">
+                        @if($quote->attachments->count() > 0)
+                            <div class="attachment-grid">
+                                @foreach($quote->attachments as $attachment)
+                                    <div class="attachment-item">
+                                        <a href="{{ Storage::url($attachment->path) }}" target="_blank" class="attachment-link">
+                                            @if(Str::contains($attachment->mime_type, 'image'))
+                                                <img src="{{ Storage::url($attachment->path) }}" alt="{{ $attachment->filename }}" class="attachment-thumbnail">
+                                            @elseif(Str::contains($attachment->mime_type, 'video'))
+                                                <div class="video-thumbnail">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-film" viewBox="0 0 16 16">
+                                                        <path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z"/>
+                                                    </svg>
+                                                </div>
+                                            @elseif(Str::contains($attachment->mime_type, 'pdf'))
+                                                <div class="document-thumbnail">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-pdf" viewBox="0 0 16 16">
+                                                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                                                        <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+                                                    </svg>
+                                                </div>
+                                            @else
+                                                <div class="document-thumbnail">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-text" viewBox="0 0 16 16">
+                                                        <path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/>
+                                                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                                                    </svg>
+                                                </div>
+                                            @endif
+                                            <div class="attachment-name">{{ Str::limit($attachment->filename, 15) }}</div>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center p-4 text-muted">
+                                <p>No attachments have been added to this quote.</p>
+                                <a href="{{ route('quotes.attachments', $quote->id) }}" class="btn btn-outline-secondary btn-sm">
+                                    Add Attachments
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="form-footer d-flex justify-content-between align-items-center">
+                    <div>
+                        <!-- Delete Button - Should be a form to prevent CSRF issues -->
+                        <form action="{{ route('quotes.destroy', $quote->id) }}" 
+                              method="POST" 
+                              style="display: inline-block;"
+                              onsubmit="return confirm('Are you sure you want to delete this quote? This action cannot be undone.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Delete Quote</button>
+                        </form>
+                    </div>
+                    <div>
+                        <a href="{{ route('quotes.show', $quote->id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <style>
+        .attachment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+        
+        .attachment-item {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        
+        .attachment-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .attachment-thumbnail {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+        }
+        
+        .video-thumbnail, .document-thumbnail {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+        
+        .attachment-name {
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .form-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const useDefaultLocationCheckbox = document.getElementById('use-default-location');
+            const addressFields = document.getElementById('address-fields');
+            const addressInputs = addressFields.querySelectorAll('input, select');
+            const hiddenCountryId = document.getElementById('hidden_country_id');
+            const visibleCountryId = document.getElementById('visible_country_id');
+            
+            useDefaultLocationCheckbox.addEventListener('change', updateAddressFieldsState);
+            
+            function updateAddressFieldsState() {
+                const useDefault = useDefaultLocationCheckbox.checked;
+                
+                // Update the visual appearance
+                if (useDefault) {
+                    addressFields.classList.add('opacity-50');
+                } else {
+                    addressFields.classList.remove('opacity-50');
+                }
+                
+                // Handle the country ID fields specifically
+                if (useDefault) {
+                    // When using default address, enable the hidden field and disable the visible dropdown
+                    hiddenCountryId.disabled = false;
+                    visibleCountryId.name = '_country_id'; // Change the name so it's not submitted
+                    visibleCountryId.disabled = true;
+                } else {
+                    // When manually entering address, disable the hidden field and enable the visible dropdown
+                    hiddenCountryId.disabled = true;
+                    visibleCountryId.name = 'country_id'; // Set the proper name for submission
+                    visibleCountryId.disabled = false;
+                }
+                
+                // Update each input's readonly status
+                addressInputs.forEach(input => {
+                    if (input.id !== 'hidden_country_id' && input.id !== 'visible_country_id') {
+                        input.readOnly = useDefault;
+                    }
+                });
+            }
+            
+            // Run the function once on page load to set initial state
+            updateAddressFieldsState();
+        });
+    </script>
+</x-app-layout>

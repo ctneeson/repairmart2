@@ -15,8 +15,8 @@ class DeliveryMethodsSeeder extends Seeder
     {
         DeliveryMethod::factory()
             ->sequence(
-                ['name' => 'Drop-off at Customer address'],
-                ['name' => 'Pick-up at Business address'],
+                ['name' => 'Pick-up/Drop-off at Customer'],
+                ['name' => 'Drop-off/Pick-up at Repair Specialist'],
                 ['name' => 'Postage (tracked)'],
                 ['name' => 'Postage (untracked)'],
             )

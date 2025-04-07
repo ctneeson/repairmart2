@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\Attachment;
+use Carbon\Carbon;
 
 class Quote extends Model
 {
@@ -55,12 +56,12 @@ class Quote extends Model
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(QuoteStatus::class, 'quote_status_id');
+        return $this->belongsTo(QuoteStatus::class, 'status_id');
     }
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'quote_currency_id');
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function country(): BelongsTo
@@ -82,4 +83,10 @@ class Quote extends Model
     {
         return $this->hasMany(Attachment::class, 'quote_id');
     }
+
+    public function getUpdatedDate(): string
+    {
+        return (new Carbon($this->updated_at))->format('Y-m-d');
+    }
+
 }

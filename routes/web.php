@@ -13,7 +13,7 @@ require_once __DIR__ . '/auth.php';
 // Auth routes for emails
 require_once __DIR__ . '/email.php';
 // Auth routes for quotes
-require_once __DIR__ . '/quote.php';
+require_once __DIR__ . '/quotes.php';
 
 
 // Logged in or logged out
@@ -70,9 +70,3 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/listings', [ListingController::class, 'index'])->name('listings.index');
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
-
-Route::resources([
-    'orders' => OrderController::class,
-]);
-
-Route::resource('quotes', QuoteController::class);

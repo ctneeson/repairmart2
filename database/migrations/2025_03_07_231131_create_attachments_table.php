@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Listing;
+use App\Models\Quote;
 use App\Models\Order;
 use App\Models\Email;
 
@@ -16,6 +17,7 @@ return new class extends Migration {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Listing::class)->nullable()->constrained();
+            $table->foreignIdFor(Quote::class)->nullable()->constrained();
             $table->foreignIdFor(Order::class)->nullable()->constrained();
             $table->foreignIdFor(Email::class)->nullable()->constrained();
             $table->integer('position');

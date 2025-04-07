@@ -59,7 +59,7 @@
                       @endforeach
                     </td>
                     <td>{{ $listing->getCreatedDate() }}</td>
-                    <td>{{$listing->status->name}}</td>
+                    <td >{{$listing->status->name}}</td>
                     <td class="actions-cell">
                       <div class="flex flex-col space-y-2" style="display: flex; flex-direction: column; gap: 8px;">
                         <!-- Edit Button -->

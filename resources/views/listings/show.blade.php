@@ -208,7 +208,8 @@
             </a>
             @endif
             {{-- Hide unless current user is a specialist or admin --}}
-            @if (auth()->check() && auth()->user()->roles->whereIn('name', ['specialist', 'admin'])->count() > 0
+            @if (auth()->check()
+                && auth()->user()->roles->whereIn('name', ['specialist', 'admin'])->count() > 0
                 && auth()->id() !== $listing->user_id)
             <a href="{{route('quotes.create', $listing->id)}}" class="listing-details-createquote btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"

@@ -1770,18 +1770,21 @@ input#phone[readonly] {
     color: #666 !important;
 }
 
-.page-email-index .card-header {
+.page-email-index .card-header,
+.page-quotes-index .card-header {
     padding-top: 15px !important;
     background-color: white;
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 0;
 }
 
-.page-email-index .nav-tabs .nav-item {
+.page-email-index .nav-tabs .nav-item,
+.page-quotes-index .nav-tabs .nav-item {
     margin-top: 5px;
 }
 
-.page-email-index .nav-tabs .nav-link {
+.page-email-index .nav-tabs .nav-link,
+.page-quotes-index .nav-tabs .nav-link {
     cursor: pointer;
     padding: 0.75rem 1rem;
     border-top-left-radius: 0.25rem;
@@ -1793,19 +1796,22 @@ input#phone[readonly] {
     transition: all 0.2s ease;
 }
 
-.page-email-index .nav-tabs .nav-link.active {
+.page-email-index .nav-tabs .nav-link.active,
+.page-quotes-index .nav-tabs .nav-link.active {
     color: #3490dc;
     border-bottom: 2px solid #3490dc;
     background-color: transparent;
 }
 
-.page-email-index .card-header-tabs {
+.page-email-index .card-header-tabs,
+.page-quotes-index .card-header-tabs {
     margin-right: 0;
     margin-bottom: -1px;
     margin-left: 0;
 }
 
-.page-email-index .nav-tabs {
+.page-email-index .nav-tabs,
+.page-quotes-index .nav-tabs {
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     flex-wrap: wrap;
@@ -1814,7 +1820,8 @@ input#phone[readonly] {
     list-style: none;
 }
 
-.page-email-index .badge.rounded-pill {
+.page-email-index .badge.rounded-pill,
+.page-quotes-index .badge.rounded-pill {
     color: white;
     background-color: #3490dc;
     margin-left: 5px;
@@ -1822,4 +1829,185 @@ input#phone[readonly] {
     border-radius: 9999px;
     font-size: 12px;
     display: inline-block;
+}
+
+.quote-status-open {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.quote-status-accepted {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.quote-status-rejected {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.quote-status-expired {
+    background-color: #eeeeee;
+    color: #616161;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.quote-action-buttons {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+}
+
+.quote-action-buttons .btn-block {
+    display: block;
+    width: 100%;
+}
+
+.quote-action-buttons .mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.quote-action-buttons form {
+    display: block;
+    width: 100%;
+}
+
+.quote-header {
+    position: relative;
+}
+
+.quote-status-badge {
+    position: relative;
+    z-index: 10;
+}
+
+.status-open {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.status-accepted {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.status-rejected {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.status-expired {
+    background-color: #eeeeee;
+    color: #616161;
+}
+
+.status-closed-rejected {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.status-closed-retracted {
+    background-color: #e0f2f1;
+    color: #004d40;
+}
+
+.status-closed-order-created {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.quote-actions {
+    position: relative;
+    z-index: 5;
+    clear: both;
+    margin-top: 15px !important;
+}
+
+@media (max-width: 767px) {
+    .page-quotes-index .table-responsive table {
+        border: 0;
+    }
+
+    .page-quotes-index .table-responsive table thead {
+        display: none; /* Hide header on mobile */
+    }
+
+    .page-quotes-index .table-responsive table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.25rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-quotes-index .table-responsive table td {
+        display: grid;
+        grid-template-columns: 40% 60%;
+        padding: 0.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        text-align: left;
+    }
+
+    .page-quotes-index .table-responsive table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #718096;
+    }
+
+    .page-quotes-index .table-responsive table td:last-child {
+        border-bottom: 0;
+    }
+
+    .page-quotes-index .table-responsive table td[data-label="Actions"] {
+        display: flex;
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    .quote-action-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .quote-action-buttons .btn {
+        flex: 1;
+    }
+
+    .quote-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .quote-status-badge {
+        position: static;
+        margin-top: 10px;
+        display: inline-block;
+    }
+
+    .quote-actions {
+        margin-top: 20px !important;
+    }
+
+    .col-md-4.ps-md-4.border-start {
+        border-left: none !important;
+        border-top: 1px solid #dee2e6;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+    }
 }

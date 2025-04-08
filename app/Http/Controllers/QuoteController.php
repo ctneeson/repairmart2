@@ -110,7 +110,7 @@ class QuoteController extends Controller
                 'deliverymethod_id' => $validated['deliverymethod_id'],
                 'amount' => $validated['amount'],
                 'turnaround' => $validated['turnaround'],
-                'details' => $validated['details'] ?? null,
+                'description' => $validated['description'] ?? null,
                 'use_default_location' => $validated['use_default_location'],
                 'address_line1' => $validated['address_line1'],
                 'address_line2' => $validated['address_line2'] ?? null,
@@ -319,5 +319,89 @@ class QuoteController extends Controller
         }
 
         return view('quotes.attachments', compact('quote'));
+    }
+
+    /**
+     * Update the attachments for a quote.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Quote  $quote
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function updateAttachments(Request $request, Quote $quote)
+    {
+        // Check if user is authorized to update attachments
+        $user = auth()->user();
+        $isQuoteCreator = $user->id === $quote->user_id;
+        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+
+        if (!$isQuoteCreator && !$isAdmin) {
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', 'You do not have permission to update attachments for this quote.');
+        }
+
+        // If the quote status is not "Open", prevent updates for non-admins
+        if ($quote->status->name !== 'Open' && !$isAdmin) {
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', 'Attachments cannot be updated because the quote status is not "Open".');
+        }
+
+        // Start a database transaction
+        DB::beginTransaction();
+
+        try {
+            // Handle attachment positioning/order updates
+            if ($request->has('positions')) {
+                foreach ($request->positions as $id => $position) {
+                    $quote->attachments()->where('id', $id)->update(['position' => $position]);
+                }
+            }
+
+            // Handle attachment deletions
+            if ($request->has('delete_attachments')) {
+                foreach ($request->delete_attachments as $id) {
+                    $attachment = $quote->attachments()->find($id);
+
+                    if ($attachment) {
+                        // Delete the file from storage
+                        Storage::disk('public')->delete($attachment->path);
+                        // Delete the attachment record
+                        $attachment->delete();
+                    }
+                }
+            }
+
+            // Handle new attachment uploads
+            if ($request->hasFile('new_attachments')) {
+                $highestPosition = $quote->attachments()->max('position') ?? 0;
+
+                foreach ($request->file('new_attachments') as $i => $file) {
+                    $path = $file->store('attachments/quotes', 'public');
+
+                    // Create the attachment record
+                    $quote->attachments()->create([
+                        'path' => $path,
+                        'filename' => $file->getClientOriginalName(),
+                        'position' => $highestPosition + $i + 1,
+                        'mime_type' => $file->getMimeType(),
+                        'size' => $file->getSize()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('success', 'Quote attachments updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Failed to update quote attachments: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Failed to update attachments: ' . $e->getMessage());
+        }
     }
 }

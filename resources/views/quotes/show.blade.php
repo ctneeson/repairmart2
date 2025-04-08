@@ -17,52 +17,6 @@
                 <!-- Clear both to ensure actions start below the status badge -->
                 <div style="clear: both;"></div>
                 
-                <!-- Action buttons in their own row with more spacing -->
-                <div class="quote-actions" style="margin-bottom: 1rem !important; margin-top: 1rem !important;">
-                    @if(auth()->id() === $quote->customer->id && $quote->status_id === 1)
-                        <button type="button" class="btn btn-success me-2"
-                            onclick="alert('Accept functionality will be added later')">
-                            Accept Quote
-                        </button>
-                    @endif
-
-                    @if(auth()->id() === $quote->user_id && $quote->status_id === 1)
-                        <a href="{{ route('quotes.edit', $quote->id) }}" class="btn btn-primary me-2">
-                            Edit Quote
-                        </a>
-                    @endif
-                    
-                    @if(auth()->user()->roles->where('name', 'admin')->count() > 0)
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button"
-                                id="adminActionsDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                Admin Actions
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="adminActionsDropdown">
-                                <li><a class="dropdown-item" href="{{ route('quotes.edit', $quote->id) }}">
-                                    Edit Quote
-                                </a></li>
-                                <li><a class="dropdown-item" href="#"
-                                    onclick="alert('Accept functionality will be added later')">
-                                    Accept Quote
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{{ route('quotes.destroy', $quote->id) }}"
-                                        method="POST"
-                                        onsubmit="return confirm('Delete this quote?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            Delete Quote
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    @endif
-                </div>
             </div>
 
             <!-- Quote Details Card -->
@@ -78,7 +32,7 @@
                                     <div class="detail-group">
                                         <label>Amount</label>
                                         <div class="detail-value">
-                                            {{ $quote->currency->symbol ?? '' }} {{ number_format($quote->amount, 2) }}
+                                            {{ $quote->currency->iso_code}} {{ number_format($quote->amount, 2) }}
                                         </div>
                                     </div>
                                 </div>
@@ -111,12 +65,12 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-12">
+                            <div class="row mt-4">
+                                <div class="col-md-12">
                                     <div class="detail-group">
-                                        <label>Quote Details</label>
-                                        <div class="detail-value quote-details-text">
-                                            {!! nl2br(e($quote->details)) !!}
+                                        <label>Quote Description</label>
+                                        <div class="detail-value quote-description-text">
+                                            {!! nl2br(e($quote->description)) !!}
                                         </div>
                                     </div>
                                 </div>
@@ -201,22 +155,47 @@
                                 </div>
                             @endif
                         </div>
-                        
-                        <!-- Link to original listing -->
-                        <div class="mt-4 original-listing-link">
-                            <a href="{{ route('listings.show', $quote->listing->id) }}"
-                                class="btn btn-outline-secondary btn-sm">
-                                View Original Listing
-                            </a>
-                        </div>
                     </div>
 
                     <!-- Right Column: Contact Information -->
                     <div class="col-md-4">
                         <div class="contact-sidebar">
+                            <h2 class="mb-small">Listing Details</h2>
+                            <h3>{{ $quote->listing->title }}
+                                <a href="{{ route('listings.show', $quote->listing_id) }}" 
+                                    class="btn btn-outline-secondary btn-sm mt-2" 
+                                    target="_blank" 
+                                    rel="noopener">
+                                     view listing
+                                 </a>
+                            </h3>
+                            <div class="listing-meta">
+                                <span class="badge bg-info">{{ $quote->listing->manufacturer->name }}</span>
+                                @foreach($quote->listing->products as $product)
+                                    <span class="badge bg-secondary">{{ $product->category }} > {{ $product->subcategory }}</span>
+                                @endforeach
+                            </div>
+                            @if($quote->listing->primaryAttachment)
+                            <div class="listing-thumbnail mb-small">
+                                @if(Str::contains($quote->listing->primaryAttachment->mime_type, 'image'))
+                                <img src="{{ Storage::url($quote->listing->primaryAttachment->path) }}"
+                                    alt="{{ $quote->listing->title }}"
+                                    class="img-fluid"
+                                    style="max-height: 150px; max-width: 100%; object-fit: contain;">
+                                @elseif(Str::contains($quote->listing->primaryAttachment->mime_type, 'video'))
+                                <video controls class="img-fluid"
+                                    style="max-height: 150px; max-width: 100%;">
+                                    <source src="{{ Storage::url($quote->listing->primaryAttachment->path) }}"
+                                            type="{{ $quote->listing->primaryAttachment->mime_type }}">
+                                        Your browser doesn't support video playback.
+                                </video>
+                                @endif
+                            </div>
+                            @endif
+
                             <!-- Repair Specialist Information -->
                             <div class="contact-details mb-4">
-                                <h3>Specialist Information</h3>
+                                <h3>Specialist</h3>
                                 <div class="contact-info">
                                     <div class="contact-item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -229,7 +208,6 @@
                                         </svg>
                                         <span>{{ $quote->repairSpecialist->name }}</span>
                                     </div>
-                                    @if($quote->use_default_location)
                                         <div class="contact-item">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
@@ -241,9 +219,15 @@
                                                 <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3
                                                     3 0 0 0 0 6z"/>
                                             </svg>
-                                            <span>{{ $quote->repairSpecialist->city }}, {{ $quote->repairSpecialist->country->name }}</span>
+                                            <span>
+                                                {{ $quote->address_line1 }}{{ !empty($quote->address_line2)
+                                                                             ? ', ' . $quote->address_line2 : '' }}
+                                                <br>
+                                                {{ $quote->city }}, {{ $quote->country->name }}
+                                                <br>
+                                                {{ $quote->postcode }}
+                                            </span>
                                         </div>
-                                    @endif
                                     @if($quote->phone)
                                         <div class="contact-item">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -268,24 +252,9 @@
                                 </div>
                             </div>
 
-                            <!-- Address Information (if not using default) -->
-                            @if(!$quote->use_default_location)
-                                <div class="address-details mb-4">
-                                    <h3>Address</h3>
-                                    <address>
-                                        {{ $quote->address_line1 }}<br>
-                                        @if($quote->address_line2)
-                                            {{ $quote->address_line2 }}<br>
-                                        @endif
-                                        {{ $quote->city }}, {{ $quote->postcode }}<br>
-                                        {{ $quote->country->name }}
-                                    </address>
-                                </div>
-                            @endif
-
                             <!-- Customer Information -->
                             <div class="customer-details">
-                                <h3>Customer Information</h3>
+                                <h3>Customer</h3>
                                 <div class="contact-info">
                                     <div class="contact-item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -309,7 +278,14 @@
                                             <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3
                                                 0 0 0 0 6z"/>
                                         </svg>
-                                        <span>{{ $quote->customer->city }}, {{ $quote->customer->country->name }}</span>
+                                        <span>
+                                            {{ $quote->listing->address_line1 }}{{ !empty($quote->listing->address_line2)
+                                                                                    ? ', ' . $quote->listing->address_line2 : '' }}
+                                            <br>
+                                            {{ $quote->listing->city }}, {{ $quote->listing->country->name }}
+                                            <br>
+                                            {{ $quote->listing->postcode }}
+                                        </span>
                                     </div>
                                     @if($quote->listing->phone)
                                         <div class="contact-item">
@@ -338,134 +314,52 @@
                     </div>
                 </div>
             </div>
+                <!-- Action buttons in their own row with more spacing -->
+                <div class="quote-actions" style="margin-bottom: 1rem !important; margin-top: 1rem !important;">
+                    @if(auth()->id() === $quote->customer->id && $quote->status_id === 1)
+                        <button type="button" class="btn btn-success me-2"
+                            onclick="alert('Accept functionality will be added later')">
+                            Accept Quote
+                        </button>
+                    @endif
+
+                    @if(auth()->id() === $quote->user_id && $quote->status_id === 1)
+                        <a href="{{ route('quotes.edit', $quote->id) }}" class="btn btn-primary">
+                            Edit Quote
+                        </a>
+                    @endif
+                    
+                    @if(auth()->user()->roles->where('name', 'admin')->count() > 0)
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                id="adminActionsDropdown" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                Admin Actions
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="adminActionsDropdown">
+                                <li><a class="dropdown-item" href="{{ route('quotes.edit', $quote->id) }}">
+                                    Edit Quote
+                                </a></li>
+                                <li><a class="dropdown-item" href="#"
+                                    onclick="alert('Accept functionality will be added later')">
+                                    Accept Quote
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{{ route('quotes.destroy', $quote->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Delete this quote?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            Delete Quote
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    @endif
+                </div>
         </div>
     </main>
-
-    <style>
-        /* Improve layout for card columns */
-        .card .row {
-            margin-left: 0;
-            margin-right: 0;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        /* Left column styles */
-        .col-md-8 {
-            flex: 0 0 66.666667%;
-            max-width: 66.666667%;
-            position: relative;
-        }
-
-        /* Right column styles */
-        .col-md-4 {
-            flex: 0 0 33.333333%;
-            max-width: 33.333333%;
-            position: relative;
-        }
-
-        /* Add border between columns */
-        .contact-sidebar {
-            border-left: 1px solid #e2e8f0;
-            padding-left: 1.5rem;
-            height: 100%;
-        }
-
-        .detail-group {
-            margin-bottom: 1rem;
-        }
-        
-        .detail-group label {
-            display: block;
-            font-size: 0.875rem;
-            color: #6c757d;
-            margin-bottom: 0.25rem;
-        }
-        
-        .detail-value {
-            font-size: 1rem;
-        }
-        
-        .quote-details-text {
-            white-space: pre-line;
-        }
-        
-        .contact-details, .address-details, .customer-details {
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 0.5rem;
-        }
-        
-        .contact-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .contact-item svg {
-            margin-right: 0.5rem;
-            min-width: 16px;
-        }
-        
-        .attachment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 1rem;
-        }
-        
-        .attachment-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            overflow: hidden;
-        }
-        
-        .attachment-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .attachment-thumbnail {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-        }
-        
-        .video-thumbnail, .document-thumbnail {
-            width: 100%;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-        }
-        
-        .attachment-name {
-            padding: 0.5rem;
-            text-align: center;
-            font-size: 0.75rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        @media (max-width: 767px) {
-            .col-md-8, .col-md-4 {
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
-            
-            .contact-sidebar {
-                border-left: none;
-                border-top: 1px solid #e2e8f0;
-                padding-left: 0;
-                margin-top: 2rem;
-                padding-top: 2rem;
-            }
-            
-            .pe-md-4 {
-                padding-right: 0 !important;
-            }
-        }
-    </style>
 </x-app-layout>

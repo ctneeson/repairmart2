@@ -29,7 +29,7 @@ class StoreQuoteRequest extends FormRequest
             'deliverymethod_id' => 'required|integer|exists:deliverymethods,id',
             'amount' => 'required|numeric|min:0.01',
             'turnaround' => 'required|integer|min:1',
-            'details' => 'nullable|string',
+            'description' => 'nullable|string',
             'use_default_location' => 'required|boolean',
             'address_line1' => 'required|string|max:255',
             'address_line2' => 'nullable|string|max:255',

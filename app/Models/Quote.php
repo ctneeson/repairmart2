@@ -23,6 +23,7 @@ class Quote extends Model
         'deliverymethod_id',
         'amount',
         'turnaround',
+        'description',
         'use_default_location',
         'address_line1',
         'address_line2',

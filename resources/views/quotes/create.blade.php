@@ -163,16 +163,16 @@
                                 </div>
                             </div>
                             
-                            <!-- Third row: Quote Details -->
+                            <!-- Third row: Quote Description -->
                             <div class="form-row" style="margin-bottom: 15px;">
-                                <div class="form-group @error('details') has-error @enderror">
-                                    <label for="details">Quote Details</label>
+                                <div class="form-group @error('description') has-error @enderror">
+                                    <label for="description">Quote Description</label>
                                     <textarea
-                                        name="details"
-                                        id="details"
+                                        name="description"
+                                        id="description"
                                         rows="4"
-                                        placeholder="Describe your repair service, approach, and any other information the customer should know">{{ old('details') }}</textarea>
-                                    @error('details')
+                                        placeholder="Describe your repair service, approach, and any other information the customer should know">{{ old('description') }}</textarea>
+                                    @error('description')
                                         <p class="error-message">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -425,7 +425,7 @@
                     document.getElementById('amount').value = '';
                     document.getElementById('turnaround').value = '';
                     document.getElementById('deliverymethod_id').selectedIndex = 0;
-                    document.getElementById('details').value = '';
+                    document.getElementById('description').value = '';
                     
                     // Reset the currency selector
                     const currencySelect = document.querySelector('select[name="currency_id"]');

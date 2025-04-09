@@ -135,8 +135,6 @@
                                         <p class="error-message">{{ $errors->first('city') }}</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col">
                                     <div class="form-group @error('postcode') has-error @enderror">
                                         <label>Postcode</label>
@@ -191,7 +189,8 @@
                                     stroke="currentColor"
                                     style="width: 48px; height: 48px;"
                                 >
-                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor"
+                                        stroke-width="1.5" fill="none"/>
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"

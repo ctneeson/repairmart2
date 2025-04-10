@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\Models\Quote;
+use Illuminate\Support\Facades\Gate;
 
 class QuoteController extends Controller
 {
@@ -403,5 +404,33 @@ class QuoteController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to update attachments: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Add attachments to a quote.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Quote  $quote
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function addAttachments(Request $request, Quote $quote)
+    {
+        Gate::authorize('update', $quote);
+
+        // Get attachments from request
+        $attachments = $request->file('attachments') ?? [];
+
+        // Get max position from existing attachments
+        $position = $quote->attachments()->max('position') ?? 0;
+        foreach ($attachments as $attachment) {
+            $path = $attachment->store('attachments', 'public');
+            $quote->attachments()->create([
+                'path' => $path,
+                'position' => $position + 1,
+                'mime_type' => $attachment->getMimeType()
+            ]);
+            $position++;
+        }
+        return redirect()->back()->with('success', 'Attachments added successfully.');
     }
 }

@@ -320,71 +320,74 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('city') has-error @enderror">
-                                    <label for="city">Town/City</label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        id="city"
-                                        value="{{ old('city', $quote->city) }}"
-                                        {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
-                                        required>
-                                    @error('city')
-                                        <p class="error-message">{{ $message }}</p>
-                                    @enderror
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('city') has-error @enderror">
+                                        <label for="city">Town/City</label>
+                                        <input
+                                            id="city"
+                                            placeholder="Town/City"
+                                            name="city"
+                                            type="text"
+                                            value="{{ old('city', $quote->city) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
+                                            required>
+                                        @error('city')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group @error('postcode') has-error @enderror">
+                                        <label for="postcode">Postcode</label>
+                                        <input
+                                            type="text"
+                                            name="postcode"
+                                            id="postcode"
+                                            value="{{ old('postcode', $quote->postcode) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
+                                            required>
+                                        @error('postcode')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="form-group @error('postcode') has-error @enderror">
-                                    <label for="postcode">Postcode</label>
-                                    <input
-                                        type="text"
-                                        name="postcode"
-                                        id="postcode"
-                                        value="{{ old('postcode', $quote->postcode) }}"
-                                        {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}
-                                        required>
-                                    @error('postcode')
-                                        <p class="error-message">{{ $message }}</p>
-                                    @enderror
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group @error('country_id') has-error @enderror">
+                                        <label for="country_id">Country</label>
+                                        <!-- Always include a hidden country_id field for default location -->
+                                        <input type="hidden" 
+                                            name="country_id" 
+                                            id="hidden_country_id" 
+                                            value="{{ old('country_id', $quote->country_id) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) != true ? 'disabled' : '' }}>
+                                        
+                                        <x-select-country-all 
+                                            name="{{ old('use_default_location', $quote->use_default_location) ? '_country_id' : 'country_id' }}"
+                                            id="visible_country_id"
+                                            value="{{ old('country_id', $quote->country_id) }}"
+                                            :disabled="old('use_default_location', $quote->use_default_location) ? true : false"
+                                            required="true" />
+                                        @error('country_id')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('country_id') has-error @enderror">
-                                    <label for="country_id">Country</label>
-                                    <!-- Always include a hidden country_id field for default location -->
-                                    <input type="hidden" 
-                                        name="country_id" 
-                                        id="hidden_country_id" 
-                                        value="{{ old('country_id', $quote->country_id) }}"
-                                        {{ old('use_default_location', $quote->use_default_location) != true ? 'disabled' : '' }}>
-                                    
-                                    <x-select-country-all 
-                                        name="{{ old('use_default_location', $quote->use_default_location) ? '_country_id' : 'country_id' }}"
-                                        id="visible_country_id"
-                                        value="{{ old('country_id', $quote->country_id) }}"
-                                        :disabled="old('use_default_location', $quote->use_default_location) ? true : false"
-                                        required="true" />
-                                    @error('country_id')
-                                        <p class="error-message">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div class="form-group @error('phone') has-error @enderror">
-                                    <label for="phone">Phone <small>(Optional)</small></label>
-                                    <input
-                                        type="text"
-                                        name="phone"
-                                        id="phone"
-                                        value="{{ old('phone', $quote->phone) }}"
-                                        {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}>
-                                    @error('phone')
-                                        <p class="error-message">{{ $message }}</p>
-                                    @enderror
+                                <div class="col">
+                                    <div class="form-group @error('phone') has-error @enderror">
+                                        <label for="phone">Phone <small>(Optional)</small></label>
+                                        <input
+                                            type="text"
+                                            name="phone"
+                                            id="phone"
+                                            value="{{ old('phone', $quote->phone) }}"
+                                            {{ old('use_default_location', $quote->use_default_location) ? 'readonly' : '' }}>
+                                        @error('phone')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>

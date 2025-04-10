@@ -15,7 +15,7 @@
                   <tr>
                     <th>Delete</th>
                     <th>Attachment</th>
-                    <th>Action</th>
+                    <th>Position</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -28,25 +28,64 @@
                             value="{{ $attachment->id }}"
                       />
                     </td>
-                    <td  class="listing-form-attachments">
+                    <td class="listing-form-attachments">
                       @if(Str::startsWith($attachment->mime_type, 'image/'))
-                        <img src="{{ $attachment->getUrl() }}" alt="" class="listing-form-attachment-preview" />
+                        <img
+                          src="{{ $attachment->getUrl() }}"
+                          alt=""
+                          class="listing-form-attachment-preview"
+                        />
                       @elseif(Str::startsWith($attachment->mime_type, 'video/'))
-                        <video src="{{ $attachment->getUrl() }}" class="listing-form-attachment-preview" controls muted></video>
+                        <video
+                          src="{{ $attachment->getUrl() }}"
+                          class="listing-form-attachment-preview"
+                          controls
+                          muted>
+                        </video>
                       @else
                         <div>Unknown type: {{ $attachment->mime_type }}</div>
                       @endif
                     </td>
                     <td class="position-controls">
-                      <input type="hidden" name="positions[{{ $attachment->id }}]" value="{{ old('positions.'.$attachment->id, $attachment->position) }}" class="position-input" />
+                      <input
+                        type="hidden"
+                        name="positions[{{ $attachment->id }}]"
+                        value="{{ old('positions.'.$attachment->id, $attachment->position) }}"
+                        class="position-input"
+                      />
                       <div class="position-buttons">
-                        <button type="button" class="btn btn-sm move-up" title="Move up" data-id="{{ $attachment->id }}">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <button type="button"
+                          class="btn btn-sm move-up"
+                          title="Move up"
+                          data-id="{{ $attachment->id }}"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
                             <path d="M18 15l-6-6-6 6"/>
                           </svg>
                         </button>
-                        <button type="button" class="btn btn-sm move-down" title="Move down" data-id="{{ $attachment->id }}">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <button
+                          type="button"
+                          class="btn btn-sm move-down"
+                          title="Move down"
+                          data-id="{{ $attachment->id }}"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
                             <path d="M6 9l6 6 6-6"/>
                           </svg>
                         </button>
@@ -65,7 +104,12 @@
             </div>
             <div class="p-medium">
               <div class="flex justify-end gap-3">
-                <a href="{{ route('listings.show', $listing) }}" class="btn btn-default" style="margin: 0.1rem">Back to Listing</a>
+                <a
+                  href="{{ route('listings.show', $listing) }}"
+                  class="btn btn-default"
+                  style="margin: 0.1rem">
+                  Back to Listing
+                </a>
                 <button type="submit" class="btn btn-primary" style="margin: 0.1rem">Save Changes</button>
               </div>
             </div>
@@ -94,7 +138,12 @@
                     />
                 </svg>
               </div>
-              <input id="listingFormAttachmentUpload" type="file" name="attachments[]" multiple accept="image/*,video/*" />
+              <input
+                id="listingFormAttachmentUpload"
+                type="file"
+                name="attachments[]"
+                multiple accept="image/*,video/*"
+              />
             </div>
 
             @error('attachments')

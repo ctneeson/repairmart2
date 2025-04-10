@@ -5,8 +5,6 @@ import "./bootstrap";
 import "./listings-search-dropdown";
 
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("This is a test log message");
-
     const initSlider = () => {
         const slides = document.querySelectorAll(".hero-slide");
         let currentIndex = 0; // Track the current slide
@@ -94,10 +92,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Get the PHP size limits - these values will be populated from PHP
         const maxPostSize = parsePhpSizeLimit(
-            fileInput.dataset.maxPostSize || "8M"
+            fileInput.dataset.maxPostSize || "20M"
         );
         const maxFileSize = parsePhpSizeLimit(
-            fileInput.dataset.maxFileSize || "2M"
+            fileInput.dataset.maxFileSize || "5M"
         );
 
         // Store selected files
@@ -485,6 +483,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const activeAttachmentContainer = document.querySelector(
             ".listing-attachment-wrapper"
         );
+
         const prevButton = document.getElementById("prevButton");
         const nextButton = document.getElementById("nextButton");
 
@@ -508,7 +507,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Function to update the active attachment and thumbnail
         const updateActiveAttachment = (index) => {
-            // Your existing updateActiveAttachment function code...
+            const thumbnail = thumbnails[index];
+            const mimeType = thumbnail.getAttribute("data-mime-type");
+            const attachmentUrl = thumbnail.getAttribute("src");
+
+            activeAttachmentContainer.innerHTML = ""; // Clear the current active attachment
+
+            if (mimeType.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = attachmentUrl;
+                img.alt = "";
+                img.classList.add("listing-active-attachment");
+                img.id = "activeAttachment";
+                activeAttachmentContainer.appendChild(img);
+            } else if (mimeType.startsWith("video/")) {
+                const video = document.createElement("video");
+                video.src = attachmentUrl;
+                video.classList.add("listing-active-attachment");
+                video.id = "activeAttachment";
+                video.controls = true;
+                activeAttachmentContainer.appendChild(video);
+            } else {
+                const img = document.createElement("img");
+                img.src = "/img/no-photo-available.jpg";
+                img.alt = "";
+                img.classList.add("listing-active-attachment");
+                img.id = "activeAttachment";
+                activeAttachmentContainer.appendChild(img);
+            }
+
+            thumbnails.forEach((thumbnail) =>
+                thumbnail.classList.remove("active-thumbnail")
+            );
+            thumbnails[index].classList.add("active-thumbnail");
         };
 
         // Add click event listeners to thumbnails

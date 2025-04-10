@@ -152,8 +152,6 @@
                                         <p class="error-message">{{ $errors->first('country_id') }}</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col">
                                     <div class="form-group @error('phone') has-error @enderror">
                                         <label>Phone</label>

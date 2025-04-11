@@ -17,10 +17,16 @@ class QuoteController extends Controller
     /**
      * Display a listing of the quotes.
      *
-     * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\View
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index()
     {
+        // Check if the user can view quotes
+        if (!Gate::allows('viewAny', Quote::class)) {
+            return redirect()->route('home')
+                ->with('error', 'You do not have permission to view quotes.');
+        }
+
         $user = auth()->user();
 
         // For customer role: Get quotes for listings created by the current user
@@ -73,10 +79,12 @@ class QuoteController extends Controller
      */
     public function create(Listing $listing)
     {
-        // Make sure the user isn't trying to quote their own listing
-        if ($listing->user_id === auth()->id()) {
+        // Use Gate to check if the user can create a quote for this listing
+        $response = Gate::inspect('create', [Quote::class, $listing]);
+
+        if (!$response->allowed()) {
             return redirect()->route('listings.show', $listing->id)
-                ->with('error', 'You cannot create a quote for your own listing.');
+                ->with('error', $response->message());
         }
 
         // Get the authenticated user for pre-filling the form
@@ -169,21 +177,12 @@ class QuoteController extends Controller
      */
     public function show(Quote $quote)
     {
-        $user = auth()->user();
+        // Use Gate to check if the user can view this quote
+        $response = Gate::inspect('view', $quote);
 
-        // 1. Check if the authenticated user is the listing owner
-        $isListingOwner = $user->id === $quote->listing->user_id;
-
-        // 2. Check if the authenticated user is the quote creator
-        $isQuoteCreator = $user->id === $quote->user_id;
-
-        // 3. Check if the authenticated user is an admin
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
-
-        // If user doesn't have any of the required roles, redirect with error
-        if (!$isListingOwner && !$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('home')
-                ->with('error', 'You do not have permission to view this quote.');
+                ->with('error', $response->message());
         }
 
         return view('quotes.show', compact('quote'));
@@ -197,20 +196,12 @@ class QuoteController extends Controller
      */
     public function edit(Quote $quote)
     {
-        // Check if user is authorized to edit this quote
-        $user = auth()->user();
-        $isQuoteCreator = $user->id === $quote->user_id;
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+        // Use Gate to check if the user can update this quote
+        $response = Gate::inspect('update', $quote);
 
-        if (!$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'You do not have permission to edit this quote.');
-        }
-
-        // If the quote status is not "Open", prevent editing
-        if ($quote->status->name !== 'Open' && !$isAdmin) {
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'This quote cannot be edited because its status is not "Open".');
+                ->with('error', $response->message());
         }
 
         // Get all delivery methods
@@ -228,20 +219,12 @@ class QuoteController extends Controller
      */
     public function update(UpdateQuoteRequest $request, Quote $quote)
     {
-        // Check if user is authorized to update this quote
-        $user = auth()->user();
-        $isQuoteCreator = $user->id === $quote->user_id;
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+        // Use Gate to check if the user can update this quote
+        $response = Gate::inspect('update', $quote);
 
-        if (!$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'You do not have permission to update this quote.');
-        }
-
-        // If the quote status is not "Open", prevent updating
-        if ($quote->status->name !== 'Open' && !$isAdmin) {
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'This quote cannot be updated because its status is not "Open".');
+                ->with('error', $response->message());
         }
 
         $validated = $request->validated();
@@ -271,20 +254,12 @@ class QuoteController extends Controller
      */
     public function destroy(Quote $quote)
     {
-        // Check if user is authorized to delete this quote
-        $user = auth()->user();
-        $isQuoteCreator = $user->id === $quote->user_id;
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+        // Use Gate to check if the user can delete this quote
+        $response = Gate::inspect('delete', $quote);
 
-        if (!$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'You do not have permission to delete this quote.');
-        }
-
-        // If the quote status is not "Open", prevent deletion for non-admins
-        if ($quote->status->name !== 'Open' && !$isAdmin) {
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'This quote cannot be deleted because its status is not "Open".');
+                ->with('error', $response->message());
         }
 
         // Delete all associated attachments
@@ -309,14 +284,12 @@ class QuoteController extends Controller
      */
     public function attachments(Quote $quote)
     {
-        // Check if user is authorized to manage attachments for this quote
-        $user = auth()->user();
-        $isQuoteCreator = $user->id === $quote->user_id;
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+        // Use Gate to check if the user can update this quote (same permissions for attachments)
+        $response = Gate::inspect('update', $quote);
 
-        if (!$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'You do not have permission to manage attachments for this quote.');
+                ->with('error', $response->message());
         }
 
         return view('quotes.attachments', compact('quote'));
@@ -331,20 +304,12 @@ class QuoteController extends Controller
      */
     public function updateAttachments(Request $request, Quote $quote)
     {
-        // Check if user is authorized to update attachments
-        $user = auth()->user();
-        $isQuoteCreator = $user->id === $quote->user_id;
-        $isAdmin = $user->roles->where('name', 'admin')->count() > 0;
+        // Use Gate to check if the user can update this quote
+        $response = Gate::inspect('update', $quote);
 
-        if (!$isQuoteCreator && !$isAdmin) {
+        if (!$response->allowed()) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'You do not have permission to update attachments for this quote.');
-        }
-
-        // If the quote status is not "Open", prevent updates for non-admins
-        if ($quote->status->name !== 'Open' && !$isAdmin) {
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('error', 'Attachments cannot be updated because the quote status is not "Open".');
+                ->with('error', $response->message());
         }
 
         // Start a database transaction
@@ -415,7 +380,13 @@ class QuoteController extends Controller
      */
     public function addAttachments(Request $request, Quote $quote)
     {
-        Gate::authorize('update', $quote);
+        // Use Gate to check if the user can update this quote
+        $response = Gate::inspect('update', $quote);
+
+        if (!$response->allowed()) {
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', $response->message());
+        }
 
         // Get attachments from request
         $attachments = $request->file('attachments') ?? [];

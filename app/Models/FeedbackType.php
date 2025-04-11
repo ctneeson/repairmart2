@@ -12,8 +12,8 @@ class FeedbackType extends Model
 
     protected $fillable = ['name'];
 
-    public function orderFeedback(): HasMany
+    public function order(): HasMany
     {
-        return $this->hasMany(OrderFeedback::class);
+        return $this->hasMany(Order::class);
     }
 }

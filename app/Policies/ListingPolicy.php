@@ -9,22 +9,12 @@ use Illuminate\Support\Facades\Gate;
 
 class ListingPolicy
 {
-    // public function before(?User $user, string $ability, $arg)
-    // {
-    //     dump($ability, $arg);
-    // }
-
-    // public function after(?User $user, string $ability, $arg)
-    // {
-    //     dump($ability, $arg);
-    // }
-
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return !!$user->hasAddress();
+        return !!$user->hasAddress() && ($user->hasRole('customer') || $user->hasRole('admin'));
     }
 
     /**

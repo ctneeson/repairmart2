@@ -31,6 +31,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.updatePassword');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // User profile public view
+    Route::get('/profile/{user}/show', [ProfileController::class, 'show'])
+        ->middleware(['auth'])
+        ->name('profile.show');
 
     // Listing - show phone number
     Route::get('/listings/{listing}/phone', [ListingController::class, 'showPhone'])

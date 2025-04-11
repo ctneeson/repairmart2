@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 
 class ProfileController extends Controller
 {
@@ -15,28 +16,35 @@ class ProfileController extends Controller
      * Show the user's profile.
      *
      * @param User|null $user
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index(User $user = null)
     {
         $currentUser = Auth::user();
 
-        // If no specific user is requested or the user is not an admin, show their own profile
-        if ($user === null || !$currentUser->roles->contains('name', 'admin')) {
+        // If no specific user is requested, show own profile
+        if ($user === null) {
             return view('profile.index', ['user' => $currentUser]);
         }
 
+        // Check authorization for viewing a specific user's profile
+        $response = Gate::inspect('view', $user);
+
+        if (!$response->allowed()) {
+            return redirect()->route('profile.index')
+                ->with('error', $response->message());
+        }
+
         // If an admin is requesting another user's profile
-        if ($currentUser->roles->contains('name', 'admin')) {
-            // Optionally, you can pass a flag to the view to indicate we're in "admin edit mode"
+        if ($currentUser->hasRole('admin')) {
             return view('profile.index', [
                 'user' => $user,
                 'isAdminEdit' => true
             ]);
         }
 
-        // Fallback (this should never be reached but added for safety)
-        return view('profile.index', ['user' => $currentUser]);
+        // User viewing their own profile
+        return view('profile.index', ['user' => $user]);
     }
 
     /**
@@ -51,9 +59,12 @@ class ProfileController extends Controller
         // Determine which user to update
         $targetUser = $user ?? auth()->user();
 
-        // Authorization check - only admins can update other users
-        if ($targetUser->id !== auth()->id() && !auth()->user()->roles->contains('name', 'admin')) {
-            abort(403, 'You do not have permission to update this profile.');
+        // Authorization check
+        $response = Gate::inspect('update', $targetUser);
+
+        if (!$response->allowed()) {
+            return redirect()->route('profile.index')
+                ->with('error', $response->message());
         }
 
         // Validation rules
@@ -105,9 +116,14 @@ class ProfileController extends Controller
             }
         }
 
-        // Only admins can modify admin role assignments
-        if (in_array('admin', $selectedRoles) && !auth()->user()->roles->contains('name', 'admin')) {
-            return redirect()->back()->with('error', 'You do not have permission to assign admin privileges.');
+        // Check permission to assign admin role
+        if (in_array('admin', $selectedRoles)) {
+            $adminResponse = Gate::inspect('assignAdminRole', $targetUser);
+
+            if (!$adminResponse->allowed()) {
+                return redirect()->back()
+                    ->with('error', $adminResponse->message());
+            }
         }
 
         // Sync roles - this will add new roles and remove ones not in the array
@@ -115,7 +131,7 @@ class ProfileController extends Controller
 
         if ($targetUser->id !== auth()->id()) {
             // Admin updating someone else, redirect back to admin view
-            return redirect()->route('profile.admin.index', ['user' => $targetUser->id])
+            return redirect()->route('profile.index', ['user' => $targetUser->id])
                 ->with('success', 'Profile updated successfully');
         }
 
@@ -124,6 +140,12 @@ class ProfileController extends Controller
             ->with('success', 'Profile updated successfully');
     }
 
+    /**
+     * Update the user's password.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePassword(Request $request)
     {
         $user = $request->user();
@@ -155,44 +177,51 @@ class ProfileController extends Controller
      */
     public function destroy(User $user = null)
     {
-        dump($user);
-        // When a user is deleting their own account (non-admin flow)
-        if ($user === null) {
-            $user = Auth::user();
-            dd($user);
-            $user->delete();
+        // Determine which user to delete
+        $targetUser = $user ?? Auth::user();
 
-            Auth::logout();
-            return redirect()->route('home')->with('success', 'Account deleted successfully.');
+        // Check permission to delete
+        $response = Gate::inspect('delete', $targetUser);
+
+        if (!$response->allowed()) {
+            return redirect()->back()
+                ->with('error', $response->message());
         }
 
-        // Admin flow - deleting another user's account
-        $currentUser = Auth::user();
-
-        // Check if the current user is an admin
-        if (!$currentUser->roles->contains('name', 'admin')) {
-            return redirect()->back()->with('error', 'You do not have permission to delete other users.');
-        }
-
-        // Admin safety check - prevent self-deletion
-        if ($currentUser->id === $user->id) {
-            return redirect()->back()->with('error', 'You cannot delete your own account.');
-        }
+        // Save user name for success message
+        $userName = $targetUser->name;
 
         // Proceed with deletion
-        $userName = $user->name;
-        $user->delete();
+        $targetUser->delete();
 
-        // Redirect admin back to user search without logging them out
+        // If user deleted their own account, log them out
+        if (Auth::id() === $targetUser->id) {
+            Auth::logout();
+            return redirect()->route('home')
+                ->with('success', 'Account deleted successfully.');
+        }
+
+        // Admin deleting another user
         return redirect()->route('profile.search')
             ->with('success', "User '{$userName}' has been deleted successfully.");
     }
 
     /**
      * Search for users based on filters.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function search(Request $request)
     {
+        // Check if user can view user listings (admin only)
+        $response = Gate::inspect('viewAny', User::class);
+
+        if (!$response->allowed()) {
+            return redirect()->route('home')
+                ->with('error', $response->message());
+        }
+
         $query = $request->input('q');
 
         $usersQuery = User::with('roles')
@@ -209,4 +238,44 @@ class ProfileController extends Controller
         return view('profile.search', compact('users'));
     }
 
+    /**
+     * Show public profile overview for a user.
+     *
+     * @param User $user
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function show(User $user)
+    {
+        // Only show profiles of active users
+        if (!$user->exists) {
+            return redirect()->route('home')
+                ->with('error', 'User not found.');
+        }
+
+        // Load additional data based on user roles
+        $isCustomer = $user->hasRole('customer');
+        $isSpecialist = $user->hasRole('specialist');
+
+        $listingCount = 0;
+        $customerOrderCount = 0;
+        $specialistOrderCount = 0;
+
+        if ($isCustomer) {
+            $listingCount = $user->listingsCreated()->count();
+            $customerOrderCount = $user->customerOrders()->count();
+        }
+
+        if ($isSpecialist) {
+            $specialistOrderCount = $user->repairSpecialistOrders()->count();
+        }
+
+        return view('profile.show', compact(
+            'user',
+            'isCustomer',
+            'isSpecialist',
+            'listingCount',
+            'customerOrderCount',
+            'specialistOrderCount'
+        ));
+    }
 }

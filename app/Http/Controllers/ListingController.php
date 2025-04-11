@@ -35,9 +35,19 @@ class ListingController extends Controller
     public function create(Request $request)
     {
         if (!Gate::allows('create', Listing::class)) {
-            return redirect()->route('profile.index')
-                ->with('warning', 'Please add an address to your profile before creating a listing.');
+            $user = auth()->user();
+
+            if (!$user->hasAddress()) {
+                return redirect()->route('profile.index')
+                    ->with('warning', 'Please add an address to your profile before creating a listing.');
+            }
+
+            if (!($user->hasRole('customer') || $user->hasRole('admin'))) {
+                return redirect()->route('profile.index')
+                    ->with('warning', 'To create a listing, please add the \'customer\' role to your account.');
+            }
         }
+
         return view('listings.create');
     }
 

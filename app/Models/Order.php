@@ -78,11 +78,6 @@ class Order extends Model
         return $this->hasMany(Attachment::class, 'order_id');
     }
 
-    public function feedback(): HasMany
-    {
-        return $this->hasMany(OrderFeedback::class);
-    }
-
     public function emails(): HasMany
     {
         return $this->HasMany(Email::class, 'order_id');

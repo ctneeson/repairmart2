@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="My Account">
     <main>
         <div class="container-small">
             <h1 class="listing-details-page-title">My Account</h1>

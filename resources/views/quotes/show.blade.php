@@ -1,20 +1,17 @@
 <x-app-layout title="View Quote">
     <main>
         <div class="container-small">
-            <!-- Status and Actions Bar -->
             <div class="quote-header" style="margin-bottom: 1rem !important; position: relative; display: block; clear: both;">
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                    <!-- Left side: Quote title -->
                     <h1 class="mb-0">Quote #{{ $quote->id }}</h1>
                     
-                    <!-- Right side: Status badge with explicit styling -->
                     <div class="quote-status-badge status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}" 
                         style="float: right; clear: both; position: relative; z-index: 10;">
                         {{ $quote->status->name }}
                     </div>
                 </div>
                 
-                <!-- Clear both to ensure actions start below the status badge -->
+                <!-- Clear both to ensure details start below the status badge -->
                 <div style="clear: both;"></div>
                 
             </div>

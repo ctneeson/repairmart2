@@ -169,13 +169,14 @@
             <hr />
 
             <div class="flex gap-1 my-medium">
-              <img
-                src="/img/avatar.png"
-                alt=""
-                class="listing-details-owner-image"
-              />
               <div>
-                <h3 class="listing-details-owner">{{$listing->customer->name}}</h3>
+                <h3 class="listing-details-owner">
+                  <a href="{{ route('profile.show', $listing->customer) }}"
+                    class="text-blue-600 hover:underline"
+                  >
+                  {{$listing->customer->name}}
+                  </a>
+                </h3>
                 <div class="text-muted">{{$listing->customer->listingsCreated()->count()}} listings</div>
               </div>
             </div>

@@ -20,38 +20,66 @@ class EmailController extends Controller
      */
     public function create(Request $request)
     {
-        $users = User::where('id', '!=', auth()->id())->get();
+        // Get all users that can receive messages
+        $users = User::whereNotNull('email')
+            ->where('id', '!=', auth()->id())
+            ->orderBy('name')
+            ->get();
 
-        // Initialize variables
-        $recipient = null;
-        $subject = '';
+        // Initialize variables for pre-filling
         $prefilled = false;
+        $recipient = null;
+        $recipients = null;
+        $subject = '';
         $listing = null;
 
-        // Check if we're creating an email for a specific listing
-        if ($request->has('listing_id')) {
-            $listing = Listing::findOrFail($request->listing_id);
-            $subject = "RE: {$listing->title}";
-            $prefilled = true;
-        }
-
-        // Check for pre-selected recipient(s)
+        // Check if recipient_ids are provided in the request
         if ($request->has('recipient_ids')) {
-            // Handle as array
-            $recipientIds = is_array($request->recipient_ids) ? $request->recipient_ids : [$request->recipient_ids];
-            $recipients = User::whereIn('id', $recipientIds)->get();
+            $recipientIds = $request->input('recipient_ids');
 
-            // If there's only one recipient, use the existing mechanism
-            if ($recipients->count() == 1) {
-                $recipient = $recipients->first();
-            }
-            // Otherwise, we'll need to pass all recipients to the view
-            else {
-                return view('email.create', compact('recipients', 'subject', 'prefilled', 'listing', 'users'));
+            // Handle both array and single value
+            if (is_array($recipientIds)) {
+                if (count($recipientIds) === 1) {
+                    // Single recipient
+                    $recipient = User::find($recipientIds[0]);
+                    $prefilled = true;
+                } else {
+                    // Multiple recipients
+                    $recipients = User::whereIn('id', $recipientIds)->get();
+                    $prefilled = true;
+                }
+            } else {
+                // Single recipient passed as non-array
+                $recipient = User::find($recipientIds);
+                $prefilled = true;
             }
         }
 
-        return view('email.create', compact('recipient', 'subject', 'prefilled', 'listing', 'users'));
+        // Check if listing_id is provided
+        if ($request->has('listing_id')) {
+            $listing = Listing::find($request->input('listing_id'));
+
+            if ($listing) {
+                // Pre-fill subject if listing exists
+                $subject = "RE: {$listing->title}";
+                $prefilled = true;
+
+                // If no recipient specified but listing exists, set recipient to listing owner
+                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
+                    $recipient = $listing->user;
+                    $prefilled = true;
+                }
+            }
+        }
+
+        return view('email.create', compact(
+            'users',
+            'prefilled',
+            'recipient',
+            'recipients',
+            'subject',
+            'listing'
+        ));
     }
 
     /**

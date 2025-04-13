@@ -45,15 +45,27 @@ class OrderController extends Controller
      * @param Quote $quote
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function store(StoreOrderRequest $request, Quote $quote)
+    public function store(Request $request, Quote $quote)
     {
-        // Authorization check
-        $response = Gate::inspect('create', [Order::class, $quote]);
+        // Add some debugging to see what's happening
+        \Log::info('Order store method called');
+        \Log::info('Request data:', $request->all());
 
-        if (!$response->allowed()) {
+        // Validation
+        $validated = $request->validate([
+            'comment' => 'nullable|string|max:255',
+            'attachments.*' => 'nullable|file|max:10240', // 10MB max per file
+        ]);
+
+        \Log::info('Validation passed');
+
+        // Authorization check
+        if (!auth()->user()->can('create', [Order::class, $quote])) {
             return redirect()->route('quotes.show', $quote->id)
-                ->with('error', $response->message());
+                ->with('error', 'You are not authorized to create this order.');
         }
+
+        \Log::info('Authorization passed');
 
         // Start DB transaction
         DB::beginTransaction();
@@ -63,20 +75,22 @@ class OrderController extends Controller
             $order = Order::create([
                 'quote_id' => $quote->id,
                 'customer_id' => $quote->listing->user_id,
+                'specialist_id' => $quote->specialist_id,
                 'status_id' => 1, // "Open" status
                 'override_quote' => false,
-                'amount' => null,
-                'customer_feedback_id' => null,
-                'customer_feedback' => null,
-                'specialist_feedback_id' => null,
-                'specialist_feedback' => null,
+                'amount' => $quote->amount,
+                'currency_id' => $quote->currency_id,
             ]);
+
+            \Log::info('Order created with ID: ' . $order->id);
 
             // Add system comment about order creation
             $order->comments()->create([
-                'user_id' => 1, // System user
+                'user_id' => auth()->id(),
                 'comment' => 'Order created with status: Created',
             ]);
+
+            \Log::info('System comment added');
 
             // Add customer comment if provided
             if ($request->filled('comment')) {
@@ -84,6 +98,7 @@ class OrderController extends Controller
                     'user_id' => auth()->id(),
                     'comment' => $request->comment,
                 ]);
+                \Log::info('User comment added');
             }
 
             // Handle attachments
@@ -102,6 +117,8 @@ class OrderController extends Controller
                         'size' => $file->getSize()
                     ]);
                 }
+
+                \Log::info('Attachments processed: ' . ($position - 1) . ' files');
             }
 
             DB::commit();
@@ -114,6 +131,7 @@ class OrderController extends Controller
 
             // Log the error
             \Log::error('Failed to create order: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
 
             return redirect()->back()
                 ->with('error', 'Failed to create order: ' . $e->getMessage())
@@ -122,11 +140,355 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified order.
+     *
+     * @param Order $order
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function show(string $id)
+    public function show(Order $order)
     {
-        //
+        // Authorization check
+        if (!auth()->user()->can('view', $order)) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to view this order.');
+        }
+
+        // Get feedback types for the feedback form (if order is closed)
+        $feedbackTypes = [];
+        if ($order->status_id == 7) { // Closed status
+            $feedbackTypes = \App\Models\FeedbackType::all();
+        }
+
+        return view('orders.show', compact('order', 'feedbackTypes'));
+    }
+
+    /**
+     * Update the status of an order.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateStatus(Request $request, Order $order)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'status_id' => 'required|exists:order_statuses,id',
+            'status_comment' => 'required|string|max:255',
+        ]);
+
+        // Authorization check
+        if (!auth()->user()->can('updateStatus', $order)) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to update this order status.');
+        }
+
+        // Check if the transition is allowed for the user's role
+        $userRole = auth()->user()->roles()->first()->id;
+        $isValidTransition = \App\Models\OrderStatusTransition::where([
+            'role_id' => $userRole,
+            'from_status_id' => $order->status_id,
+            'to_status_id' => $request->status_id,
+        ])->exists();
+
+        if (!$isValidTransition) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'This status transition is not allowed.');
+        }
+
+        // Get status names for comment
+        $oldStatus = \App\Models\OrderStatus::find($order->status_id);
+        $newStatus = \App\Models\OrderStatus::find($request->status_id);
+
+        DB::beginTransaction();
+
+        try {
+            // Update the order status
+            $order->status_id = $request->status_id;
+            $order->save();
+
+            // Add a comment about the status change
+            $statusChangeComment = sprintf(
+                'Status changed from "%s" to "%s": %s',
+                $oldStatus->name,
+                $newStatus->name,
+                $request->status_comment
+            );
+
+            $order->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => $statusChangeComment,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Order status updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Failed to update order status: ' . $e->getMessage());
+
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Failed to update order status: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update the order amount (for price adjustment).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateAmount(Request $request, Order $order)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        // Authorization check
+        if (!auth()->user()->can('updateAmount', $order)) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to update this order amount.');
+        }
+
+        // Check if the order is in Price Adjustment Approved status (id = 5)
+        if ($order->status_id != 5) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Order amount can only be updated when in Price Adjustment Approved status.');
+        }
+
+        $oldAmount = $order->amount;
+
+        DB::beginTransaction();
+
+        try {
+            // Update the order amount
+            $order->amount = $request->amount;
+            $order->save();
+
+            // Add a comment about the amount change
+            $order->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => sprintf(
+                    'Order amount updated from %s %s to %s %s',
+                    $order->currency->iso_code,
+                    number_format($oldAmount, 2),
+                    $order->currency->iso_code,
+                    number_format($request->amount, 2)
+                ),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Order amount updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Failed to update order amount: ' . $e->getMessage());
+
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Failed to update order amount: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add feedback to the order.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function addFeedback(Request $request, Order $order)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'feedback_type_id' => 'required|exists:feedback_types,id',
+            'feedback' => 'required|string|max:255',
+            'feedback_type' => 'required|in:customer,specialist',
+        ]);
+
+        // Check if the order is in Closed status (id = 7)
+        if ($order->status_id != 7) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Feedback can only be added when the order is closed.');
+        }
+
+        // Check if the user is authorized to add feedback
+        $isCustomer = auth()->id() === $order->customer_id;
+        $isSpecialist = auth()->id() === $order->specialist_id;
+
+        if (
+            ($request->feedback_type == 'customer' && !$isCustomer) ||
+            ($request->feedback_type == 'specialist' && !$isSpecialist)
+        ) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to add this type of feedback.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Update the order with feedback
+            if ($request->feedback_type == 'customer') {
+                if (!empty($order->customer_feedback_id)) {
+                    return redirect()->route('orders.show', $order)
+                        ->with('error', 'Customer feedback has already been provided.');
+                }
+
+                $order->customer_feedback_id = $request->feedback_type_id;
+                $order->customer_feedback = $request->feedback;
+            } else {
+                if (!empty($order->specialist_feedback_id)) {
+                    return redirect()->route('orders.show', $order)
+                        ->with('error', 'Specialist feedback has already been provided.');
+                }
+
+                $order->specialist_feedback_id = $request->feedback_type_id;
+                $order->specialist_feedback = $request->feedback;
+            }
+
+            $order->save();
+
+            // Add a comment about the feedback
+            $order->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => sprintf(
+                    '%s feedback added: %s',
+                    ucfirst($request->feedback_type),
+                    $request->feedback
+                ),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Feedback added successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Failed to add feedback: ' . $e->getMessage());
+
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Failed to add feedback: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add a comment to an order.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function storeComment(Request $request, Order $order)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'comment' => 'required|string|max:255',
+        ]);
+
+        // Check if the user is authorized to add a comment
+        $isCustomer = auth()->id() === $order->customer_id;
+        $isSpecialist = auth()->id() === $order->specialist_id;
+
+        if (!$isCustomer && !$isSpecialist) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to add comments to this order.');
+        }
+
+        // Check if the order is closed
+        if ($order->status_id == 7) { // Closed status
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Comments cannot be added to closed orders.');
+        }
+
+        try {
+            // Create the comment
+            $order->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => $request->comment,
+            ]);
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Comment added successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Failed to add comment: ' . $e->getMessage());
+
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Failed to add comment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add an attachment to an order.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function storeAttachment(Request $request, Order $order)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'attachment' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        // Check if the user is authorized to add an attachment
+        $isCustomer = auth()->id() === $order->customer_id;
+        $isSpecialist = auth()->id() === $order->specialist_id;
+
+        if (!$isCustomer && !$isSpecialist) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to add attachments to this order.');
+        }
+
+        // Check if the order is closed
+        if ($order->status_id == 7) { // Closed status
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Attachments cannot be added to closed orders.');
+        }
+
+        try {
+            // Get the file
+            $file = $request->file('attachment');
+            $path = $file->store('attachments/orders', 'public');
+
+            // Get the next position
+            $position = $order->attachments()->count() + 1;
+
+            // Create the attachment
+            $attachment = $order->attachments()->create([
+                'user_id' => auth()->id(),
+                'path' => $path,
+                'filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'position' => $position,
+            ]);
+
+            // Add a comment about the attachment
+            $order->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => 'Added attachment: ' . $file->getClientOriginalName(),
+            ]);
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Attachment added successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Failed to add attachment: ' . $e->getMessage());
+
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Failed to add attachment: ' . $e->getMessage());
+        }
     }
 
     /**

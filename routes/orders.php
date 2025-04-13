@@ -21,4 +21,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('orders.update');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])
         ->name('orders.destroy');
+
+    // Order status and updates
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.update-status');
+    Route::patch('/orders/{order}/amount', [OrderController::class, 'updateAmount'])
+        ->name('orders.update-amount');
+    Route::post('/orders/{order}/feedback', [OrderController::class, 'addFeedback'])
+        ->name('orders.feedback');
+
+    // Order comments and attachments
+    Route::post('/orders/{order}/comments', [OrderController::class, 'storeComment'])
+        ->name('orders.comments.store');
+    Route::post('/orders/{order}/attachments', [OrderController::class, 'storeAttachment'])
+        ->name('orders.attachments.store');
 });

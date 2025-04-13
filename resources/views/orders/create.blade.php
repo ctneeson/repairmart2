@@ -307,7 +307,7 @@
         </div>
 
         <div class="confirmation-section mt-6">
-            <form action="{{ route('orders.store', $quote) }}" method="POST">
+            <form action="{{ route('orders.store', $quote) }}" method="POST" enctype="multipart/form-data" id="createOrderForm">
                 @csrf
                 <div class="card p-large mb-large">
                     <div class="quote-details">
@@ -355,7 +355,7 @@
                                                 type="file" 
                                                 name="attachments[]" 
                                                 multiple 
-                                                accept="image/*,video/*" 
+                                                accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
                                                 data-max-post-size="{{ ini_get('post_max_size') }}"
                                                 data-max-file-size="{{ ini_get('upload_max_filesize') }}"
                                             />
@@ -407,6 +407,31 @@
                     } else {
                         commentCounter.classList.remove('text-danger');
                     }
+                });
+            }
+
+            // Override the form submission behavior from listings-attachments.js
+            const form = document.getElementById('createOrderForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Stop event propagation to prevent any other handlers
+                    e.stopImmediatePropagation();
+                    
+                    // Get all files from the attachment list
+                    const filesList = document.getElementById('attachmentsList');
+                    const fileInput = document.getElementById('listingFormAttachmentUpload');
+                    
+                    // Debugging to see what's happening
+                    console.log("Form submission triggered");
+                    
+                    // Check if we have a DataTransfer object with files
+                    const attachments = fileInput.files;
+                    if (attachments && attachments.length > 0) {
+                        console.log(`Found ${attachments.length} files to upload`);
+                    }
+                    
+                    // Let the form submit normally
+                    return true;
                 });
             }
         });

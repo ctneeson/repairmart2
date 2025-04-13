@@ -79,4 +79,33 @@ class OrderPolicy
 
         return Response::denyWithStatus(403, 'You do not have permission to delete this order.');
     }
+
+    /**
+     * Determine whether the user can update the order status.
+     */
+    public function updateStatus(User $user, Order $order): Response
+    {
+        $isCustomer = $user->id === $order->customer_id;
+        $isSpecialist = $user->id === $order->quote->user_id;
+        $isAdmin = $user->hasRole('admin');
+
+        if ($isCustomer || $isSpecialist || $isAdmin) {
+            return Response::allow();
+        }
+
+        return Response::denyWithStatus(403, 'You do not have permission to update this order status.');
+    }
+
+    /**
+     * Determine whether the user can update the order amount.
+     */
+    public function updateAmount(User $user, Order $order): Response
+    {
+        // Only the specialist can update the amount, and only when in "Price Adjustment Approved" status
+        if ($user->id === $order->quote->user_id && $order->status_id === 5) {
+            return Response::allow();
+        }
+
+        return Response::denyWithStatus(403, 'Only the specialist can update the order amount, and only during price adjustment.');
+    }
 }

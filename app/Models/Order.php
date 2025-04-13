@@ -91,6 +91,23 @@ class Order extends Model
     }
 
     /**
+     * Get the currency associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
+    public function currency(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Currency::class, // The final model we want to access
+            Quote::class, // The intermediate model
+            'id', // Foreign key on the quotes table
+            'id', // Foreign key on the currencies table
+            'quote_id', // Local key on the orders table
+            'currency_id' // Local key on the quotes table
+        );
+    }
+
+    /**
      * Get the delivery method associated with this order.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
@@ -140,20 +157,20 @@ class Order extends Model
     /**
      * Get the customer feedback type associated with this order.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function customerFeedbackType(): HasOne
+    public function customerFeedbackType(): BelongsTo
     {
-        return $this->hasOne(FeedbackType::class, 'id', 'customer_feedback_id');
+        return $this->belongsTo(FeedbackType::class, 'customer_feedback_id');
     }
 
     /**
      * Get the specialist feedback type associated with this order.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function specialistFeedbackType(): HasOne
+    public function specialistFeedbackType(): BelongsTo
     {
-        return $this->hasOne(FeedbackType::class, 'id', 'specialist_feedback_id');
+        return $this->belongsTo(FeedbackType::class, 'specialist_feedback_id');
     }
 }

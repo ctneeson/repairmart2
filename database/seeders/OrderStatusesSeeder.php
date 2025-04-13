@@ -23,8 +23,11 @@ class OrderStatusesSeeder extends Seeder
                 ['name' => 'Price Adjustment Rejected'],
                 ['name' => 'Specialist Repairing'],
                 ['name' => 'Dispatched to Customer'],
-                ['name' => 'Closed-Repaired'],
-                ['name' => 'Closed-Cancelled'],
+                ['name' => 'Received by Customer'],
+                ['name' => 'Payment requested'],
+                ['name' => 'Payment received'],
+                ['name' => 'Closed'],
+                ['name' => 'Cancelled'],
             )
             ->count(10)
             ->create();

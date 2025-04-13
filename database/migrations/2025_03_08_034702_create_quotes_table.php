@@ -12,11 +12,11 @@ return new class extends Migration {
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrainedTo('users');
-            $table->foreignId('listing_id')->constrainedTo('listings');
-            $table->foreignId('status_id')->constrainedTo('quote_statuses')->default(1);
-            $table->foreignId('currency_id')->constrainedTo('currencies');
-            $table->foreignId('deliverymethod_id')->constrainedTo('deliverymethods');
+            $table->foreignId('user_id')->constrainedTo('users')->cascadeOnDelete();
+            $table->foreignId('listing_id')->constrainedTo('listings')->cascadeOnDelete();
+            $table->foreignId('status_id')->constrainedTo('quote_statuses')->default(1)->restrictOnDelete();
+            $table->foreignId('currency_id')->constrainedTo('currencies')->restrictOnDelete();
+            $table->foreignId('deliverymethod_id')->constrainedTo('deliverymethods')->restrictOnDelete();
             $table->decimal('amount', 10, 2);
             $table->integer('turnaround');
             $table->text('description')->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->string('address_line2', 255)->nullable();
             $table->string('city', 255);
             $table->string('postcode', 50);
-            $table->foreignId('country_id')->constrainedTo('countries');
+            $table->foreignId('country_id')->constrainedTo('countries')->restrictOnDelete();
             $table->string('phone', 45)->unique()->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Listing;
 use App\Models\Email;
+use App\Models\Quote;
+use App\Models\Order;
 use App\Models\Attachment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +34,8 @@ class EmailController extends Controller
         $recipients = null;
         $subject = '';
         $listing = null;
+        $quote = null;
+        $order = null;
 
         // Check if recipient_ids are provided in the request
         if ($request->has('recipient_ids')) {
@@ -72,13 +76,61 @@ class EmailController extends Controller
             }
         }
 
+        // Check if quote_id is provided
+        if ($request->has('quote_id')) {
+            $quote = Quote::find($request->input('quote_id'));
+
+            if ($quote) {
+                // Pre-fill subject if quote exists
+                $subject = "RE: Quote #{$quote->id} - {$quote->listing->title}";
+                $prefilled = true;
+
+                // If no recipient specified but quote exists, set recipient based on context
+                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
+                    if (auth()->id() === $quote->user_id) {
+                        // If the current user is the quote creator, set recipient to listing owner
+                        $recipient = $quote->listing->user;
+                    } else {
+                        // Otherwise, set recipient to quote creator
+                        $recipient = $quote->user;
+                    }
+                    $prefilled = true;
+                }
+            }
+        }
+
+        // Check if order_id is provided
+        if ($request->has('order_id')) {
+            $order = Order::find($request->input('order_id'));
+
+            if ($order) {
+                // Pre-fill subject if order exists
+                $subject = "RE: Order #{$order->id} - {$order->quote->listing->title}";
+                $prefilled = true;
+
+                // If no recipient specified but order exists, set recipient based on context
+                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
+                    if (auth()->id() === $order->quote->user_id) {
+                        // If current user is specialist, set recipient to customer
+                        $recipient = $order->customer;
+                    } else {
+                        // Otherwise, set recipient to specialist
+                        $recipient = $order->quote->user;
+                    }
+                    $prefilled = true;
+                }
+            }
+        }
+
         return view('email.create', compact(
             'users',
             'prefilled',
             'recipient',
             'recipients',
             'subject',
-            'listing'
+            'listing',
+            'quote',
+            'order'
         ));
     }
 

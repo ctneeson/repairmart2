@@ -4,8 +4,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
-use App\Http\Controllers\QuoteController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 
 // Auth routes for signup, login, password reset, and socialite
@@ -14,6 +12,8 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/email.php';
 // Auth routes for quotes
 require_once __DIR__ . '/quotes.php';
+// Auth routes for orders
+require_once __DIR__ . '/orders.php';
 
 
 // Logged in or logged out

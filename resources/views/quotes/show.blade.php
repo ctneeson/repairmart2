@@ -151,6 +151,24 @@
                                     </div>
                                 </div>
                             @endif
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                </div>
+                                <div class="col-md-6">
+                                    @if (auth()->id() === $quote->listing->user_id)
+                                    <a href="{{ route('email.create', ['quote_id' => $quote->id, 'recipient_ids[]' => $quote->user_id]) }}"
+                                        class="listing-details-email btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                        Contact Repair Specialist
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -203,7 +221,13 @@
                                                 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83
                                                 1.418-.832 1.664h10z"/>
                                         </svg>
-                                        <span>{{ $quote->repairSpecialist->name }}</span>
+                                        <span>
+                                            <a href="{{ route('profile.show', $quote->repairSpecialist) }}"
+                                            class="text-blue-600 hover:underline"
+                                              >
+                                              {{ $quote->repairSpecialist->name }}
+                                            </a>
+                                        </span>
                                     </div>
                                         <div class="contact-item">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -262,7 +286,13 @@
                                                 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83
                                                 1.418-.832 1.664h10z"/>
                                         </svg>
-                                        <span>{{ $quote->customer->name }}</span>
+                                        <span>
+                                            <a href="{{ route('profile.show', $quote->customer) }}"
+                                                class="text-blue-600 hover:underline"
+                                                  >
+                                                  {{ $quote->customer->name }}
+                                            </a>
+                                        </span>
                                     </div>
                                     <div class="contact-item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -311,52 +341,30 @@
                     </div>
                 </div>
             </div>
-                <!-- Action buttons in their own row with more spacing -->
-                <div class="quote-actions" style="margin-bottom: 1rem !important; margin-top: 1rem !important;">
-                    @if(auth()->id() === $quote->customer->id && $quote->status_id === 1)
-                        <button type="button" class="btn btn-success me-2"
-                            onclick="alert('Accept functionality will be added later')">
-                            Accept Quote
+            <div class="quote-actions-right">
+                @if(auth()->id() === $quote->customer->id && $quote->status_id === 1)
+                <a href="{{ route('orders.create', $quote) }}" class="btn btn-primary">
+                    Accept Quote
+                </a>
+                @endif
+            
+                @if(auth()->id() === $quote->user_id && $quote->status_id === 1)
+                    <a href="{{ route('quotes.edit', $quote->id) }}" class="btn btn-primary">
+                        Edit Quote
+                    </a>
+                @endif
+                
+                @if(auth()->user()->roles->where('name', 'admin')->count() > 0)
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-secondary dropdown-toggle" type="button"
+                            id="adminActionsDropdown" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Admin Actions
                         </button>
-                    @endif
-
-                    @if(auth()->id() === $quote->user_id && $quote->status_id === 1)
-                        <a href="{{ route('quotes.edit', $quote->id) }}" class="btn btn-primary">
-                            Edit Quote
-                        </a>
-                    @endif
-                    
-                    @if(auth()->user()->roles->where('name', 'admin')->count() > 0)
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button"
-                                id="adminActionsDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                Admin Actions
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="adminActionsDropdown">
-                                <li><a class="dropdown-item" href="{{ route('quotes.edit', $quote->id) }}">
-                                    Edit Quote
-                                </a></li>
-                                <li><a class="dropdown-item" href="#"
-                                    onclick="alert('Accept functionality will be added later')">
-                                    Accept Quote
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{{ route('quotes.destroy', $quote->id) }}"
-                                        method="POST"
-                                        onsubmit="return confirm('Delete this quote?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            Delete Quote
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    @endif
-                </div>
+                        <!-- dropdown menu -->
+                    </div>
+                @endif
+            </div>
         </div>
     </main>
 </x-app-layout>

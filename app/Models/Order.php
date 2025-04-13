@@ -14,41 +14,70 @@ class Order extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        'listing_id',
         'quote_id',
+        'customer_id',
         'status_id',
         'override_quote',
         'amount',
+        'customer_feedback_id',
+        'customer_feedback',
+        'specialist_feedback_id',
+        'specialist_feedback',
     ];
 
 
-    public function listing(): BelongsTo
+    /**
+     * Get the listing associated with this order through the quote.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
+    public function listing(): HasOneThrough
     {
-        return $this->belongsTo(Listing::class, 'listing_id');
+        return $this->hasOneThrough(
+            Listing::class,     // The final model we want to access
+            Quote::class,       // The intermediate model
+            'id',               // Foreign key on the quotes table
+            'id',               // Foreign key on the listings table
+            'quote_id',         // Local key on the orders table
+            'listing_id'        // Local key on the quotes table
+        );
     }
 
-    public function quote(): HasOne
+    /**
+     * Get the quote associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function quote(): BelongsTo
     {
-        return $this->hasOne(Quote::class, 'quote_id');
+        return $this->belongsTo(Quote::class, 'quote_id');
     }
 
+    /**
+     * Get the status associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, 'status_id');
     }
 
-    public function customer(): HasOneThrough
+    /**
+     * Get the customer associated with this order.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function customer(): BelongsTo
     {
-        return $this->hasOneThrough(
-            User::class, // The final model we want to access
-            Listing::class, // The intermediate model
-            'id', // Foreign key on the listings table
-            'id', // Foreign key on the users table
-            'listing_id', // Local key on the orders table
-            'user_id' // Local key on the listings table
-        );
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
+    /**
+     * Get the specialist associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function repairSpecialist(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -61,6 +90,11 @@ class Order extends Model
         );
     }
 
+    /**
+     * Get the delivery method associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
     public function deliveryMethod(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -73,13 +107,53 @@ class Order extends Model
         );
     }
 
+    /**
+     * Get the attachments associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class, 'order_id');
     }
 
+    /**
+     * Get the comments associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(OrderComment::class, 'order_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the emails associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function emails(): HasMany
     {
         return $this->HasMany(Email::class, 'order_id');
+    }
+
+    /**
+     * Get the customer feedback type associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function customerFeedbackType(): HasOne
+    {
+        return $this->hasOne(FeedbackType::class, 'id', 'customer_feedback_id');
+    }
+
+    /**
+     * Get the specialist feedback type associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function specialistFeedbackType(): HasOne
+    {
+        return $this->hasOne(FeedbackType::class, 'id', 'specialist_feedback_id');
     }
 }

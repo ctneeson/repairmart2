@@ -1958,6 +1958,14 @@ input#phone[readonly] {
     margin-top: 15px !important;
 }
 
+.quote-actions-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
 .quote-details .row {
     display: flex;
     flex-wrap: wrap;

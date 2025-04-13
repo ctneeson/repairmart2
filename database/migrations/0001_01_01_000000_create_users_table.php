@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('address_line2', 255)->nullable();
             $table->string('city', 255)->nullable();
             $table->string('postcode', 50)->nullable();
-            $table->foreignId('country_id')->constrainedTo('countries');
+            $table->foreignId('country_id')->constrainedTo('countries')->restrictOnDelete();
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

@@ -5,7 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Order;
 use App\Models\User;
-use App\Models\FeedbackType;
 
 return new class extends Migration {
     /**
@@ -13,15 +12,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('orders_feedback', function (Blueprint $table) {
+        Schema::create('orders_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(FeedbackType::class)->constrained()->cascadeOnDelete();
-            $table->text('comments');
+            $table->foreignIdFor(Order::class)->constrained('orders')->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
+            $table->string('comment', 255);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-            $table->timestamp('deleted_at')->nullable();
         });
     }
 
@@ -30,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders_feedback');
+        Schema::dropIfExists('orders_comments');
     }
 };

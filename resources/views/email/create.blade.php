@@ -4,9 +4,18 @@
             <div class="card p-large">
                 <h1 class="page-title">Compose Message</h1>
                 
+                <!-- Context Alerts -->
                 @if(isset($listing))
                 <div class="alert alert-info mb-medium">
                     <p>You are sending a message regarding: <a href="{{ route('listings.show', $listing) }}" class="underline">{{ $listing->title }}</a></p>
+                </div>
+                @elseif(isset($quote))
+                <div class="alert alert-info mb-medium">
+                    <p>You are sending a message regarding Quote #{{ $quote->id }} for: <a href="{{ route('listings.show', $quote->listing) }}" class="underline">{{ $quote->listing->title }}</a></p>
+                </div>
+                @elseif(isset($order))
+                <div class="alert alert-info mb-medium">
+                    <p>You are sending a message regarding Order #{{ $order->id }} for: <a href="{{ route('listings.show', $order->listing) }}" class="underline">{{ $order->listing->title }}</a></p>
                 </div>
                 @endif
                 
@@ -65,7 +74,15 @@
                             <input type="text" value="{{ $subject }}" 
                                    class="opacity-75" style="background-color: #f3f4f6;" disabled>
                             <span class="text-sm text-gray-500 mt-1 block">
-                                This subject is pre-filled based on the listing.
+                                @if(isset($listing))
+                                    This subject is pre-filled based on the listing.
+                                @elseif(isset($quote))
+                                    This subject is pre-filled based on the quote.
+                                @elseif(isset($order))
+                                    This subject is pre-filled based on the order.
+                                @else
+                                    This subject is pre-filled.
+                                @endif
                             </span>
                         @else
                             <input type="text" id="subject" name="subject" value="{{ old('subject', $subject) }}" required maxlength="100">

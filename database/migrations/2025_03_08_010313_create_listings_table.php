@@ -12,19 +12,19 @@ return new class extends Migration {
     {
         Schema::create('listings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrainedTo('users');
-            $table->foreignId('status_id')->constrainedTo('listing_status');
-            $table->foreignId('manufacturer_id')->constrainedTo('manufacturers');
+            $table->foreignId('user_id')->constrainedTo('users')->restrictOnDelete();
+            $table->foreignId('status_id')->constrainedTo('listing_status')->restrictOnDelete();
+            $table->foreignId('manufacturer_id')->constrainedTo('manufacturers')->restrictOnDelete();
             $table->string('title', 255);
             $table->text('description');
-            $table->foreignId('currency_id')->constrainedTo('currency')->nullable();
+            $table->foreignId('currency_id')->constrainedTo('currency')->nullable()->restrictOnDelete();
             $table->decimal('budget', 10, 2)->nullable();
             $table->boolean('use_default_location')->default(false);
             $table->string('address_line1', 255)->nullable();
             $table->string('address_line2', 255)->nullable();
             $table->string('city', 255)->nullable();
             $table->string('postcode', 50)->nullable();
-            $table->foreignId('country_id')->constrainedTo('countries')->nullable();
+            $table->foreignId('country_id')->constrainedTo('countries')->nullable()->restrictOnDelete();
             $table->string('phone', 45)->unique()->nullable();
             $table->integer('expiry_days')->default(30);
             $table->timestamp('published_at')->nullable();

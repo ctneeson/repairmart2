@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('favourite_listings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('listing_id')->constrained('listings');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('listing_id')->constrained('listings')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

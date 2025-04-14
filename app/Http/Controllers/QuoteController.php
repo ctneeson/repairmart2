@@ -134,13 +134,13 @@ class QuoteController extends Controller
                 foreach ($request->file('attachments') as $i => $file) {
                     $path = $file->store('attachments/quotes', 'public');
 
-                    // Create the attachment record
+                    // Create the attachment record with user_id
                     $quote->attachments()->create([
                         'path' => $path,
-                        'filename' => $file->getClientOriginalName(),
                         'position' => $i + 1,
                         'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize()
+                        'size' => $file->getSize(),
+                        'user_id' => auth()->id()  // Add the user ID
                     ]);
                 }
             }
@@ -347,10 +347,10 @@ class QuoteController extends Controller
                     // Create the attachment record
                     $quote->attachments()->create([
                         'path' => $path,
-                        'filename' => $file->getClientOriginalName(),
                         'position' => $highestPosition + $i + 1,
                         'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize()
+                        'size' => $file->getSize(),
+                        'user_id' => auth()->id()  // Add the user ID
                     ]);
                 }
             }
@@ -398,7 +398,8 @@ class QuoteController extends Controller
             $quote->attachments()->create([
                 'path' => $path,
                 'position' => $position + 1,
-                'mime_type' => $attachment->getMimeType()
+                'mime_type' => $attachment->getMimeType(),
+                'user_id' => auth()->id()  // Add the user ID
             ]);
             $position++;
         }

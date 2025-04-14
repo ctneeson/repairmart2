@@ -1795,7 +1795,8 @@ input#phone[readonly] {
 }
 
 .page-email-index .card-header,
-.page-quotes-index .card-header {
+.page-quotes-index .card-header,
+.page-orders-index .card-header {
     padding-top: 15px !important;
     background-color: white;
     border-bottom: 1px solid #e2e8f0;
@@ -1803,12 +1804,14 @@ input#phone[readonly] {
 }
 
 .page-email-index .nav-tabs .nav-item,
-.page-quotes-index .nav-tabs .nav-item {
+.page-quotes-index .nav-tabs .nav-item,
+.page-orders-index .nav-tabs .nav-item {
     margin-top: 5px;
 }
 
 .page-email-index .nav-tabs .nav-link,
-.page-quotes-index .nav-tabs .nav-link {
+.page-quotes-index .nav-tabs .nav-link,
+.page-orders-index .nav-tabs .nav-link {
     cursor: pointer;
     padding: 0.75rem 1rem;
     border-top-left-radius: 0.25rem;
@@ -1821,21 +1824,24 @@ input#phone[readonly] {
 }
 
 .page-email-index .nav-tabs .nav-link.active,
-.page-quotes-index .nav-tabs .nav-link.active {
+.page-quotes-index .nav-tabs .nav-link.active,
+.page-orders-index .nav-tabs .nav-link.active {
     color: #3490dc;
     border-bottom: 2px solid #3490dc;
     background-color: transparent;
 }
 
 .page-email-index .card-header-tabs,
-.page-quotes-index .card-header-tabs {
+.page-quotes-index .card-header-tabs,
+.page-orders-index .card-header-tabs {
     margin-right: 0;
     margin-bottom: -1px;
     margin-left: 0;
 }
 
 .page-email-index .nav-tabs,
-.page-quotes-index .nav-tabs {
+.page-quotes-index .nav-tabs,
+.page-orders-index .nav-tabs {
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     flex-wrap: wrap;
@@ -1845,7 +1851,8 @@ input#phone[readonly] {
 }
 
 .page-email-index .badge.rounded-pill,
-.page-quotes-index .badge.rounded-pill {
+.page-quotes-index .badge.rounded-pill,
+.page-orders-index .badge.rounded-pill {
     color: white;
     background-color: #3490dc;
     margin-left: 5px;

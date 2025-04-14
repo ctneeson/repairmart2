@@ -12,11 +12,34 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of orders.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        //
+        // Get the authenticated user
+        $user = auth()->user();
+
+        // Get customer orders if user has customer role
+        $customerOrders = collect([]);
+        if ($user->hasRole('customer')) {
+            $customerOrders = Order::with(['quote.listing', 'status', 'repairSpecialist', 'currency'])
+                ->where('customer_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10, ['*'], 'customer_page');
+        }
+
+        // Get specialist orders if user has specialist role
+        $specialistOrders = collect([]);
+        if ($user->hasRole('specialist')) {
+            $specialistOrders = Order::with(['quote.listing', 'status', 'customer', 'currency'])
+                ->where('specialist_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10, ['*'], 'specialist_page');
+        }
+
+        return view('orders.index', compact('customerOrders', 'specialistOrders'));
     }
 
     /**
@@ -111,10 +134,10 @@ class OrderController extends Controller
                     // Create the attachment record
                     $order->attachments()->create([
                         'path' => $path,
-                        'filename' => $file->getClientOriginalName(),
                         'position' => $position++,
                         'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize()
+                        'size' => $file->getSize(),
+                        'user_id' => auth()->id()
                     ]);
                 }
 
@@ -468,7 +491,6 @@ class OrderController extends Controller
             $attachment = $order->attachments()->create([
                 'user_id' => auth()->id(),
                 'path' => $path,
-                'filename' => $file->getClientOriginalName(),
                 'mime_type' => $file->getMimeType(),
                 'size' => $file->getSize(),
                 'position' => $position,
@@ -477,7 +499,7 @@ class OrderController extends Controller
             // Add a comment about the attachment
             $order->comments()->create([
                 'user_id' => auth()->id(),
-                'comment' => 'Added attachment: ' . $file->getClientOriginalName(),
+                'comment' => 'Added attachment: ' . $file->getClientOriginalName(), // Use original name in comment only
             ]);
 
             return redirect()->route('orders.show', $order)

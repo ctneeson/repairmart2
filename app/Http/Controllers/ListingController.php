@@ -98,7 +98,8 @@ class ListingController extends Controller
                         ->create([
                             'path' => $path,
                             'position' => $i + 1,
-                            'mime_type' => $file->getMimeType()
+                            'mime_type' => $file->getMimeType(),
+                            'user_id' => Auth::id()
                         ]);
                 }
             }
@@ -290,7 +291,8 @@ class ListingController extends Controller
             $listing->attachments()->create([
                 'path' => $path,
                 'position' => $position + 1,
-                'mime_type' => $attachment->getMimeType()
+                'mime_type' => $attachment->getMimeType(),
+                'user_id' => Auth::id() // Add the current user's ID
             ]);
             $position++;
         }

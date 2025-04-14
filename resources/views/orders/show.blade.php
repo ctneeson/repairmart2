@@ -210,10 +210,10 @@
                                             1.418-.832 1.664h10z"/>
                                     </svg>
                                     <span>
-                                        <a href="{{ route('profile.show', $order->specialist) }}"
+                                        <a href="{{ route('profile.show', $order->repairSpecialist) }}"
                                         class="text-blue-600 hover:underline"
                                             >
-                                            {{ $order->specialist->name }}
+                                            {{ $order->repairSpecialist->name }}
                                         </a>
                                     </span>
                                 </div>

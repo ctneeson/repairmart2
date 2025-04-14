@@ -147,8 +147,7 @@ class EmailController extends Controller
             'recipient_ids.*' => 'exists:users,id',
             'subject' => 'required|string|max:100',
             'content' => 'required|string',
-            'attachments.*'
-            => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,pdf,doc,docx,txt,mp4,mov,ogg,qt',
+            'attachments.*' => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,pdf,doc,docx,txt,mp4,mov,ogg,qt',
         ]);
 
         DB::beginTransaction();
@@ -169,12 +168,13 @@ class EmailController extends Controller
                     $path = $file->store('attachments', 'public');
 
                     // Create the attachment record with the correct file information
+                    // and add the current user's ID - no filename column
                     $email->attachments()->create([
+                        'user_id' => auth()->id(),
                         'path' => $path,
-                        'filename' => $file->getClientOriginalName(),
                         'position' => $i + 1,
                         'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize()
+                        'size' => $file->getSize(),
                     ]);
                 }
             }
@@ -367,6 +367,9 @@ class EmailController extends Controller
         // Log successful download attempt
         \Log::info("User {$currentUserId} downloaded attachment {$attachmentId} from email {$email->id}");
 
-        return Storage::disk('public')->download($attachment->path, $attachment->filename);
+        // Extract a filename from the path instead of using a filename column
+        $generatedFilename = basename($attachment->path);
+
+        return Storage::disk('public')->download($attachment->path, $generatedFilename);
     }
 }

@@ -13,6 +13,7 @@ class Attachment extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'user_id',
         'listing_id',
         'order_id',
         'email_id',
@@ -23,6 +24,11 @@ class Attachment extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function listings(): BelongsTo
     {

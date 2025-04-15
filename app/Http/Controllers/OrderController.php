@@ -8,6 +8,7 @@ use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -197,7 +198,6 @@ class OrderController extends Controller
         // Validate request
         $validated = $request->validate([
             'status_id' => 'required|exists:order_statuses,id',
-            'status_comment' => 'required|string|max:255',
         ]);
 
         // Authorization check
@@ -230,12 +230,11 @@ class OrderController extends Controller
             $order->status_id = $request->status_id;
             $order->save();
 
-            // Add a comment about the status change
+            // Add a comment about the status change automatically
             $statusChangeComment = sprintf(
-                'Status changed from "%s" to "%s": %s',
+                'Status changed from "%s" to "%s"',
                 $oldStatus->name,
-                $newStatus->name,
-                $request->status_comment
+                $newStatus->name
             );
 
             $order->comments()->create([
@@ -514,26 +513,86 @@ class OrderController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Download an attachment
      */
-    public function edit(string $id)
+    public function downloadAttachment(Order $order, $attachmentId)
     {
-        //
+        $attachment = $order->attachments()->findOrFail($attachmentId);
+
+        // Check if user is authorized to view this attachment
+        $isCustomer = auth()->id() === $order->customer_id;
+        $isSpecialist = auth()->id() === $order->specialist_id;
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        if (!$isCustomer && !$isSpecialist && !$isAdmin) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to download this attachment.');
+        }
+
+        // Check if file exists
+        if (!Storage::disk('public')->exists($attachment->path)) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Attachment file not found.');
+        }
+
+        // Extract filename from path
+        $filename = basename($attachment->path);
+
+        return Storage::disk('public')->download($attachment->path, $filename);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Delete an attachment
      */
-    public function update(Request $request, string $id)
+    public function deleteAttachment(Order $order, $attachmentId)
     {
-        //
+        $attachment = $order->attachments()->findOrFail($attachmentId);
+
+        // Check if user is authorized to delete this attachment
+        $isOwner = auth()->id() === $attachment->user_id;
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        if (!$isOwner && !$isAdmin) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You can only delete attachments you uploaded.');
+        }
+
+        // Delete file from storage
+        Storage::disk('public')->delete($attachment->path);
+
+        // Delete attachment record
+        $attachment->delete();
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Attachment deleted successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Update attachment positions
      */
-    public function destroy(string $id)
+    public function updateAttachments(Request $request, Order $order)
     {
-        //
+        // Check authorization
+        $isCustomer = auth()->id() === $order->customer_id;
+        $isSpecialist = auth()->id() === $order->specialist_id;
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        if (!$isCustomer && !$isSpecialist && !$isAdmin) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You are not authorized to update attachment positions.');
+        }
+
+        // Update positions
+        if ($request->has('positions')) {
+            foreach ($request->positions as $id => $position) {
+                $attachment = $order->attachments()->find($id);
+                if ($attachment) {
+                    $attachment->update(['position' => $position]);
+                }
+            }
+        }
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Attachment positions updated successfully.');
     }
 }

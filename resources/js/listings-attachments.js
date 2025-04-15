@@ -111,7 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButtonStates();
 
     // Add new functionality to handle file uploads and button state
-    const fileInput = document.getElementById("listingFormAttachmentUpload");
+    const fileInput =
+        document.getElementById("listingFormAttachmentUpload") ||
+        document.getElementById("orderFormAttachmentUpload");
     const addButton = document.querySelector(".form-attachments .btn-primary");
 
     // Initially disable the add button if no files are selected

@@ -333,89 +333,100 @@
         <!-- Status Management Section -->
         <div class="card p-large mb-large">
             <div class="row">
-                <div class="col-md-6">
-                    <div class="current-status mb-3">
-                        <h3 class="mb-3">Manage Status</h3>
-                        <span class="label">Current Status:</span> 
-                        <span class="badge bg-{{ $order->status->color }} fs-6">{{ $order->status->name }}</span>
-                    </div>
-                    
-                    @php
-                        $userRole = auth()->user()->hasRole('specialist') ? 'specialist' : 'customer';
-                        $allowedTransitions = \App\Models\OrderStatusTransition::where('role_id', auth()->user()->roles()->first()->id)
-                            ->where('from_status_id', $order->status_id)
-                            ->pluck('to_status_id')
-                            ->toArray();
-                        $allowedStatuses = \App\Models\OrderStatus::whereIn('id', $allowedTransitions)->get();
-                    @endphp
-                    
-                    @if(count($allowedStatuses) > 0)
-                        <form action="{{ route('orders.update-status', $order) }}" method="POST" id="statusUpdateForm">
-                            @csrf
-                            @method('PATCH')
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="status_id" class="form-label">Change Status</label>
-                                        <select name="status_id" id="status_id" class="form-select">
-                                            @foreach($allowedStatuses as $status)
-                                                <option value="{{ $status->id }}">{{ $status->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end mt-3">
-                                <button type="submit" class="btn btn-primary">Update Status</button>
-                            </div>
-                        </form>
-                    @else
-                        <div class="alert alert-info">
-                            No status changes are available for your role at this time.
-                        </div>
-                    @endif
-                </div>
-                <div class="col-md-6">
-                    <h3 class="mb-3">Comment History</h3>
+                <div class="col-md-8 pe-md-4">
                     <div class="comments-list">
                         @if($order->comments->count() > 0)
-                            @foreach($order->comments as $comment)
-                                <div class="comment-item {{ $comment->user_id === auth()->id() ? 'comment-own' : '' }}">
-                                    <div class="comment-header">
-                                        <span class="comment-author">{{ $comment->user->name }}</span>
-                                        <span class="comment-date">{{ $comment->created_at->format('M j, Y g:i A') }}</span>
-                                    </div>
-                                    <div class="comment-body">
-                                        {{ $comment->comment }}
-                                    </div>
-                                </div>
-                            @endforeach
+                        <div class="table-responsive" style="width: 95%;">
+                            <h3 class="mb-3">Comment History</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Comment</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($order->comments as $comment)
+                                        <tr class="{{ $comment->user_id === auth()->id() ? 'table-primary' : '' }}">
+                                            <td>
+                                                @if($comment->user_id === auth()->id())
+                                                    <span class="badge bg-primary">You</span>
+                                                @else
+                                                    <span class="badge bg-secondary">
+                                                        <a href="{{ route('profile.show', $comment->user) }}"
+                                                            class="text-blue-600 hover:underline">
+                                                            {{ $comment->user->name }}
+                                                        </a>
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $comment->comment }}</td>
+                                            <td>{{ $comment->created_at->format('M j, Y g:i A') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                         @else
                             <div class="alert alert-info">No comments have been added to this order yet.</div>
                         @endif
                     </div>
-                    @if($order->status_id != 7) {{-- Not Closed --}}
-                    <div class="comment-form mb-4">
-                        <form action="{{ route('orders.comments.store', $order) }}" method="POST">
-                            @csrf
-                            <div class="form-group">
-                                <label for="comment" class="form-label">Add a comment</label>
-                                <textarea name="comment" id="comment" rows="3" 
-                                    class="form-control" placeholder="Enter your comment here..." 
-                                    maxlength="255" required></textarea>
-                            </div>
-                            <div class="d-flex justify-content-end mt-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots me-1" viewBox="0 0 16 16">
-                                        <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                        <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9.06 9.06 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 2.318l-.003.011a10.722 10.722 0 0 1-.244.637c-.079.186.074.394.273.362a21.673 21.673 0 0 0 .693-.125zm.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6c0 3.193-3.004 6-7 6a8.06 8.06 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a10.97 10.97 0 0 0 .398-2z"/>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-sidebar">
+                        <div class="form-attachments" style="border-left: none; padding-left: 0; padding-right: 1.75rem;">
+                            <h3 class="mb-3">Attachments</h3>
+                            <div class="form-attachment-upload">
+                                <div class="upload-placeholder">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        style="width: 48px; height: 48px;"
+                                    >
+                                        <circle cx="12" cy="12" r="9" stroke="currentColor"
+                                            stroke-width="1.5" fill="none"/>
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 8v8m-4-4h8"
+                                        />
                                     </svg>
-                                    Post Comment
-                                </button>
+                                </div>
+                                <input 
+                                    id="listingFormAttachmentUpload" 
+                                    type="file" 
+                                    name="attachments[]" 
+                                    multiple 
+                                    accept="image/*,video/*" 
+                                    data-max-post-size="{{ ini_get('post_max_size') }}"
+                                    data-max-file-size="{{ ini_get('upload_max_filesize') }}"
+                                />
                             </div>
-                        </form>
+
+                            @error('attachments')
+                                <p class="error-message">{{ $message }}</p>
+                            @enderror
+                            
+                            @error('attachments.*')
+                                <p class="error-message">{{ $message }}</p>
+                            @enderror
+                
+                            <div id="attachmentPreviews" class="listing-form-attachments"></div>
+                            <div id="attachmentsList" style="margin-top: 20px;"></div>
+                            
+                            <p class="info-message">
+                                <small>
+                                    Supported formats: JPEG, PNG, JPG, GIF, SVG, MP4, MOV, OGG, QT<br>
+                                    Maximum total upload size: {{ ini_get('post_max_size') }}<br>
+                                    Maximum individual file size: {{ ini_get('upload_max_filesize') }}
+                                </small>
+                            </p>
+                        </div>
                     </div>
-                    @endif
                 </div>
             </div>
 
@@ -532,268 +543,71 @@
                 </div>
             @endif
         </div>
-
-        <!-- Attachments Section -->
         <div class="card p-large mb-large">
-            <h3 class="card-title">Attachments</h3>
-            
-            @if($order->attachments->count() > 0)
-                <form action="{{ route('orders.attachments.update', $order->id) }}"
-                    method="POST"
-                    id="attachmentsForm">
-                    @csrf
-                    @method('PATCH')
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Attachment</th>
-                                    <th>Added By</th>
-                                    <th>Size</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order->attachments->sortBy('position') as $attachment)
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('orders.attachments.download', [$order->id, $attachment->id]) }}" class="attachment-link">
-                                            {{ basename($attachment->path) }}
-                                        </a>
-                                        <input type="hidden" name="positions[{{ $attachment->id }}]" value="{{ $attachment->position }}" class="position-input">
-                                    </td>
-                                    <td>
-                                        <small>{{ $attachment->user?->name ?? 'Unknown user' }}</small>
-                                    </td>
-                                    <td>
-                                        <small>{{ number_format($attachment->size / 1024, 0) }} KB</small>
-                                    </td>
-                                    <td>
-                                        <small>{{ $attachment->created_at->format('M j, Y') }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary move-up">
-                                                <i class="bi bi-arrow-up"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary move-down">
-                                                <i class="bi bi-arrow-down"></i>
-                                            </button>
-                                            @if(auth()->id() === $attachment->user_id || auth()->user()->hasRole('admin'))
-                                            <a href="{{ route('orders.attachments.delete', [$order->id, $attachment->id]) }}" 
-                                               class="btn btn-sm btn-outline-danger"
-                                               onclick="return confirm('Are you sure you want to delete this attachment?');">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+            <div class="row">
+                <div class="col-md-8 pe-md-4">
+                    <h3 class="mb-3">Comments</h3>
+                    @if($order->status_id != 7) {{-- Not Closed --}}
+                    <div class="comment-form mb-4">
+                        <form action="{{ route('orders.comments.store', $order) }}" method="POST">
+                            @csrf
+                            <div class="form-group">
+                                <span class="label">Add a comment</span>
+                                <textarea name="comment" id="comment" rows="1" 
+                                    class="form-control" placeholder="Enter your comment here..." 
+                                    maxlength="255" required style="width: 95%;"></textarea>
+                            </div>
+                            <div class="d-flex align-center mt-2">
+                                <button type="submit" class="btn btn-primary">
+                                    Post Comment
+                                </button>
+                            </div>
+                        </form>
                     </div>
+                    @endif
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-sidebar">
+                        <h3 class="mb-3">Manage Status</h3>
+                        <span class="label">Current Status:</span> 
+                        <span class="badge bg-{{ $order->status->color }} fs-6">{{ $order->status->name }}</span>
                     
-                    <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn btn-primary">Save Order</button>
+                        @php
+                            $userRole = auth()->user()->hasRole('specialist') ? 'specialist' : 'customer';
+                            $allowedTransitions = \App\Models\OrderStatusTransition::where('role_id', auth()->user()->roles()->first()->id)
+                                ->where('from_status_id', $order->status_id)
+                                ->pluck('to_status_id')
+                                ->toArray();
+                            $allowedStatuses = \App\Models\OrderStatus::whereIn('id', $allowedTransitions)->get();
+                        @endphp
+                        
+                        @if(count($allowedStatuses) > 0)
+                            <form action="{{ route('orders.update-status', $order) }}" method="POST" id="statusUpdateForm">
+                                @csrf
+                                @method('PATCH')
+                                <div class="form-group">
+                                    {{-- <label for="status_id" class="form-label">Change Status</label> --}}
+                                    <select name="status_id" id="status_id" class="form-select">
+                                        @foreach($allowedStatuses as $status)
+                                            <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="d-flex align-center mt-3">
+                                    <button type="submit" class="btn btn-primary">Update Status</button>
+                                </div>
+                            </form>
+                        @else
+                            <div class="alert alert-info">
+                                No status changes are available for your role at this time.
+                            </div>
+                        @endif
                     </div>
-                </form>
-            @else
-                <div class="alert alert-info">No attachments have been added to this order yet.</div>
-            @endif
-            
-            <!-- Add new attachments form -->
-            @if(auth()->id() === $order->customer_id || auth()->id() === $order->specialist_id)
-                <div class="mt-4 form-attachments">
-                    <h4>Add New Attachments</h4>
-                    <form action="{{ route('orders.attachments.store', $order->id) }}" 
-                          method="POST" 
-                          enctype="multipart/form-data"
-                          class="mt-3">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="orderFormAttachmentUpload" class="form-label">Upload Files</label>
-                            <input type="file" 
-                                   name="attachments[]" 
-                                   id="orderFormAttachmentUpload" 
-                                   class="form-control @error('attachments.*') is-invalid @enderror" 
-                                   multiple>
-                            @error('attachments.*')
-                                <div class="invalid-feedback">{{ $errors->first('attachments.*') }}</div>
-                            @enderror
-                            <div id="attachmentsList" class="mt-2"></div>
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Upload Files</button>
-                        </div>
-                    </form>
                 </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Add Attachment Modal -->
-    <div class="modal fade" id="addAttachmentModal" tabindex="-1" aria-labelledby="addAttachmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addAttachmentModalLabel">Add Attachment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('orders.attachments.store', $order) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="attachment" class="form-label">Select File</label>
-                            <input type="file" class="form-control" id="attachment" name="attachment" required>
-                            <div class="form-text">Maximum file size: {{ ini_get('upload_max_filesize') }}</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
 
-    @push('styles')
-    <style>
-        .comment-item {
-            padding: 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            margin-bottom: 15px;
-            background-color: #f9fafb;
-        }
-        
-        .comment-own {
-            background-color: #f0f7ff;
-            border-color: #bfdbfe;
-        }
-        
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .comment-author {
-            font-weight: 600;
-        }
-        
-        .comment-date {
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-        
-        .attachment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        
-        .attachment-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        .attachment-thumbnail {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin: 0 auto 10px;
-            display: block;
-        }
-        
-        .video-thumbnail, .document-thumbnail {
-            width: 100px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            background-color: #f3f4f6;
-            border-radius: 0.25rem;
-        }
-        
-        .attachment-name {
-            font-size: 0.875rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 5px;
-        }
-        
-        .attachment-meta {
-            display: flex;
-            flex-direction: column;
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-        
-        .detail-group {
-            margin-bottom: 1rem;
-        }
-        
-        .detail-group label {
-            font-size: 0.875rem;
-            color: #6b7280;
-            display: block;
-            margin-bottom: 0.25rem;
-        }
-        
-        .detail-value {
-            font-weight: 500;
-        }
-        
-        .quote-description-text {
-            white-space: pre-line;
-        }
-        
-        .contact-sidebar {
-            background-color: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 0.375rem;
-        }
-        
-        .contact-item {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            align-items: flex-start;
-        }
-        
-        .contact-item svg {
-            margin-top: 0.25rem;
-            flex-shrink: 0;
-        }
-        
-        .listing-thumbnail {
-            text-align: center;
-            margin: 1rem 0;
-        }
-        
-        .listing-meta {
-            margin-bottom: 1rem;
-        }
-        
-        .listing-meta .badge {
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .amount-edit-form .input-group {
-            max-width: 300px;
-        }
-    </style>
-    @endpush
-
     @vite(['resources/js/listings-attachments.js',])
-    {{-- @push('scripts')
-        <script src="{{ asset('js/listings-attachments.js') }}"></script>
-    @endpush --}}
+
 </x-app-layout>

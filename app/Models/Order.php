@@ -173,4 +173,19 @@ class Order extends Model
     {
         return $this->belongsTo(FeedbackType::class, 'specialist_feedback_id');
     }
+
+    /**
+     * Check if the order amount can be edited in the current status.
+     *
+     * @return bool
+     */
+    public function isAmountEditable(): bool
+    {
+        // Load the status relationship if it's not already loaded
+        if (!$this->relationLoaded('status')) {
+            $this->load('status');
+        }
+
+        return (bool) $this->status->amount_editable;
+    }
 }

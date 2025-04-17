@@ -35,12 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('orders.comments.store');
 
     // Order attachment routes
-    Route::post('/orders/{order}/attachments', [OrderController::class, 'storeAttachment'])
-        ->name('orders.attachments.store');
-    Route::get('/orders/{order}/attachments/{attachment}/download', [OrderController::class, 'downloadAttachment'])
-        ->name('orders.attachments.download');
-    Route::get('/orders/{order}/attachments/{attachment}/delete', [OrderController::class, 'deleteAttachment'])
-        ->name('orders.attachments.delete');
-    Route::patch('/orders/{order}/attachments', [OrderController::class, 'updateAttachments'])
-        ->name('orders.attachments.update');
+    Route::get('/orders/{order}/attachments', [OrderController::class, 'attachments'])
+        ->name('orders.attachments');
+    Route::put('/orders/{order}/attachments', [OrderController::class, 'updateAttachments'])
+        ->name('orders.updateAttachments');
+    Route::post('/orders/{order}/attachments', [OrderController::class, 'addAttachments'])
+        ->name('orders.addAttachments');
+
 });

@@ -277,10 +277,10 @@ class OrderController extends Controller
                 ->with('error', 'You are not authorized to update this order amount.');
         }
 
-        // Check if the order is in Price Adjustment Approved status (id = 5)
-        if ($order->status_id != 5) {
+        // Check if amount can be updated in the current status
+        if (!$order->isAmountEditable()) {
             return redirect()->route('orders.show', $order)
-                ->with('error', 'Order amount can only be updated when in Price Adjustment Approved status.');
+                ->with('error', 'Order amount can only be updated when in a status that allows price adjustments.');
         }
 
         $oldAmount = $order->amount;
@@ -568,31 +568,147 @@ class OrderController extends Controller
     }
 
     /**
-     * Update attachment positions
+     * Update the attachments for an order.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function updateAttachments(Request $request, Order $order)
     {
-        // Check authorization
-        $isCustomer = auth()->id() === $order->customer_id;
-        $isSpecialist = auth()->id() === $order->specialist_id;
-        $isAdmin = auth()->user()->hasRole('admin');
+        // Use Gate to check if the user can update this order
+        $response = Gate::inspect('update', $order);
 
-        if (!$isCustomer && !$isSpecialist && !$isAdmin) {
-            return redirect()->route('orders.show', $order)
-                ->with('error', 'You are not authorized to update attachment positions.');
+        if (!$response->allowed()) {
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', $response->message());
         }
 
-        // Update positions
-        if ($request->has('positions')) {
-            foreach ($request->positions as $id => $position) {
-                $attachment = $order->attachments()->find($id);
-                if ($attachment) {
-                    $attachment->update(['position' => $position]);
+        // Start a database transaction
+        DB::beginTransaction();
+
+        try {
+            // Handle attachment positioning/order updates
+            if ($request->has('positions')) {
+                foreach ($request->positions as $id => $position) {
+                    $order->attachments()->where('id', $id)->update(['position' => $position]);
                 }
             }
+
+            // Handle attachment deletions
+            if ($request->has('delete_attachments')) {
+                $unauthorizedDeletes = 0;
+                foreach ($request->delete_attachments as $id) {
+                    $attachment = $order->attachments()->find($id);
+
+                    if ($attachment) {
+                        // Check if the user is authorized to delete this attachment
+                        $isOwner = auth()->id() === $attachment->user_id;
+                        $isAdmin = auth()->user()->hasRole('admin');
+
+                        if ($isOwner || $isAdmin) {
+                            // Delete the file from storage
+                            Storage::disk('public')->delete($attachment->path);
+                            // Delete the attachment record
+                            $attachment->delete();
+                        } else {
+                            // Count unauthorized deletion attempts
+                            $unauthorizedDeletes++;
+                        }
+                    }
+                }
+
+                // If there were unauthorized deletion attempts, log and notify
+                if ($unauthorizedDeletes > 0) {
+                    \Log::warning("User " . auth()->id() . " attempted to delete {$unauthorizedDeletes} attachments they don't own");
+                }
+            }
+
+            // Handle new attachment uploads
+            if ($request->hasFile('new_attachments')) {
+                $highestPosition = $order->attachments()->max('position') ?? 0;
+
+                foreach ($request->file('new_attachments') as $i => $file) {
+                    $path = $file->store('attachments/orders', 'public');
+
+                    // Create the attachment record
+                    $order->attachments()->create([
+                        'path' => $path,
+                        'position' => $highestPosition + $i + 1,
+                        'mime_type' => $file->getMimeType(),
+                        'size' => $file->getSize(),
+                        'user_id' => auth()->id()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', 'Order attachments updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Failed to update order attachments: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Failed to update attachments: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the attachments management page for an order.
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse|\Illuminate\Contracts\View\View
+     */
+    public function attachments(Order $order)
+    {
+        // Use Gate to check if the user can update this quote (same permissions for attachments)
+        $response = Gate::inspect('update', $order);
+
+        if (!$response->allowed()) {
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', $response->message());
         }
 
-        return redirect()->route('orders.show', $order)
-            ->with('success', 'Attachment positions updated successfully.');
+        return view('orders.attachments', compact('order'));
+    }
+
+    /**
+     * Add attachments to an order.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function addAttachments(Request $request, Order $order)
+    {
+        // Use Gate to check if the user can update this order
+        $response = Gate::inspect('update', $order);
+
+        if (!$response->allowed()) {
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', $response->message());
+        }
+
+        // Get attachments from request
+        $attachments = $request->file('attachments') ?? [];
+
+        // Get max position from existing attachments
+        $position = $order->attachments()->max('position') ?? 0;
+        foreach ($attachments as $attachment) {
+            $path = $attachment->store('attachments', 'public');
+            $order->attachments()->create([
+                'path' => $path,
+                'position' => $position + 1,
+                'mime_type' => $attachment->getMimeType(),
+                'user_id' => auth()->id()  // Add the user ID
+            ]);
+            $position++;
+        }
+        return redirect()->back()->with('success', 'Attachments added successfully.');
     }
 }

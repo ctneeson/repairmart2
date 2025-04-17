@@ -13,6 +13,7 @@ class OrderStatus extends Model
 
     protected $fillable = [
         'name',
+        'amount_editable',
     ];
 
     public function orders(): HasMany

@@ -1949,6 +1949,16 @@ input#phone[readonly] {
     width: 95%;
 }
 
+input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.text-muted.small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
 @media screen and (max-width: 1200px) {
     .listing-items-listing {
         grid-template-columns: repeat(4, minmax(0, 1fr));

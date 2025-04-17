@@ -53,18 +53,30 @@ class OrderPolicy
         return Response::denyWithStatus(403, 'Only the customer or an admin can create an order from this quote.');
     }
 
-
     /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Order $order): Response
     {
-        // Only admins can update orders
-        if ($user->hasRole('admin')) {
-            return Response::allow();
+        // Only the customer (listing owner), the specialist (quote creator), or an admin can update an order
+        if (
+            !($user->id === $order->customer_id
+                || $user->id === $order->quote->user_id
+                || $user->hasRole('admin'))
+        ) {
+            return Response::denyWithStatus(404);
         }
 
-        return Response::denyWithStatus(403, 'You do not have permission to update this order.');
+        // Check if the order is in a status that allows updates
+        if (
+            ($order->status->name === 'Closed'
+                || $order->status->name === 'Cancelled') && !$user->hasRole('admin')
+        ) {
+            return Response::deny('This order can no longer be updated because its status is \'' .
+                $order->status->name . '\'.');
+        }
+
+        return Response::allow();
     }
 
     /**
@@ -98,11 +110,15 @@ class OrderPolicy
 
     /**
      * Determine whether the user can update the order amount.
+     *
+     * @param User $user
+     * @param Order $order
+     * @return \Illuminate\Auth\Access\Response
      */
     public function updateAmount(User $user, Order $order): Response
     {
-        // Only the specialist can update the amount, and only when in "Price Adjustment Approved" status
-        if ($user->id === $order->quote->user_id && $order->status_id === 5) {
+        // Only the specialist can update the amount, and only when in a status that allows it
+        if ($user->id === $order->specialist_id && $order->isAmountEditable()) {
             return Response::allow();
         }
 

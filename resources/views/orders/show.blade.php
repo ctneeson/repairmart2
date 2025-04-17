@@ -31,13 +31,16 @@
                                 <div class="detail-group">
                                     <label>Amount</label>
                                     <div class="detail-value">
-                                        @if(auth()->user()->id === $order->specialist_id && $order->status_id === 5)
+                                        @if(auth()->user()->id === $order->specialist_id && $order->isAmountEditable())
                                             <form action="{{ route('orders.update-amount', $order) }}" method="POST" class="amount-edit-form">
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="input-group">
-                                                    <span class="input-group-text">{{ $order->currency->iso_code }}</span>
-                                                    <input type="number" name="amount" value="{{ $order->amount }}" step="0.01" min="0" class="form-control" required>
+                                                    <span class="input-group-text">
+                                                        {{ $order->currency->iso_code }}
+                                                    </span>
+                                                    <input type="number" name="amount" value="{{ $order->amount }}"
+                                                        step="0.01" min="0" class="form-control" required>
                                                     <button type="submit" class="btn btn-primary">Update</button>
                                                 </div>
                                             </form>
@@ -377,54 +380,23 @@
                     <div class="contact-sidebar">
                         <div class="form-attachments" style="border-left: none; padding-left: 0; padding-right: 1.75rem;">
                             <h3 class="mb-3">Attachments</h3>
-                            <div class="form-attachment-upload">
-                                <div class="upload-placeholder">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        style="width: 48px; height: 48px;"
-                                    >
-                                        <circle cx="12" cy="12" r="9" stroke="currentColor"
-                                            stroke-width="1.5" fill="none"/>
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 8v8m-4-4h8"
-                                        />
-                                    </svg>
-                                </div>
-                                <input 
-                                    id="listingFormAttachmentUpload" 
-                                    type="file" 
-                                    name="attachments[]" 
-                                    multiple 
-                                    accept="image/*,video/*" 
-                                    data-max-post-size="{{ ini_get('post_max_size') }}"
-                                    data-max-file-size="{{ ini_get('upload_max_filesize') }}"
-                                />
-                            </div>
-
-                            @error('attachments')
-                                <p class="error-message">{{ $message }}</p>
-                            @enderror
-                            
-                            @error('attachments.*')
-                                <p class="error-message">{{ $message }}</p>
-                            @enderror
-                
-                            <div id="attachmentPreviews" class="listing-form-attachments"></div>
-                            <div id="attachmentsList" style="margin-top: 20px;"></div>
-                            
-                            <p class="info-message">
-                                <small>
-                                    Supported formats: JPEG, PNG, JPG, GIF, SVG, MP4, MOV, OGG, QT<br>
-                                    Maximum total upload size: {{ ini_get('post_max_size') }}<br>
-                                    Maximum individual file size: {{ ini_get('upload_max_filesize') }}
-                                </small>
+                            <p>
+                                Manage attachments <a href="{{ route('orders.attachments', $order->id) }}">here</a>
                             </p>
+                            <div class="listing-form-attachments">
+                                @foreach ($order->attachments as $attachment)
+                                <a href="#" class="listing-form-attachment-preview"
+                                    data-type="{{ $attachment->mime_type }}">
+                                @if(Str::startsWith($attachment->mime_type, 'image/'))
+                                    <img src="{{ $attachment->getUrl() }}" alt="" />
+                                @elseif(Str::startsWith($attachment->mime_type, 'video/'))
+                                    <video src="{{ $attachment->getUrl() }}" muted></video>
+                                @else
+                                    <div>Unknown type: {{ $attachment->mime_type }}</div>
+                                @endif
+                                </a>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -403,7 +403,7 @@
             </div>
 
             <!-- Feedback Section -->
-            @if($order->status_id === 7) {{-- Closed status --}}
+            @if($order->hasStatus('Closed'))
                 <div class="feedback-section mt-4">
                     <h3>Order Feedback</h3>
                     <div class="row mt-3">
@@ -519,7 +519,7 @@
             <div class="row">
                 <div class="col-md-8 pe-md-4">
                     <h3 class="mb-3">Comments</h3>
-                    @if($order->status_id != 7) {{-- Not Closed --}}
+                    @if(!$order->hasStatus('Closed'))
                     <div class="comment-form mb-4">
                         <form action="{{ route('orders.comments.store', $order) }}" method="POST">
                             @csrf
@@ -544,21 +544,13 @@
                         <span class="label">Current Status:</span> 
                         <span class="badge bg-{{ $order->status->color }} fs-6">{{ $order->status->name }}</span>
                     
-                        @php
-                            $userRole = auth()->user()->hasRole('specialist') ? 'specialist' : 'customer';
-                            $allowedTransitions = \App\Models\OrderStatusTransition::where('role_id', auth()->user()->roles()->first()->id)
-                                ->where('from_status_id', $order->status_id)
-                                ->pluck('to_status_id')
-                                ->toArray();
-                            $allowedStatuses = \App\Models\OrderStatus::whereIn('id', $allowedTransitions)->get();
-                        @endphp
-                        
                         @if(count($allowedStatuses) > 0)
-                            <form action="{{ route('orders.update-status', $order) }}" method="POST" id="statusUpdateForm">
+                            <form action="{{ route('orders.update-status', $order) }}"
+                                method="POST"
+                                id="statusUpdateForm">
                                 @csrf
                                 @method('PATCH')
                                 <div class="form-group">
-                                    {{-- <label for="status_id" class="form-label">Change Status</label> --}}
                                     <select name="status_id" id="status_id" class="form-select">
                                         @foreach($allowedStatuses as $status)
                                             <option value="{{ $status->id }}">{{ $status->name }}</option>

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,6 +15,7 @@ class Order extends Model
     protected $fillable = [
         'quote_id',
         'customer_id',
+        'specialist_id',
         'status_id',
         'override_quote',
         'amount',
@@ -64,6 +64,17 @@ class Order extends Model
     }
 
     /**
+     * Check if the order has a specific status.
+     *
+     * @param string $statusName
+     * @return bool
+     */
+    public function hasStatus($statusName)
+    {
+        return $this->status->name === $statusName;
+    }
+
+    /**
      * Get the customer associated with this order.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -78,16 +89,9 @@ class Order extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function repairSpecialist(): HasOneThrough
+    public function repairSpecialist(): BelongsTo
     {
-        return $this->hasOneThrough(
-            User::class, // The final model we want to access
-            Quote::class, // The intermediate model
-            'id', // Foreign key on the quotes table
-            'id', // Foreign key on the users table
-            'quote_id', // Local key on the orders table
-            'user_id' // Local key on the quotes table
-        );
+        return $this->belongsTo(User::class, 'specialist_id');
     }
 
     /**

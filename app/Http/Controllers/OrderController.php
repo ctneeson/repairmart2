@@ -99,7 +99,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'quote_id' => $quote->id,
                 'customer_id' => $quote->listing->user_id,
-                'specialist_id' => $quote->specialist_id,
+                'specialist_id' => $quote->user_id,
                 'status_id' => 1, // "Open" status
                 'override_quote' => false,
                 'amount' => $quote->amount,
@@ -171,19 +171,54 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
+        $order->load(['status', 'comments', 'attachments', 'customer', 'repairSpecialist']);
+
         // Authorization check
         if (!auth()->user()->can('view', $order)) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to view this order.');
         }
 
+        // Determine user's role in relation to this specific order
+        $userRole = null;
+        $orderRoleId = null;
+
+        if (auth()->id() === $order->customer_id) {
+            $userRole = 'customer';
+            $orderRoleId = \App\Models\Role::where('name', 'customer')->first()->id;
+        } elseif (auth()->id() === $order->specialist_id) {
+            $userRole = 'specialist';
+            $orderRoleId = \App\Models\Role::where('name', 'specialist')->first()->id;
+        } elseif (auth()->user()->hasRole('admin')) {
+            $userRole = 'admin';
+            $orderRoleId = \App\Models\Role::where('name', 'admin')->first()->id;
+        } else {
+            $userRole = 'viewer';
+        }
+
+        // Get allowed status transitions for this user's role
+        $allowedTransitions = [];
+        if ($orderRoleId) {
+            $allowedTransitions = \App\Models\OrderStatusTransition::where('role_id', $orderRoleId)
+                ->where('from_status_id', $order->status_id)
+                ->pluck('to_status_id')
+                ->toArray();
+        }
+
+        $allowedStatuses = \App\Models\OrderStatus::whereIn('id', $allowedTransitions)->get();
+
         // Get feedback types for the feedback form (if order is closed)
         $feedbackTypes = [];
-        if ($order->status_id == 7) { // Closed status
+        if ($order->hasStatus('Closed')) {
             $feedbackTypes = \App\Models\FeedbackType::all();
         }
 
-        return view('orders.show', compact('order', 'feedbackTypes'));
+        return view('orders.show', compact(
+            'order',
+            'feedbackTypes',
+            'userRole',
+            'allowedStatuses'
+        ));
     }
 
     /**
@@ -206,17 +241,31 @@ class OrderController extends Controller
                 ->with('error', 'You are not authorized to update this order status.');
         }
 
+        // Determine user's role in relation to this specific order
+        $orderRoleId = null;
+        $userId = auth()->id();
+
+        if ($userId === $order->customer_id) {
+            $orderRoleId = \App\Models\Role::where('name', 'customer')->first()->id;
+        } elseif ($userId === $order->specialist_id) {
+            $orderRoleId = \App\Models\Role::where('name', 'specialist')->first()->id;
+        } elseif (auth()->user()->hasRole('admin')) {
+            $orderRoleId = \App\Models\Role::where('name', 'admin')->first()->id;
+        } else {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'You do not have a role that allows updating this order.');
+        }
+
         // Check if the transition is allowed for the user's role
-        $userRole = auth()->user()->roles()->first()->id;
         $isValidTransition = \App\Models\OrderStatusTransition::where([
-            'role_id' => $userRole,
+            'role_id' => $orderRoleId,
             'from_status_id' => $order->status_id,
             'to_status_id' => $request->status_id,
         ])->exists();
 
         if (!$isValidTransition) {
             return redirect()->route('orders.show', $order)
-                ->with('error', 'This status transition is not allowed.');
+                ->with('error', 'This status transition is not allowed for your role.');
         }
 
         // Get status names for comment
@@ -426,7 +475,7 @@ class OrderController extends Controller
         }
 
         // Check if the order is closed
-        if ($order->status_id == 7) { // Closed status
+        if ($order->hasStatus('Closed')) {
             return redirect()->route('orders.show', $order)
                 ->with('error', 'Comments cannot be added to closed orders.');
         }
@@ -473,7 +522,7 @@ class OrderController extends Controller
         }
 
         // Check if the order is closed
-        if ($order->status_id == 7) { // Closed status
+        if ($order->hasStatus('Closed')) {
             return redirect()->route('orders.show', $order)
                 ->with('error', 'Attachments cannot be added to closed orders.');
         }

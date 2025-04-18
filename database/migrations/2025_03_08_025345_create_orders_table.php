@@ -13,8 +13,8 @@ return new class extends Migration {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('quote_id')->constrainedTo('quotes')->restrictOnDelete();
-            $table->foreignId('customer_id')->nullable()->after('quote_id')
-                ->constrained('users')->restrictOnDelete();
+            $table->foreignId('customer_id')->constrained('users')->restrictOnDelete();
+            $table->foreignId('specialist_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('status_id')->constrainedTo('order_status')->restrictOnDelete();
             $table->boolean('override_quote')->default(false);
             $table->decimal('amount', 10, 2)->nullable();

@@ -27,7 +27,7 @@ class OrderPolicy
         // 2. The specialist (quote creator)
         // 3. An admin
         $isCustomer = $user->id === $order->customer_id;
-        $isSpecialist = $user->id === $order->quote->user_id;
+        $isSpecialist = $user->id === $order->specialist_id;
         $isAdmin = $user->hasRole('admin');
 
         if ($isCustomer || $isSpecialist || $isAdmin) {
@@ -98,7 +98,7 @@ class OrderPolicy
     public function updateStatus(User $user, Order $order): Response
     {
         $isCustomer = $user->id === $order->customer_id;
-        $isSpecialist = $user->id === $order->quote->user_id;
+        $isSpecialist = $user->id === $order->specialist_id;
         $isAdmin = $user->hasRole('admin');
 
         if ($isCustomer || $isSpecialist || $isAdmin) {
@@ -122,6 +122,6 @@ class OrderPolicy
             return Response::allow();
         }
 
-        return Response::denyWithStatus(403, 'Only the specialist can update the order amount, and only during price adjustment.');
+        return Response::denyWithStatus(403, 'Only the repair specialist can update the order amount, and only during price adjustment.');
     }
 }

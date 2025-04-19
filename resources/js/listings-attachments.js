@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add new functionality to handle file uploads and button state
     const fileInput =
         document.getElementById("listingFormAttachmentUpload") ||
+        document.getElementById("quoteFormAttachmentUpload") ||
         document.getElementById("orderFormAttachmentUpload");
     const addButton = document.querySelector(".form-attachments .btn-primary");
 

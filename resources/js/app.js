@@ -789,6 +789,22 @@ document.addEventListener("DOMContentLoaded", function () {
         showPreviews: true,
         previewClass: "quote-form-attachment-preview",
     });
+    // For order attachments
+    initAttachmentHandler({
+        fileInputId: "orderFormAttachmentUpload",
+        previewsContainerId: "attachmentPreviews",
+        listContainerId: "attachmentsList",
+        allowedTypes: [
+            "image/*",
+            "video/*",
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+        ],
+        showPreviews: true,
+        previewClass: "order-form-attachment-preview",
+    });
     initMobileNavbar();
     attachmentCarousel();
     initMobileFilters();

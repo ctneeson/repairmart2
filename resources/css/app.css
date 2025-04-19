@@ -783,7 +783,9 @@ a.pagination-item:hover {
     color: var(--primary-color);
 }
 
-.listing-attachments-wrapper {
+.listing-attachments-wrapper,
+.quote-attachments-wrapper,
+.order-attachments-wrapper {
     display: flex;
     gap: 1rem;
 }
@@ -802,7 +804,9 @@ a.pagination-item:hover {
     flex: 1;
 }
 
-.listing-details-page-title {
+.listing-details-page-title,
+.quote-details-page-title,
+.order-details-page-title {
     margin-top: 0;
     margin-bottom: 0.25rem;
 }
@@ -1085,7 +1089,9 @@ a.pagination-item:hover {
     margin-top: 15px;
 }
 
-.listing-form-attachment-preview {
+.listing-form-attachment-preview,
+.quote-form-attachment-preview,
+.order-form-attachment-preview {
     position: relative;
     width: 100px;
     height: 100px;
@@ -1094,10 +1100,17 @@ a.pagination-item:hover {
     background-color: #f5f5f5;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: block;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease;
 }
 
 .listing-form-attachment-preview img,
-.listing-form-attachment-preview video {
+.listing-form-attachment-preview video,
+.quote-form-attachment-preview img,
+.quote-form-attachment-preview video,
+.order-form-attachment-preview img,
+.order-form-attachment-preview video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1105,11 +1118,15 @@ a.pagination-item:hover {
     display: block;
 }
 
-.listing-form-attachment-preview video {
+.listing-form-attachment-preview video,
+.quote-form-attachment-preview video,
+.order-form-attachment-preview video {
     background-color: #000;
 }
 
-.listing-form-attachment-preview.video-preview::before {
+.listing-form-attachment-preview.video-preview::before,
+.quote-form-attachment-preview.video-preview::before,
+.order-form-attachment-preview.video-preview::before {
     content: "▶";
     position: absolute;
     top: 50%;
@@ -1127,7 +1144,9 @@ a.pagination-item:hover {
     z-index: 1;
 }
 
-.listing-form-attachment-preview video::after {
+.listing-form-attachment-preview video::after,
+.quote-form-attachment-preview video::after,
+.order-form-attachment-preview video::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -1141,7 +1160,9 @@ a.pagination-item:hover {
     z-index: 2;
 }
 
-.listing-form-attachment-preview.video-preview::before {
+.listing-form-attachment-preview.video-preview::before,
+.quote-form-attachment-preview.video-preview::before,
+.order-form-attachment-preview.video-preview::before {
     content: "▶";
     position: absolute;
     top: 50%;
@@ -1159,7 +1180,9 @@ a.pagination-item:hover {
     z-index: 1;
 }
 
-.form-attachments .listing-form-attachments .listing-form-attachment-preview {
+.form-attachments .listing-form-attachments .listing-form-attachment-preview,
+.form-attachments .quote-form-attachments .quote-form-attachment-preview,
+.form-attachments .order-form-attachments .order-form-attachment-preview {
     position: relative;
     width: 100px;
     height: 100px;
@@ -1179,7 +1202,11 @@ a.pagination-item:hover {
 .form-attachments
     .listing-form-attachments
     .listing-form-attachment-preview
-    video {
+    video,
+.form-attachments .quote-form-attachments .quote-form-attachment-preview img,
+.form-attachments .quote-form-attachments .quote-form-attachment-preview video,
+.form-attachments .order-form-attachments .order-form-attachment-preview img,
+.form-attachments .order-form-attachments .order-form-attachment-preview video {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
@@ -1188,7 +1215,9 @@ a.pagination-item:hover {
     margin: 0 !important; /* Ensure no margins are affecting alignment */
 }
 
-.listing-form-attachment-preview .delete-icon {
+.listing-form-attachment-preview .delete-icon,
+.quote-form-attachment-preview .delete-icon,
+.order-form-attachment-preview .delete-icon {
     position: absolute;
     right: 0.125rem;
     top: 0.125rem;
@@ -1205,15 +1234,24 @@ a.pagination-item:hover {
     transition: all 0.3s;
 }
 
-.listing-form-attachment-preview:hover .delete-icon {
+.listing-form-attachment-preview:hover .delete-icon,
+.quote-form-attachment-preview:hover .delete-icon,
+.order-form-attachment-preview:hover .delete-icon {
+    transform: scale(1.05);
+    text-decoration: none;
+    color: var(--primary-color);
     opacity: 1;
 }
 
-.listing-form-attachment-preview .delete-icon:hover {
+.listing-form-attachment-preview .delete-icon:hover,
+.quote-form-attachment-preview .delete-icon:hover,
+.order-form-attachment-preview .delete-icon:hover {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-.listing-form-attachment-preview img {
+.listing-form-attachment-preview img,
+.quote-form-attachment-preview img,
+.order-form-attachment-preview img {
     width: 80px;
     height: 80px;
     max-width: 100%;
@@ -1866,8 +1904,9 @@ input#phone[readonly] {
 
 .attachment-thumbnail {
     width: 100%;
-    height: 80px;
+    height: 100%;
     object-fit: cover;
+    justify-content: center;
 }
 
 .video-thumbnail,
@@ -1875,9 +1914,51 @@ input#phone[readonly] {
     width: 100%;
     height: 80px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: #f8f9fa;
+    border-radius: 4px;
+    margin: 0 auto 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.document-thumbnail svg,
+.video-thumbnail svg {
+    margin-bottom: 8px;
+}
+
+.video-player-container {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    background-color: #000;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.video-player-container:hover .video-overlay {
+    opacity: 0.7;
+}
+
+.video-overlay svg {
+    width: 32px;
+    height: 32px;
+    color: #fff;
 }
 
 .attachment-name {
@@ -1886,6 +1967,7 @@ input#phone[readonly] {
     font-size: 0.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
     white-space: nowrap;
 }
 
@@ -2043,16 +2125,22 @@ input[type="checkbox"]:disabled {
         align-items: stretch;
     }
 
-    .listing-attachments-wrapper {
+    .listing-attachments-wrapper,
+    .quote-attachments-wrapper,
+    .order-attachments-wrapper {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .listing-attachments-wrapper .form-update-attachments {
+    .listing-attachments-wrapper .form-update-attachments,
+    .quote-attachments-wrapper .form-update-attachments,
+    .order-attachments-wrapper .form-update-attachments {
         order: 2;
     }
 
-    .listing-attachments-wrapper .form-attachments {
+    .listing-attachments-wrapper .form-attachments,
+    .quote-attachments-wrapper .form-attachments,
+    .order-attachments-wrapper .form-attachments {
         width: 100%;
         order: 1;
     }

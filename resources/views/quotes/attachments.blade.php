@@ -2,8 +2,8 @@
   <main>
     <div>
       <div class="container">
-        <h1 class="listing-details-page-title">Manage attachments for Quote #{{ $quote->id }}</h1>
-        <div class="listing-attachments-wrapper">
+        <h1 class="quote-details-page-title">Manage attachments for Quote #{{ $quote->id }}</h1>
+        <div class="quote-attachments-wrapper">
           <form action="{{ route('quotes.updateAttachments', $quote) }}"
                 method="POST"
                 class="card p-medium form-update-attachments">
@@ -29,17 +29,17 @@
                         value="{{ $attachment->id }}"
                       />
                     </td>
-                    <td class="listing-form-attachments">
+                    <td class="quote-form-attachments">
                       @if(Str::startsWith($attachment->mime_type, 'image/'))
                         <img
                           src="{{ Storage::url($attachment->path) }}"
                           alt=""
-                          class="listing-form-attachment-preview"
+                          class="quote-form-attachment-preview"
                         />
                       @elseif(Str::startsWith($attachment->mime_type, 'video/'))
                         <video
                           src="{{ Storage::url($attachment->path) }}"
-                          class="listing-form-attachment-preview"
+                          class="quote-form-attachment-preview"
                           controls
                           muted>
                         </video>
@@ -191,7 +191,7 @@
                 </svg>
               </div>
               <input
-                id="listingFormAttachmentUpload"
+                id="quoteFormAttachmentUpload"
                 type="file"
                 name="attachments[]"
                 multiple

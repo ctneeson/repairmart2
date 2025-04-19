@@ -41,5 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('orders.updateAttachments');
     Route::post('/orders/{order}/attachments', [OrderController::class, 'addAttachments'])
         ->name('orders.addAttachments');
+    Route::get('/orders/{order}/attachments/{attachment}/download', [OrderController::class, 'downloadAttachment'])
+        ->name('orders.attachments.download');
 
 });

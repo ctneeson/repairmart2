@@ -42,12 +42,12 @@
                                             <img
                                                 src="{{ Storage::url($attachment->path) }}"
                                                 alt=""
-                                                class="listing-form-attachment-preview"
+                                                class="order-form-attachment-preview"
                                             />
                                             @elseif(Str::startsWith($attachment->mime_type, 'video/'))
                                             <video
                                                 src="{{ Storage::url($attachment->path) }}"
-                                                class="listing-form-attachment-preview"
+                                                class="order-form-attachment-preview"
                                                 controls
                                                 muted>
                                             </video>
@@ -212,7 +212,7 @@
                                         />
                                 </svg>
                             </div>
-                            <input id="listingFormAttachmentUpload"
+                            <input id="orderFormAttachmentUpload"
                                 type="file"
                                 name="attachments[]"
                                 multiple

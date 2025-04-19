@@ -568,12 +568,12 @@ class OrderController extends Controller
     {
         $attachment = $order->attachments()->findOrFail($attachmentId);
 
-        // Check if user is authorized to view this attachment
-        $isCustomer = auth()->id() === $order->customer_id;
-        $isSpecialist = auth()->id() === $order->specialist_id;
-        $isAdmin = auth()->user()->hasRole('admin');
+        // Authorization check
+        $isAuthorized = auth()->id() === $order->customer_id ||
+            auth()->id() === $order->specialist_id ||
+            auth()->user()->hasRole('admin');
 
-        if (!$isCustomer && !$isSpecialist && !$isAdmin) {
+        if (!$isAuthorized) {
             return redirect()->route('orders.show', $order)
                 ->with('error', 'You are not authorized to download this attachment.');
         }
@@ -581,10 +581,9 @@ class OrderController extends Controller
         // Check if file exists
         if (!Storage::disk('public')->exists($attachment->path)) {
             return redirect()->route('orders.show', $order)
-                ->with('error', 'Attachment file not found.');
+                ->with('error', 'The requested file could not be found.');
         }
 
-        // Extract filename from path
         $filename = basename($attachment->path);
 
         return Storage::disk('public')->download($attachment->path, $filename);

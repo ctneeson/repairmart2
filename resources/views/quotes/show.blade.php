@@ -86,18 +86,23 @@
                                                             <img src="{{ Storage::url($attachment->path) }}"
                                                                 alt="{{ $attachment->filename }}"
                                                                 class="attachment-thumbnail">
-                                                        @elseif(Str::contains($attachment->mime_type, 'video'))
-                                                            <div class="video-thumbnail">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" fill="currentColor"
-                                                                    class="bi bi-film" viewBox="0 0 16 16">
-                                                                    <path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1
-                                                                        1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4
-                                                                        0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2
-                                                                        3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2
-                                                                        3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2
-                                                                        3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z"/>
-                                                                </svg>
+                                                        @elseif(Str::startsWith($attachment->mime_type, 'video/'))
+                                                            <div class="video-player-container">
+                                                                <video 
+                                                                    src="{{ Storage::url($attachment->path) }}" 
+                                                                    class="video-preview" 
+                                                                    muted 
+                                                                    loop 
+                                                                    preload="metadata"
+                                                                    onclick="event.preventDefault(); this.paused ? this.play() : this.pause();">
+                                                                </video>
+                                                                <div class="video-overlay">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
+                                                                            class="bi bi-play-circle" viewBox="0 0 16 16">
+                                                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                                        <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/>
+                                                                    </svg>
+                                                                </div>
                                                             </div>
                                                         @elseif(Str::contains($attachment->mime_type, 'pdf'))
                                                             <div class="document-thumbnail">

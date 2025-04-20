@@ -5,6 +5,7 @@ use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 
 // Auth routes for signup, login, password reset, and socialite
 require_once __DIR__ . '/auth.php';
@@ -25,6 +26,7 @@ Route::get('/listings/search', [ListingController::class, 'search'])->name('list
 // AUTH: User must be logged in
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // User Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

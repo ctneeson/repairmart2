@@ -466,116 +466,20 @@
     </main>
 
     @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle the default location checkbox
-            const useDefaultLocationCheckbox = document.getElementById('use-default-location');
-            const addressFields = document.getElementById('address-fields');
-            const addressInputs = addressFields.querySelectorAll('input, select');
-            
-            function updateAddressFieldsState() {
-                const useDefault = useDefaultLocationCheckbox.checked;
-                
-                // Update the visual appearance
-                if (useDefault) {
-                    addressFields.classList.add('opacity-50');
-                } else {
-                    addressFields.classList.remove('opacity-50');
-                }
-                
-                // Handle the country ID fields specifically
-                const hiddenCountryId = document.getElementById('hidden_country_id');
-                const visibleCountryId = document.getElementById('visible_country_id');
-                
-                if (useDefault) {
-                    // When using default address, enable the hidden field and disable the visible dropdown
-                    hiddenCountryId.disabled = false;
-                    hiddenCountryId.value = '{{ $user->country_id }}';
-                    visibleCountryId.name = '_country_id'; // Change the name so it's not submitted
-                    visibleCountryId.disabled = true;
-                } else {
-                    // When manually entering address, disable the hidden field and enable the visible dropdown
-                    hiddenCountryId.disabled = true;
-                    visibleCountryId.name = 'country_id'; // Set the proper name for submission
-                    visibleCountryId.disabled = false;
-                }
-                
-                // Update each input's readonly status
-                addressInputs.forEach(input => {
-                    if (input.id !== 'hidden_country_id' && input.id !== 'visible_country_id') {
-                        input.readOnly = useDefault;
-                    }
-                });
-            }
-            
-            // Initialize and set up change handler
-            updateAddressFieldsState();
-            useDefaultLocationCheckbox.addEventListener('change', updateAddressFieldsState);
-            
-            // Reset button functionality
-            const resetButton = document.getElementById('reset-button');
-            if (resetButton) {
-                resetButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    if (!confirm("Are you sure you want to reset the form? All entered information will be cleared.")) {
-                        return;
-                    }
-                    
-                    // Reset form fields
-                    document.getElementById('amount').value = '';
-                    document.getElementById('turnaround').value = '';
-                    document.getElementById('deliverymethod_id').selectedIndex = 0;
-                    document.getElementById('description').value = '';
-                    
-                    // Reset the currency selector
-                    const currencySelect = document.querySelector('select[name="currency_id"]');
-                    if (currencySelect) {
-                        currencySelect.selectedIndex = 0;
-                    }
-                    
-                    // Reset default location to checked
-                    document.getElementById('use-default-location').checked = true;
-                    updateAddressFieldsState();
-                    
-                    // Reset address to user defaults
-                    document.getElementById('address_line1').value = '{{ $user->address_line1 }}';
-                    document.getElementById('address_line2').value = '{{ $user->address_line2 }}';
-                    document.getElementById('city').value = '{{ $user->city }}';
-                    document.getElementById('postcode').value = '{{ $user->postcode }}';
-                    document.getElementById('phone').value = '{{ $user->phone }}';
-                    
-                    // Reset country
-                    const countrySelect = document.querySelector('select[name="country_id"]');
-                    if (countrySelect) {
-                        // Find the option with the user's country ID
-                        const userCountryOption = countrySelect.querySelector('option[value="{{ $user->country_id }}"]');
-                        if (userCountryOption) {
-                            userCountryOption.selected = true;
-                        }
-                    }
-                    
-                    // Reset attachments
-                    const fileInput = document.getElementById('quoteFormAttachmentUpload');
-                    if (fileInput) {
-                        fileInput.value = '';
-                        
-                        // Clear previews
-                        const previewsContainer = document.getElementById('attachmentPreviews');
-                        if (previewsContainer) {
-                            previewsContainer.innerHTML = '';
-                        }
-                        
-                        // Clear list
-                        const attachmentsList = document.getElementById('attachmentsList');
-                        if (attachmentsList) {
-                            attachmentsList.innerHTML = '';
-                        }
-                    }
-                });
-            }
-        });
-    </script>
+    <!-- User data required for the reset functionality -->
+    <div id="user-data" 
+         data-user="{{ json_encode([
+             'address_line1' => $user->address_line1,
+             'address_line2' => $user->address_line2,
+             'city' => $user->city,
+             'postcode' => $user->postcode,
+             'phone' => $user->phone,
+             'country_id' => $user->country_id
+         ]) }}" 
+         hidden>
+    </div>
     @endpush
+
+    @vite(['resources/js/quote-create.js'])
 
 </x-app-layout>

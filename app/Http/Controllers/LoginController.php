@@ -22,7 +22,7 @@ class LoginController extends Controller
         if (Auth::attempt($data)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('home'))
+            return redirect()->intended(route('dashboard'))
                 ->with('success', 'Login successful');
         }
 

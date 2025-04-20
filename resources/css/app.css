@@ -2041,6 +2041,11 @@ input[type="checkbox"]:disabled {
     color: #6c757d;
 }
 
+.inline-form {
+    display: inline-block;
+    margin-left: 10px;
+}
+
 @media screen and (max-width: 1200px) {
     .listing-items-listing {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2366,5 +2371,16 @@ input[type="checkbox"]:disabled {
 @media screen and (min-width: 680px) {
     .sm\:flex {
         display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-small {
+        margin-top: 10px !important;
+    }
+    .inline-form {
+        margin-top: 10px;
+        display: block;
+        text-align: right;
     }
 }

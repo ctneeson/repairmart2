@@ -169,7 +169,6 @@
                                                         </svg>
                                                     </div>
                                                 @endif
-                                                <div class="attachment-name">{{ Str::limit($attachment->position, 15) }}</div>
                                             </a>
                                         </div>
                                     @endforeach
@@ -441,125 +440,35 @@
                                         <span>{{ Str::substr($attachment->mime_type, 0, 20) }}</span>
                                     </div>
                                 @endif
-                                <div class="attachment-name">{{ basename($attachment->position) }}</div>
                             </a>
                             @endforeach
                         </div>
                     </div>
                 </div>
                 <div class="p-medium" style="width: 100%">
-                    <div class="flex justify-end gap-1">
-                        <a href="{{ route('quotes.show', $quote->id) }}" class="btn btn-default">Cancel</a>
-                        <button type="button" class="btn btn-default">Reset</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <!-- Delete Button - Should be a form to prevent CSRF issues -->
-                        <form action="{{ route('quotes.destroy', $quote->id) }}" 
-                            method="POST" 
-                            style="display: inline-block;"
-                            onsubmit="return confirm('Are you sure you want to delete this quote? This action cannot be undone.')">
-                          @csrf
-                          @method('DELETE')
-                          <button type="submit" class="btn btn-danger">Delete Quote</button>
-                      </form>
+                    <div class="flex justify-between align-items-center">
+                        <!-- Placeholder div to maintain layout -->
+                        <div></div>
+                        
+                        <!-- Right-aligned Cancel/Save buttons -->
+                        <div class="flex gap-1">
+                            <a href="{{ route('quotes.show', $quote->id) }}" class="btn btn-default">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+                            <form action="{{ route('quotes.destroy', $quote->id) }}" 
+                                method="POST"
+                                class="card delete-form"
+                                onsubmit="return confirm('Are you sure you want to delete this quote? This action cannot be undone.')">
+                                @csrf
+                                @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Delete Quote</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </form>
         </div>
     </main>
 
-    <style>
-        .attachment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 1rem;
-        }
-        
-        .attachment-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            overflow: hidden;
-        }
-        
-        .attachment-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .attachment-thumbnail {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-        }
-        
-        .video-thumbnail, .document-thumbnail {
-            width: 100%;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-        }
-        
-        .attachment-name {
-            padding: 0.5rem;
-            text-align: center;
-            font-size: 0.75rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .form-footer {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #dee2e6;
-        }
-    </style>
+    @vite(['resources/js/quote-edit.js'])
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const useDefaultLocationCheckbox = document.getElementById('use-default-location');
-            const addressFields = document.getElementById('address-fields');
-            const addressInputs = addressFields.querySelectorAll('input, select');
-            const hiddenCountryId = document.getElementById('hidden_country_id');
-            const visibleCountryId = document.getElementById('visible_country_id');
-            
-            useDefaultLocationCheckbox.addEventListener('change', updateAddressFieldsState);
-            
-            function updateAddressFieldsState() {
-                const useDefault = useDefaultLocationCheckbox.checked;
-                
-                // Update the visual appearance
-                if (useDefault) {
-                    addressFields.classList.add('opacity-50');
-                } else {
-                    addressFields.classList.remove('opacity-50');
-                }
-                
-                // Handle the country ID fields specifically
-                if (useDefault) {
-                    // When using default address, enable the hidden field and disable the visible dropdown
-                    hiddenCountryId.disabled = false;
-                    visibleCountryId.name = '_country_id'; // Change the name so it's not submitted
-                    visibleCountryId.disabled = true;
-                } else {
-                    // When manually entering address, disable the hidden field and enable the visible dropdown
-                    hiddenCountryId.disabled = true;
-                    visibleCountryId.name = 'country_id'; // Set the proper name for submission
-                    visibleCountryId.disabled = false;
-                }
-                
-                // Update each input's readonly status
-                addressInputs.forEach(input => {
-                    if (input.id !== 'hidden_country_id' && input.id !== 'visible_country_id') {
-                        input.readOnly = useDefault;
-                    }
-                });
-            }
-            
-            // Run the function once on page load to set initial state
-            updateAddressFieldsState();
-        });
-    </script>
 </x-app-layout>

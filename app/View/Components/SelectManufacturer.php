@@ -18,11 +18,17 @@ class SelectManufacturer extends Component
      */
     public function __construct()
     {
-        $this->manufacturers = Cache::remember('manufacturers', now()->addMinute(), function () {
-            return Manufacturer::whereHas('listings')
-                ->orderBy('name', 'asc')
-                ->get();
-        });
+        $this->manufacturers = Cache::remember(
+            'manufacturers',
+            now()->addMinute(),
+            function () {
+                return Manufacturer::whereHas('listings', function ($query) {
+                    $query->active();
+                })
+                    ->orderBy('name', 'asc')
+                    ->get();
+            }
+        );
     }
 
     /**

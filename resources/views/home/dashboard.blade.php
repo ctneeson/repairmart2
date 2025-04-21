@@ -14,10 +14,8 @@
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <h3 class="mb-0">{{ $unreadMessagesCount }}
-                                        <span class="badge bg-success rounded-pill">
-                                            Unread {{ Str::plural('message', $unreadMessagesCount) }}
-                                        </span>
+                                    <h3 class="mb-0">
+                                        {{ $unreadMessagesCount }} Unread {{ Str::plural('message', $unreadMessagesCount) }}
                                     </h3>
                                 </div>
                             </div>
@@ -75,22 +73,14 @@
                         <div class="card-body d-flex flex-column">
                             @if(auth()->user()->hasRole('customer'))
                                 <div class="mb-3">
-                                    @if($listingsByStatus->isEmpty())
-                                        <p class="text-center">No listings created yet.</p>
-                                    @else
-                                        <ul class="list-group list-group-flush">
-                                            @foreach($listingsByStatus as $listing)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ $listing['status_name'] }}
-                                                <span class="badge bg-success rounded-pill">{{ $listing['count'] }}</span>
-                                            </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h3 class="mb-0">
+                                                {{ $openListingsCount }} Open {{ Str::plural('Listing', $openListingsCount) }}
+                                            </h3>
+                                        </div>
+                                    </div>
                                 </div>
-                                
-                                <h6 class="border-bottom pb-2 mb-3">Open Listings</h6>
-                                
                                 <div class="flex-grow-1 overflow-auto">
                                     @if($openListings->count() > 0)
                                         <div class="table-responsive" style="max-height: 200px;">
@@ -110,7 +100,7 @@
                                                                     {{ Str::limit($listing->title, 30) }}
                                                                 </a>
                                                             </td>
-                                                            <td>{{ $listing->created_at->addDays($listing->expiry_days)->format('M d, Y') }}</td>
+                                                            <td>{{ $listing->published_at->addDays($listing->expiry_days)->format('M d, Y') }}</td>
                                                             <td>
                                                                 <span class="badge bg-info rounded-pill">
                                                                     {{ $listing->quotes_count }}
@@ -188,7 +178,13 @@
                                                                     {{ Str::limit($quote->listing->title, 30) }}
                                                                 </a>
                                                             </td>
-                                                            <td>{{ $quote->listing->created_at->addDays($quote->listing->expiry_days)->format('M d, Y') }}</td>
+                                                            <td>
+                                                                @if($quote->listing && $quote->listing->expiry_date)
+                                                                    {{ $quote->listing->expiry_date->format('M d, Y') }}
+                                                                @else
+                                                                    N/A
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -353,20 +349,13 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
-                            @if(auth()->user()->hasRole('customer'))
-                            <a href="{{ route('listings.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> New Repair Request
-                            </a>
                             <a href="{{ route('watchlist.index') }}" class="btn btn-info">
                                 <i class="bi bi-eye-fill"></i> My Watchlist
                             </a>
-                            @endif
                             
-                            @if(auth()->user()->hasRole('specialist'))
                             <a href="{{ route('listings.search') }}" class="btn btn-info">
                                 <i class="bi bi-search"></i> Browse Repair Requests
                             </a>
-                            @endif
                             
                             <a href="{{ route('profile.index') }}" class="btn btn-info">
                                 <i class="bi bi-person"></i> Update Profile
@@ -413,6 +402,10 @@
             display: flex;
             flex-direction: column;
         }
+
+        .row {
+            width: 100%;
+        }
         
         .card-body {
             flex: 1 0 auto;
@@ -447,12 +440,13 @@
         }
         
         .card-body {
-            padding: 1.5rem;
+            padding: 0rem 1.5rem;
         }
         
         .card-title {
             font-size: 20px;
             font-weight: bolder;
+            margin-bottom: 0.5rem;
         }
         
         .card-footer {

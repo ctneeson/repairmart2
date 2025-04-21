@@ -11,8 +11,8 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $listings = Cache::remember('home-listings', now()->addMinute(), function () {
-            return Listing::where('published_at', '<=', now())
+        $listings = Cache::remember('home-listings', now()->addMinutes(5), function () {
+            return Listing::active() // This uses the active scope (published, open, not expired)
                 ->with([
                     'country',
                     'customer',

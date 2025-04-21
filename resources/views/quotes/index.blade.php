@@ -80,7 +80,7 @@
                                                 </td>
                                                 <td data-label="Created"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $quote->listing->getCreatedDate() }}
+                                                    {{ $quote->listing->getPublishedDate() }}
                                                 </td>
                                                 <td data-label="Status"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
@@ -169,7 +169,7 @@
                                     <thead>
                                         <tr style="border-bottom: 2px solid #e2e8f0;">
                                             <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Listing</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Created</th>
+                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Published</th>
                                             <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
                                             <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Delivery Method</th>
                                             <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
@@ -189,7 +189,7 @@
                                                 </td>
                                                 <td data-label="Created"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $quote->listing->getCreatedDate() }}
+                                                    {{ $quote->listing->getPublishedDate() }}
                                                 </td>
                                                 <td data-label="Status"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">

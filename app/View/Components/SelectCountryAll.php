@@ -12,12 +12,16 @@ use Illuminate\Support\Facades\Cache;
 class SelectCountryAll extends Component
 {
     public Collection $countries;
+    public $value;
+
     /**
      * Create a new component instance.
+     * 
+     * @param mixed $value The pre-selected value (country ID)
      */
-    public function __construct()
+    public function __construct($value = null)
     {
-        // $this->countries = Country::orderBy('name', 'asc')->get();
+        $this->value = $value;
 
         $this->countries = Cache::rememberForever('countries-all', function () {
             return Country::orderBy('name', 'asc')->get();

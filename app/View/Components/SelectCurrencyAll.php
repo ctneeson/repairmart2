@@ -11,14 +11,15 @@ use Illuminate\Support\Facades\Cache;
 
 class SelectCurrencyAll extends Component
 {
+    public $value;
     public Collection $currencies;
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($value = null)
     {
+        $this->value = $value;
 
-        // $this->currencies = Currency::orderBy('iso_code', 'asc')->get();
         $this->currencies = Cache::rememberForever('currencies-all', function () {
             return Currency::orderBy('iso_code', 'asc')->get();
         });

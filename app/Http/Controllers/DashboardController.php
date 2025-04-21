@@ -34,31 +34,25 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'messages_page');
 
-        // Get listing counts by status (for customers)
-        $listingsByStatus = collect();
+        // Initialize variables for listings
+        $openListingsCount = 0;
         $openListings = collect();
 
         if ($user->hasRole('customer')) {
-            $listingsByStatus = Listing::where('user_id', $user->id)
-                ->select('status_id', DB::raw('count(*) as count'))
-                ->groupBy('status_id')
-                ->get()
-                ->map(function ($item) {
-                    $status = ListingStatus::find($item->status_id);
-                    return [
-                        'status_name' => $status ? $status->name : 'Unknown',
-                        'count' => $item->count,
-                        'status_id' => $item->status_id
-                    ];
-                });
-
-            // Get open listings with details
+            // Get open status ID
             $openStatusId = ListingStatus::where('name', 'Open')->first()->id ?? null;
+
             if ($openStatusId) {
+                // Get count of open listings
+                $openListingsCount = Listing::where('user_id', $user->id)
+                    ->where('status_id', $openStatusId)
+                    ->count();
+
+                // Get open listings with details
                 $openListings = Listing::where('user_id', $user->id)
                     ->where('status_id', $openStatusId)
                     ->withCount('quotes')
-                    ->orderBy('expires_at', 'asc')
+                    ->orderBy('created_at', 'desc') // Order by created date
                     ->paginate(5, ['*'], 'listings_page');
             }
         }
@@ -142,7 +136,7 @@ class DashboardController extends Controller
         return view('home.dashboard', compact(
             'unreadMessagesCount',
             'unreadMessages',
-            'listingsByStatus',
+            'openListingsCount',
             'openListings',
             'quotesByStatus',
             'openQuotes',

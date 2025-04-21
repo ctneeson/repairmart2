@@ -12,6 +12,7 @@ use App\Mail\ListingPosted;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Attachment;
+use App\Models\ListingStatus;
 
 class ListingController extends Controller
 {
@@ -34,6 +35,7 @@ class ListingController extends Controller
      */
     public function create(Request $request)
     {
+        // Keep all authorization checks
         if (!Gate::allows('create', Listing::class)) {
             $user = auth()->user();
 
@@ -48,7 +50,16 @@ class ListingController extends Controller
             }
         }
 
-        return view('listings.create');
+        // Get relisted data from session if available
+        $relistData = session('relist_data') ?? [];
+
+        // Get attachment information for preview
+        $attachments = [];
+        if (!empty($relistData['attachment_ids'])) {
+            $attachments = \App\Models\Attachment::whereIn('id', $relistData['attachment_ids'])->get();
+        }
+
+        return view('listings.create', compact('relistData', 'attachments'));
     }
 
     /**
@@ -68,7 +79,7 @@ class ListingController extends Controller
             // Create the listing
             $listing = Listing::create([
                 'user_id' => Auth::id(),
-                'status_id' => 1,
+                'status_id' => 1, // Open
                 'manufacturer_id' => $validated['manufacturer_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
@@ -82,7 +93,7 @@ class ListingController extends Controller
                 'country_id' => $validated['country_id'] ?? null,
                 'phone' => $validated['phone'] ?? null,
                 'expiry_days' => $validated['expiry_days'],
-                'published_at' => $validated['published_at'] ?? null,
+                'published_at' => $validated['published_at'] ?? now(),
             ]);
 
             // Attach products to the listing
@@ -90,17 +101,48 @@ class ListingController extends Controller
                 $listing->products()->attach($validated['product_ids']);
             }
 
-            // Handle file uploads
+            // Handle new file uploads
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $i => $file) {
                     $path = $file->store('attachments', 'public');
-                    $listing->attachments()
-                        ->create([
-                            'path' => $path,
-                            'position' => $i + 1,
-                            'mime_type' => $file->getMimeType(),
-                            'user_id' => Auth::id()
-                        ]);
+                    $listing->attachments()->create([
+                        'path' => $path,
+                        'position' => $i + 1,
+                        'mime_type' => $file->getMimeType(),
+                        'user_id' => Auth::id()
+                    ]);
+                }
+            }
+
+            // Handle duplicate attachments from relisted listing
+            if ($request->has('duplicate_attachments') && is_array($request->duplicate_attachments)) {
+                $position = $listing->attachments()->max('position') ?? 0;
+
+                foreach ($request->duplicate_attachments as $attachmentId) {
+                    $originalAttachment = Attachment::find($attachmentId);
+
+                    if ($originalAttachment) {
+                        // Create a new file copy to prevent deletion issues if original listing is deleted
+                        $originalPath = 'public/' . $originalAttachment->path;
+                        $newPath = 'attachments/' . basename($originalAttachment->path);
+
+                        if (Storage::exists($originalPath)) {
+                            // Copy the file to a new path
+                            $contents = Storage::get($originalPath);
+                            Storage::put('public/' . $newPath, $contents);
+
+                            // Create new attachment record
+                            $position++;
+                            $listing->attachments()->create([
+                                'path' => $newPath,
+                                'position' => $position,
+                                'mime_type' => $originalAttachment->mime_type,
+                                'user_id' => Auth::id(),
+                                'title' => $originalAttachment->title,
+                                'description' => $originalAttachment->description
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -108,7 +150,6 @@ class ListingController extends Controller
                 ->with('success', 'Listing created successfully.');
 
         } catch (\Exception $e) {
-
             \Log::error('Error creating listing: ' . $e->getMessage());
 
             // Check if it's a file size issue
@@ -184,51 +225,55 @@ class ListingController extends Controller
         $countries = $request->country_ids;
         $manufacturers = $request->manufacturer_ids;
         $sort = $request->input('sort', '-published_at');
+        $page = $request->input('page', 1);
 
-        $query = Listing::where('published_at', '<', now())
-            ->with([
-                'country',
-                'customer',
-                'customer.country',
-                'manufacturer',
-                'currency',
-                'primaryAttachment',
-                'products',
-                'watchlistUsers'
-            ]);
+        // Create a cache key based on the search parameters
+        $cacheKey = 'listing_search_' . md5(json_encode([
+            'products' => $products,
+            'countries' => $countries,
+            'manufacturers' => $manufacturers,
+            'sort' => $sort,
+            'page' => $page
+        ]));
 
-        if ($manufacturers) {
-            $query->whereIn('manufacturer_id', $manufacturers);
-        }
+        // Cache only the query results, not the view
+        $listings = cache()->remember($cacheKey, 300, function () use ($products, $countries, $manufacturers, $sort) {
+            // Start with active listings (published, open, not expired)
+            $query = Listing::active()
+                ->with([
+                    'country',
+                    'manufacturer',
+                    'currency',
+                    'primaryAttachment',
+                    'products',
+                    'watchlistUsers'
+                ]);
 
-        if ($products) {
-            $query->whereHas('products', function ($q) use ($products) {
-                $q->whereIn('product_id', $products);
-            });
-        }
+            if ($manufacturers) {
+                $query->whereIn('manufacturer_id', $manufacturers);
+            }
 
-        if ($countries) {
-            $query->where(function ($q) use ($countries) {
-                $q->where(function ($q) use ($countries) {
-                    $q->where('use_default_location', 0)
-                        ->whereIn('country_id', $countries);
-                })->orWhereHas('customer', function ($q) use ($countries) {
-                    $q->where('use_default_location', 1)
-                        ->whereIn('country_id', $countries);
+            if ($products) {
+                $query->whereHas('products', function ($q) use ($products) {
+                    $q->whereIn('product_id', $products);
                 });
-            });
-        }
+            }
 
-        if (str_starts_with($sort, '-')) {
-            $sort = substr($sort, 1);
-            $query->orderBy($sort, 'desc');
-        } else {
-            $query->orderBy($sort, 'asc');
-        }
+            if ($countries) {
+                $query->whereIn('country_id', $countries);
+            }
 
-        $listings = $query->paginate(15)
-            ->withQueryString();
+            if (str_starts_with($sort, '-')) {
+                $sort = substr($sort, 1);
+                $query->orderBy($sort, 'desc');
+            } else {
+                $query->orderBy($sort, 'asc');
+            }
 
+            return $query->paginate(15)->withQueryString();
+        });
+
+        // Generate and return the view with the cached results
         return view('listings.search', ['listings' => $listings]);
     }
 
@@ -309,5 +354,45 @@ class ListingController extends Controller
             'phone' => $listing->phone,
             'success' => true
         ]);
+    }
+
+    /**
+     * Prepare a new listing based on an expired one.
+     *
+     * @param Listing $listing
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function relist(Listing $listing)
+    {
+        // Check if the listing is expired and belongs to the current user
+        if ($listing->status->name !== 'Closed-Expired' || $listing->user_id !== auth()->id()) {
+            return redirect()->route('listings.index')
+                ->with('error', 'You can only relist your own expired listings.');
+        }
+
+        // Store attachment data so we can duplicate them later
+        $attachmentIds = $listing->attachments->pluck('id')->toArray();
+
+        // Store the old listing data in the session
+        session()->flash('relist_data', [
+            'title' => $listing->title,
+            'description' => $listing->description,
+            'manufacturer_id' => $listing->manufacturer_id,
+            'country_id' => $listing->country_id,
+            'city' => $listing->city,
+            'postcode' => $listing->postcode,
+            'address_line1' => $listing->address_line1,
+            'address_line2' => $listing->address_line2,
+            'currency_id' => $listing->currency_id,
+            'budget' => $listing->budget,
+            'phone' => $listing->phone,
+            'expiry_days' => $listing->expiry_days,
+            'use_default_location' => $listing->use_default_location,
+            'product_ids' => $listing->products->pluck('id')->toArray(),
+            'attachment_ids' => $attachmentIds, // Store attachment IDs to duplicate later
+        ]);
+
+        return redirect()->route('listings.create')
+            ->with('success', 'Create a new listing using the details from your expired listing.');
     }
 }

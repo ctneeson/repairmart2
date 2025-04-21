@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,51 +36,116 @@ class Listing extends Model
         'phone',
         'expiry_days',
         'published_at',
+        'expired_at',
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'published_at',
+        'expired_at',
+    ];
+
+    protected $casts = [
+        'use_default_location' => 'boolean',
+        'budget' => 'decimal:2',
+        'expiry_days' => 'integer',
+        'published_at' => 'datetime',
+        'expired_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // public $timestamps = false;
 
+    /*
+     * Get the user who created the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /*
+     * Get the status of the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(ListingStatus::class, 'status_id');
     }
 
+    /*
+     * Get the manufacturer for the item being listed.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
+    /*
+     * Get the currency associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
+    /*
+     * Get the country associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
 
+    /*
+     * Get the primary attachment associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function primaryAttachment(): HasOne
     {
         return $this->hasOne(Attachment::class, 'listing_id')
             ->oldestOfMany('position');
     }
 
+    /*
+     * Get the attachments associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function attachments(): HasMany
     {
         return $this->HasMany(Attachment::class, 'listing_id')->orderBy('position');
     }
 
+    /*
+     * Get the quotes associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function quotes(): HasMany
     {
         return $this->HasMany(Quote::class, 'listing_id');
     }
 
+    /*
+     * Get the users who have submitted quotes for the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
     public function quotesReceivedFrom(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -92,6 +158,11 @@ class Listing extends Model
         );
     }
 
+    /*
+     * Get the order associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
     public function order(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -104,6 +175,11 @@ class Listing extends Model
         );
     }
 
+    /*
+     * Get the user who is assigned to the order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
     public function orderAssignedTo(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -116,6 +192,11 @@ class Listing extends Model
         );
     }
 
+    /*
+     * Get the product categories assigned to the item being listed.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -126,23 +207,140 @@ class Listing extends Model
         );
     }
 
+    /*
+     * Get the emails associated with the listing.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function emails(): HasMany
     {
         return $this->HasMany(Email::class, 'listing_id');
     }
 
+    /**
+     * Get the created date in 'Y-m-d' format.
+     *
+     * @return string
+     */
     public function getCreatedDate(): string
     {
         return (new Carbon($this->created_at))->format('Y-m-d');
     }
 
+    /**
+     * Get the published date in 'Y-m-d' format.
+     *
+     * @return string
+     */
+    public function getPublishedDate(): string
+    {
+        return (new Carbon($this->published_at))->format('Y-m-d');
+    }
+
+    /**
+     * Get the users who have added the listing to their watchlist.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function watchlistUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favourite_listings');
     }
 
+    /**
+     * Check if the listing is in the user's watchlist.
+     *
+     * @return bool
+     */
     public function isInWatchlist(): bool
     {
         return $this->watchlistUsers->contains(Auth::user());
+    }
+
+    /**
+     * Scope a query to only include open listings.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOpen(Builder $query): Builder
+    {
+        $openStatusId = cache()->remember('listing_status_open', 60 * 24, function () {
+            return ListingStatus::where('name', 'Open')->first()->id ?? null;
+        });
+
+        return $query->where('status_id', $openStatusId);
+    }
+
+    /**
+     * Scope a query to only include published listings.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('published_at', '<', now());
+    }
+
+    /**
+     * Scope a query to only include listings that haven't expired.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeNotExpired(Builder $query): Builder
+    {
+        $today = Carbon::now()->startOfDay();
+        $earliestValidPublishDate = $today->copy()->subDays(config('app.max_listing_expiry_days', 90));
+
+        return $query->where(function ($query) use ($today, $earliestValidPublishDate) {
+            // If published more recently than the earliest valid date, compare days difference
+            $query->where('published_at', '>=', $earliestValidPublishDate)
+                ->whereRaw('(julianday(?) - julianday(published_at)) <= expiry_days', [$today->format('Y-m-d')]);
+        });
+    }
+
+    /**
+     * Scope a query to only include active listings (published, open, not expired).
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->published()->open()->notExpired();
+    }
+
+    /**
+     * Get the expiry date attribute.
+     *
+     * @return \Carbon\Carbon|null
+     */
+    public function getExpiryDateAttribute()
+    {
+        if (!$this->published_at) {
+            return null;
+        }
+
+        $publishedAt = $this->published_at instanceof Carbon
+            ? $this->published_at
+            : Carbon::parse($this->published_at);
+
+        return $publishedAt->addDays($this->expiry_days);
+    }
+
+    /**
+     * Determine if the listing is expired.
+     *
+     * @return bool
+     */
+    public function isExpired()
+    {
+        if (!$this->published_at) {
+            return false;
+        }
+
+        return $this->expiry_date->lt(Carbon::now()->startOfDay());
     }
 }

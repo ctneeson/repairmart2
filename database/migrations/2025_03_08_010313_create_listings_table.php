@@ -31,6 +31,20 @@ return new class extends Migration {
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
+            $table->timestamp('expired_at')->nullable();
+        });
+
+        Schema::table('listings', function (Blueprint $table) {
+            // Create a composite index for status and published date
+            $table->index(['status_id', 'published_at'], 'listings_status_published_index');
+
+            // Index for expiry calculation
+            $table->index(['published_at', 'expiry_days'], 'listings_expiry_index');
+
+            // Other common search filters
+            $table->index('manufacturer_id');
+            $table->index('country_id');
+            $table->index('use_default_location');
         });
     }
 
@@ -39,6 +53,14 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        Schema::table('listings', function (Blueprint $table) {
+            $table->dropIndex('listings_status_published_index');
+            $table->dropIndex('listings_expiry_index');
+            $table->dropIndex('manufacturer_id');
+            $table->dropIndex('country_id');
+            $table->dropIndex('use_default_location');
+        });
+
         Schema::dropIfExists('listings');
     }
 };

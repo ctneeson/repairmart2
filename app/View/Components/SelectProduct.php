@@ -18,12 +18,18 @@ class SelectProduct extends Component
      */
     public function __construct()
     {
-        $this->products = Cache::remember('products', now()->addMinute(), function () {
-            return Product::whereHas('listings')
-                ->orderBy('category', 'asc')
-                ->orderBy('subcategory', 'asc')
-                ->get();
-        });
+        $this->products = Cache::remember(
+            'products',
+            now()->addMinute(),
+            function () {
+                return Product::whereHas('listings', function ($query) {
+                    $query->active();
+                })
+                    ->orderBy('category', 'asc')
+                    ->orderBy('subcategory', 'asc')
+                    ->get();
+            }
+        );
     }
 
     /**

@@ -3,6 +3,8 @@
 namespace App\View\Components;
 
 use App\Models\Country;
+use App\Models\Listing;
+use App\Models\ListingStatus;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,11 +20,19 @@ class SelectCountry extends Component
      */
     public function __construct()
     {
-        $this->countries = Cache::remember('countries', now()->addMinute(), function () {
-            return Country::whereHas('listings')
-                ->orderBy('name', 'asc')
-                ->get();
-        });
+        $this->countries = Cache::remember(
+            'countries-with-active-listings',
+            now()->addHours(1),
+            function () {
+                // Get countries that have active listings
+                return Country::whereHas('listings', function ($query) {
+                    // Apply the active scope to filter for open, non-expired listings
+                    $query->active();
+                })
+                    ->orderBy('name', 'asc')
+                    ->get();
+            }
+        );
     }
 
     /**

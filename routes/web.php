@@ -47,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
         // Listings
         Route::resource('listings', ListingController::class)
             ->except(['index', 'show']);
+        Route::get('/listings/{listing}/relist', [ListingController::class, 'relist'])
+            ->name('listings.relist');
         Route::get('/listings/{listing}/attachments', [ListingController::class, 'listingAttachments'])
             ->name('listings.attachments');
         Route::put('/listings/{listing}/attachments', [ListingController::class, 'updateAttachments'])

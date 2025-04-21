@@ -49,5 +49,24 @@ class AppServiceProvider extends ServiceProvider
         //         ? Response::allow()
         //         : Response::denyWithStatus(404);
         // });
+
+        // Add N+1 query detection to identify performance issues:
+        if (app()->environment('local')) {
+            \DB::listen(function ($query) {
+                $backtrace = collect(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS))
+                    ->filter(function ($trace) {
+                        return !str_contains($trace['file'] ?? '', 'vendor');
+                    })->take(3);
+
+                \Log::channel('n1_queries')->info(
+                    $query->sql,
+                    [
+                        'bindings' => $query->bindings,
+                        'time' => $query->time,
+                        'backtrace' => $backtrace->toArray()
+                    ]
+                );
+            });
+        }
     }
 }

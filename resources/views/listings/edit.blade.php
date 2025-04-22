@@ -188,12 +188,46 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        @if($isRelisting)
+                        <div class="alert alert-info">
+                            <p>You're relisting an expired listing. Update any details as needed and click Submit to publish it again.</p>
+                        </div>
+                        @endif
+
+                        {{-- Always display the published_at field, but control editability --}}
                         <div class="form-group @error('published_at') has-error @enderror">
-                            <label class="checkbox">
-                                Publish on:
-                            </label>
-                            <input type="date" name="published_at" value="{{ old('published_at', $listing->published_at) }}" />
-                            <p class="error-message">{{ $errors->first('published_at') }}</p>
+                        <label>Publish Date</label>
+
+                        @php
+                            // Determine if the field should be editable:
+                            // 1. Editable if we're relisting
+                            // 2. Editable if publish date is in the future
+                            // 3. Read-only if already published in the past
+                            $publishDate = old('published_at', $listing->published_at ? date('Y-m-d', strtotime($listing->published_at)) : date('Y-m-d'));
+                            $isEditable = $isRelisting || $publishDate > date('Y-m-d');
+                        @endphp
+
+                        @if($isEditable)
+                            {{-- Editable date field --}}
+                            <input type="date" 
+                                name="published_at" 
+                                class="form-control" 
+                                value="{{ $publishDate }}"
+                                min="{{ date('Y-m-d') }}">
+                        @else
+                            {{-- Read-only display with hidden input to preserve the value --}}
+                            <div class="form-control-static" style="padding: 7px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
+                                {{ date('F j, Y', strtotime($publishDate)) }}
+                            </div>
+                            <input type="hidden" name="published_at" value="{{ $publishDate }}">
+                        @endif
+
+                        @if(!$isEditable)
+                            <small class="text-muted">This listing has already been published and the date cannot be changed.</small>
+                        @endif
+
+                        <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
                     </div>
                     <div class="form-attachments">

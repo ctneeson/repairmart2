@@ -747,6 +747,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
+    // Cancel button functionality
+    const cancelButton = document.getElementById("cancel-btn");
+
+    if (cancelButton) {
+        cancelButton.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (
+                confirm(
+                    "Do you wish to cancel? Any unsaved changes will be lost."
+                )
+            ) {
+                if (cancelButton.dataset.returnUrl) {
+                    window.location.href = cancelButton.dataset.returnUrl;
+                } else {
+                    window.history.back();
+                }
+            }
+        });
+    }
+
     initSlider();
     // For listing attachments
     initAttachmentHandler({

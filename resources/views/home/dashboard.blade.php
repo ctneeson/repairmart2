@@ -3,6 +3,37 @@
         <h1 class="mb-4">Welcome, {{ auth()->user()->name }}</h1>
         
         <div class="row row-eq-height">
+            <!-- Quick Actions Row -->
+            <div class="row mb-4">
+                <div class="col-md-12" style="width: 100%; padding-left: 15px; padding-right: 15px;">
+                    <div class="card h-100">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('watchlist.index') }}"
+                                        class="btn btn-add-new-listing">
+                                        <i class="bi bi-eye-fill"></i> 
+                                        My Watchlist
+                                    </a>
+                                    <a href="{{ route('listings.search') }}"
+                                        class="btn btn-add-new-listing">
+                                        <i class="bi bi-search"></i>
+                                        Browse Repair Requests
+                                    </a>
+                                    <a href="{{ route('profile.index') }}"
+                                        class="btn btn-add-new-listing">
+                                        <i class="bi bi-person"></i>
+                                        Update Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- First Row -->
             <div class="row mb-4">
                 <!-- Messages Panel -->
@@ -339,32 +370,6 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Quick Actions Row -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2">
-                            <a href="{{ route('watchlist.index') }}" class="btn btn-info">
-                                <i class="bi bi-eye-fill"></i> My Watchlist
-                            </a>
-                            
-                            <a href="{{ route('listings.search') }}" class="btn btn-info">
-                                <i class="bi bi-search"></i> Browse Repair Requests
-                            </a>
-                            
-                            <a href="{{ route('profile.index') }}" class="btn btn-info">
-                                <i class="bi bi-person"></i> Update Profile
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     
     <style>
@@ -436,7 +441,7 @@
         
         .card-header {
             border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
-            padding: 1rem 1.5rem;
+            padding: 0rem 1.5rem;
         }
         
         .card-body {

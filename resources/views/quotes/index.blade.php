@@ -11,8 +11,8 @@
                     <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         @if(auth()->user()->hasRole('customer'))
                         <li class="nav-item">
-                            <a class="nav-link {{ !auth()->user()->hasRole('specialist') ? 'active' : '' }}"
-                                href="#received">
+                            <a class="nav-link {{ auth()->user()->hasRole('customer') ? 'active' : '' }}"
+                               href="#received">
                                 Quotes Received
                                 @if($receivedPendingCount > 0)
                                     <span class="badge rounded-pill"
@@ -27,10 +27,9 @@
                         
                         @if(auth()->user()->hasRole('specialist'))
                         <li class="nav-item">
-                            <a class="nav-link {{ !auth()->user()->hasRole('customer')
-                                || (auth()->user()->hasRole('customer')
-                                && auth()->user()->hasRole('specialist')) ? 'active' : '' }}"
-                                href="#submitted">
+                            <a class="nav-link {{ auth()->user()->hasRole('specialist')
+                                && !auth()->user()->hasRole('customer') ? 'active' : '' }}"
+                               href="#submitted">
                                 Quotes Submitted
                                 @if($submittedOpenCount > 0)
                                     <span class="badge rounded-pill"
@@ -47,11 +46,9 @@
                 <div class="tab-content p-medium">
                     <!-- Quotes Received Tab -->
                     @if(auth()->user()->hasRole('customer'))
-                    <div class="tab-pane {{ !auth()->user()->hasRole('specialist')
-                            ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
                         id="received"
-                        style="{{ !auth()->user()->hasRole('specialist')
-                            ? '' : 'display: none;' }}">
+                        style="{{ auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
                         @if($receivedQuotes->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
@@ -95,7 +92,7 @@
                                                 </td>
                                                 <td data-label="Amount"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $quote->currency->symbol }} {{ number_format($quote->amount, 2) }}
+                                                    {{ $quote->currency->iso_code }} {{ number_format($quote->amount, 2) }}
                                                 </td>
                                                 <td data-label="Updated"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
@@ -107,23 +104,6 @@
                                                             class="btn btn-sm btn-outline-primary btn-block mb-1 text-center">
                                                             View
                                                         </a>
-                                                        @if($quote->status->name === 'Open')
-                                                            <a href="{{ route('quotes.edit', $quote->id) }}"
-                                                                class="btn btn-sm btn-outline-secondary btn-block mb-1 text-center">
-                                                                Edit
-                                                            </a>
-                                                            <form action="{{ route('quotes.destroy', $quote->id) }}" 
-                                                                  method="POST" 
-                                                                  onsubmit="return confirm('Are you sure you want to delete this quote?')"
-                                                                  class="d-block">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="btn btn-sm btn-outline-danger btn-block text-center">
-                                                                    Delete
-                                                                </button>
-                                                            </form>
-                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -154,15 +134,11 @@
                     
                     <!-- Quotes Submitted Tab -->
                     @if(auth()->user()->hasRole('specialist'))
-                    <div class="tab-pane {{ !auth()->user()->hasRole('customer')
-                            || (auth()->user()->hasRole('customer')
-                            && auth()->user()->hasRole('specialist'))
-                            ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ auth()->user()->hasRole('specialist')
+                        && !auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
                         id="submitted"
-                        style="{{ !auth()->user()->hasRole('customer')
-                            || (auth()->user()->hasRole('customer')
-                            && auth()->user()->hasRole('specialist'))
-                            ? '' : 'display: none;' }}">
+                        style="{{ auth()->user()->hasRole('specialist')
+                            && !auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
                         @if($submittedQuotes->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
@@ -203,7 +179,7 @@
                                                 </td>
                                                 <td data-label="Amount"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $quote->currency->symbol }} {{ number_format($quote->amount, 2) }}
+                                                    {{ $quote->currency->iso_code }} {{ number_format($quote->amount, 2) }}
                                                 </td>
                                                 <td data-label="Updated"
                                                     style="padding: 12px; border-bottom: 1px solid #e2e8f0;">

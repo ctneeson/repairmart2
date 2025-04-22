@@ -5,7 +5,12 @@
 <x-app-layout title="View Listing">
   <main>
       <div class="container">
-        <h1 class="listing-details-page-title">{{$listing->title}}</h1>
+        <div class="flex items-center">
+          <h1 class="listing-details-page-title">{{$listing->title}}</h1>
+          <span class="listing-status-badge status-{{ strtolower(str_replace(' ', '-', $listing->status->name)) }}">
+              {{ $listing->status->name }}
+          </span>
+        </div>
         <div class="listing-details-region">
           {{$listing->city}}, {{$listing->country->name}}
            - {{$listing->published_at}}
@@ -209,28 +214,52 @@
             </a>
             @endif
             {{-- Hide unless current user is a specialist or admin --}}
-            @if (auth()->check()
+            @if (auth()->check() 
                 && auth()->user()->roles->whereIn('name', ['specialist', 'admin'])->count() > 0
-                && auth()->id() !== $listing->user_id)
+                && auth()->id() !== $listing->user_id
+                && $listing->status->name === 'Open')
             <a href="{{route('quotes.create', $listing->id)}}" class="listing-details-createquote btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line>
-                <line x1="8" y1="12" x2="16" y2="12"></line>
-              </svg>
-              Create Quote
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Create Quote
             </a>
             @endif
             {{-- Hide unless current user is looking at their own listing --}}
-            @if (auth()->id() === $listing->user_id)
+            @if (auth()->id() === $listing->user_id && $listing->status->name === 'Open')
             <a href="{{route('listings.edit', $listing->id)}}" class="listing-details-edit btn">
-              <svg xmlns="http://www.w3.org/2000/svg"
-               width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-               <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path>
-               <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path>
+                    <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
+                </svg>
+                Edit Listing
+            </a>
+            <a href="{{route('listings.destroy', $listing->id)}}" class="listing-details-delete btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                </path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
               </svg>
-              Edit Listing
+              Delete Listing
+            </a>
+            @endif
+            {{-- Relist Button - Only show for owner when listing is Closed-Expired --}}
+            @if (auth()->id() === $listing->user_id && $listing->status->name === 'Closed-Expired')
+            <a href="{{route('listings.relist', $listing->id)}}" class="listing-details-relist btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <polyline points="23 20 23 14 17 14"></polyline>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+                Relist
             </a>
             @endif
           </div>

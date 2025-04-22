@@ -455,8 +455,12 @@
                 </div>
                 <div class="p-medium" style="width: 100%">
                     <div class="flex justify-end gap-1">
-                        <a href="{{ route('listings.show', $listing->id) }}"
-                            class="btn btn-default">Cancel</a>
+                        <button type="button" id="cancel-btn" class="btn btn-default"
+                            data-return-url="{{ route('listings.show', $listing->id) }}">
+                            Cancel
+                        </button>
+                        {{-- <a href="{{ route('listings.show', $listing->id) }}"
+                            class="btn btn-default">Cancel</a> --}}
                         <button type="button" class="btn btn-default" id="reset-button">Reset</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </div>

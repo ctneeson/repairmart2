@@ -1,7 +1,9 @@
 <header class="navbar">
     <div class="container navbar-content">
-        <a href="/" class="logo-wrapper">
-        <img src="/img/RepairMart-logo.png" alt="Logo" />
+        <a href="{{ Auth::check() ? route('dashboard') : '/' }}" 
+            class="logo-wrapper" 
+            title="{{ Auth::check() ? 'Go to Dashboard' : 'Go to Homepage' }}">
+            <img src="/img/RepairMart-logo.png" alt="Logo" />
         </a>
         <button class="btn btn-default btn-navbar-toggle">
         <svg
@@ -35,7 +37,6 @@
                 d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
             />
             </svg>
-
             Add new Listing
         </a>
         @auth()

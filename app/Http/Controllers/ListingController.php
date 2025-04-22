@@ -35,7 +35,6 @@ class ListingController extends Controller
      */
     public function create(Request $request)
     {
-        // Keep all authorization checks
         if (!Gate::allows('create', Listing::class)) {
             $user = auth()->user();
 
@@ -50,16 +49,7 @@ class ListingController extends Controller
             }
         }
 
-        // Get relisted data from session if available
-        $relistData = session('relist_data') ?? [];
-
-        // Get attachment information for preview
-        $attachments = [];
-        if (!empty($relistData['attachment_ids'])) {
-            $attachments = \App\Models\Attachment::whereIn('id', $relistData['attachment_ids'])->get();
-        }
-
-        return view('listings.create', compact('relistData', 'attachments'));
+        return view('listings.create');
     }
 
     /**
@@ -79,7 +69,7 @@ class ListingController extends Controller
             // Create the listing
             $listing = Listing::create([
                 'user_id' => Auth::id(),
-                'status_id' => 1, // Open
+                'status_id' => 1,
                 'manufacturer_id' => $validated['manufacturer_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
@@ -93,7 +83,7 @@ class ListingController extends Controller
                 'country_id' => $validated['country_id'] ?? null,
                 'phone' => $validated['phone'] ?? null,
                 'expiry_days' => $validated['expiry_days'],
-                'published_at' => $validated['published_at'] ?? now(),
+                'published_at' => $validated['published_at'] ?? null,
             ]);
 
             // Attach products to the listing
@@ -101,48 +91,17 @@ class ListingController extends Controller
                 $listing->products()->attach($validated['product_ids']);
             }
 
-            // Handle new file uploads
+            // Handle file uploads
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $i => $file) {
                     $path = $file->store('attachments', 'public');
-                    $listing->attachments()->create([
-                        'path' => $path,
-                        'position' => $i + 1,
-                        'mime_type' => $file->getMimeType(),
-                        'user_id' => Auth::id()
-                    ]);
-                }
-            }
-
-            // Handle duplicate attachments from relisted listing
-            if ($request->has('duplicate_attachments') && is_array($request->duplicate_attachments)) {
-                $position = $listing->attachments()->max('position') ?? 0;
-
-                foreach ($request->duplicate_attachments as $attachmentId) {
-                    $originalAttachment = Attachment::find($attachmentId);
-
-                    if ($originalAttachment) {
-                        // Create a new file copy to prevent deletion issues if original listing is deleted
-                        $originalPath = 'public/' . $originalAttachment->path;
-                        $newPath = 'attachments/' . basename($originalAttachment->path);
-
-                        if (Storage::exists($originalPath)) {
-                            // Copy the file to a new path
-                            $contents = Storage::get($originalPath);
-                            Storage::put('public/' . $newPath, $contents);
-
-                            // Create new attachment record
-                            $position++;
-                            $listing->attachments()->create([
-                                'path' => $newPath,
-                                'position' => $position,
-                                'mime_type' => $originalAttachment->mime_type,
-                                'user_id' => Auth::id(),
-                                'title' => $originalAttachment->title,
-                                'description' => $originalAttachment->description
-                            ]);
-                        }
-                    }
+                    $listing->attachments()
+                        ->create([
+                            'path' => $path,
+                            'position' => $i + 1,
+                            'mime_type' => $file->getMimeType(),
+                            'user_id' => Auth::id()
+                        ]);
                 }
             }
 
@@ -150,6 +109,7 @@ class ListingController extends Controller
                 ->with('success', 'Listing created successfully.');
 
         } catch (\Exception $e) {
+
             \Log::error('Error creating listing: ' . $e->getMessage());
 
             // Check if it's a file size issue
@@ -178,12 +138,28 @@ class ListingController extends Controller
 
     /**
      * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Listing  $listing
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse|\Illuminate\Contracts\View\View
      */
     public function edit(Listing $listing)
     {
-        Gate::authorize('update', $listing);
+        // Verify the current user owns this listing
+        if ($listing->user_id !== auth()->id()) {
+            return redirect()->route('listings.index')
+                ->with('error', 'You can only edit your own listings.');
+        }
 
-        return view('listings.edit', ['listing' => $listing]);
+        // Check if we're relisting
+        $isRelisting = session('is_relisting', false);
+
+        // If relisting, change some defaults for the form
+        if ($isRelisting) {
+            // These values will be used in the form but not saved until submission
+            $listing->published_at = now()->format('Y-m-d');
+        }
+
+        return view('listings.edit', compact('listing', 'isRelisting'));
     }
 
     /**
@@ -195,13 +171,30 @@ class ListingController extends Controller
 
         $validated = $request->validated();
         $validated['use_default_location'] = (bool) $request->use_default_location;
-        $products = $validated['product_ids'];
+        $products = $validated['product_ids'] ?? [];
+
+        // Check if we're relisting an expired listing
+        $isRelisting = session('is_relisting', false);
+
+        if ($isRelisting) {
+            // Reset the expiration and status for relisted listings
+            $validated['status_id'] = 1; // Open
+            $validated['expired_at'] = null;
+            $validated['published_at'] = $request->published_at ?? now();
+
+            // Clear the relisting flag from session
+            session()->forget('is_relisting');
+        }
 
         $listing->update($validated);
         $listing->products()->sync($products);
 
+        $successMessage = $isRelisting
+            ? 'Listing relisted successfully.'
+            : 'Listing updated successfully.';
+
         return redirect()->route('listings.index')
-            ->with('success', 'Listing updated successfully.');
+            ->with('success', $successMessage);
     }
 
     /**
@@ -211,7 +204,19 @@ class ListingController extends Controller
     {
         Gate::authorize('delete', $listing);
 
+        $retractedStatus = ListingStatus::where('name', 'Closed-Retracted')->first();
+
+        if (!$retractedStatus) {
+            \Log::warning('Closed-Retracted status not found when deleting listing #' . $listing->id);
+            $retractedStatus = ListingStatus::create(['name' => 'Closed-Retracted']);
+        }
+
+        $listing->update([
+            'status_id' => $retractedStatus->id,
+        ]);
+
         $listing->delete();
+
         return redirect()->route('listings.index')
             ->with('success', 'Listing deleted successfully.');
     }
@@ -357,42 +362,26 @@ class ListingController extends Controller
     }
 
     /**
-     * Prepare a new listing based on an expired one.
+     * Reopen an expired listing
      *
      * @param Listing $listing
      * @return \Illuminate\Http\RedirectResponse
      */
     public function relist(Listing $listing)
     {
+        Gate::authorize('restore', $listing);
+
         // Check if the listing is expired and belongs to the current user
         if ($listing->status->name !== 'Closed-Expired' || $listing->user_id !== auth()->id()) {
             return redirect()->route('listings.index')
                 ->with('error', 'You can only relist your own expired listings.');
         }
 
-        // Store attachment data so we can duplicate them later
-        $attachmentIds = $listing->attachments->pluck('id')->toArray();
+        // Set session flag to indicate we're relisting (for the edit form)
+        session()->flash('is_relisting', true);
 
-        // Store the old listing data in the session
-        session()->flash('relist_data', [
-            'title' => $listing->title,
-            'description' => $listing->description,
-            'manufacturer_id' => $listing->manufacturer_id,
-            'country_id' => $listing->country_id,
-            'city' => $listing->city,
-            'postcode' => $listing->postcode,
-            'address_line1' => $listing->address_line1,
-            'address_line2' => $listing->address_line2,
-            'currency_id' => $listing->currency_id,
-            'budget' => $listing->budget,
-            'phone' => $listing->phone,
-            'expiry_days' => $listing->expiry_days,
-            'use_default_location' => $listing->use_default_location,
-            'product_ids' => $listing->products->pluck('id')->toArray(),
-            'attachment_ids' => $attachmentIds, // Store attachment IDs to duplicate later
-        ]);
-
-        return redirect()->route('listings.create')
-            ->with('success', 'Create a new listing using the details from your expired listing.');
+        // Redirect to the edit form
+        return redirect()->route('listings.edit', $listing)
+            ->with('success', 'Update the listing details and submit to relist it.');
     }
 }

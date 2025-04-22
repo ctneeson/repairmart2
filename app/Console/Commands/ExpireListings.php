@@ -64,7 +64,7 @@ class ExpireListings extends Command
             ->get()
             ->filter(function ($listing) use ($today) {
                 // Calculate expiry date (using only the date portion, ignoring time)
-                $expiryDate = $listing->published_at->copy()
+                $expiryDate = Carbon::parse($listing->published_at)
                     ->addDays($listing->expiry_days)
                     ->startOfDay();
 

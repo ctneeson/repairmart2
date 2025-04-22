@@ -71,18 +71,15 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     function updateAddProductLinkVisibility() {
-        if (!addProductLink) return;
-
         const selectedValue = productSelect ? productSelect.value : "";
-        const validSelection =
-            selectedValue !== "" && !selectedProducts.includes(selectedValue);
-
-        // Show the add button when:
-        // 1. We have fewer than 3 products AND
-        // 2. There's a valid selection in the dropdown that isn't already selected
-        if (selectedProducts.length < 3 && validSelection) {
-            addProductLink.style.display = "inline-block";
-        } else {
+        if (
+            productSelect &&
+            selectedValue !== "" &&
+            !selectedProducts.includes(selectedValue) &&
+            selectedProducts.length < 3
+        ) {
+            addProductLink.style.display = "inline";
+        } else if (addProductLink) {
             addProductLink.style.display = "none";
         }
     }
@@ -107,25 +104,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // If not found in initialSelectedProducts, try to get from select options
             if (!productText && productSelect) {
-                // For multiple select, update the selector method
-                if (productSelect.multiple) {
-                    const productOption = Array.from(
-                        productSelect.options
-                    ).find((option) => option.value === productId);
-                    if (productOption) {
-                        productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
-                    }
+                const productOption = productSelect.querySelector(
+                    `option[value="${productId}"]`
+                );
+                if (productOption) {
+                    productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
                 } else {
-                    // Original selector for dropdown
-                    const productOption = productSelect.querySelector(
-                        `option[value="${productId}"]`
-                    );
-                    if (productOption) {
-                        productText = `${productOption.dataset.category} > ${productOption.dataset.subcategory}`;
-                    }
-                }
-
-                if (!productText) {
                     // As a fallback, just show the ID
                     productText = `Product #${productId}`;
                 }
@@ -135,14 +119,14 @@ document.addEventListener("DOMContentLoaded", function () {
             productElement.classList.add("listing-item-badge");
             productElement.style.position = "relative";
             productElement.textContent = productText;
-            productElement.style.width = "100%";
 
             const removeLink = document.createElement("a");
             removeLink.href = "#";
-            removeLink.classList.add("remove-product-link");
             removeLink.textContent = " Remove";
-            removeLink.style.marginLeft = "10px";
-            removeLink.style.float = "right";
+            removeLink.style.position = "absolute";
+            removeLink.style.right = "10px";
+            removeLink.style.top = "50%";
+            removeLink.style.transform = "translateY(-50%)";
             removeLink.addEventListener("click", function (e) {
                 e.preventDefault();
                 selectedProducts = selectedProducts.filter(

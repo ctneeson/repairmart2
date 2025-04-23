@@ -340,17 +340,20 @@ select:focus {
 
 .table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .table > thead > tr > th {
     background-color: #f4f4f4;
     padding: 0.75rem;
     text-align: left;
+    border-bottom: 2px solid #cbd5e0;
 }
 
 .table > tbody > tr > td {
     padding: 0.25rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 html,
@@ -727,7 +730,9 @@ main {
     margin-bottom: 2px;
 }
 
-.listing-status-badge {
+.listing-status-badge,
+.quote-status-badge,
+.order-status-badge {
     display: inline-block;
     padding: 0.35em 0.65em;
     font-size: 0.75em;
@@ -739,24 +744,6 @@ main {
     border-radius: 0.25rem;
     margin-left: 10px;
     text-transform: uppercase;
-}
-
-.listing-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 15px;
-    max-width: 100%;
-}
-
-.listing-meta .badge {
-    display: inline-block;
-    white-space: normal;
-    word-break: break-word;
-    text-align: left;
-    line-height: 1.3;
-    max-width: 100%;
-    margin-bottom: 3px;
 }
 
 .btn-heart {
@@ -838,7 +825,8 @@ a.pagination-item:hover {
 
 .listing-details-page-title,
 .quote-details-page-title,
-.order-details-page-title {
+.order-details-page-title,
+.email-index-page-title {
     margin-top: 0;
     margin-bottom: 0.25rem;
 }
@@ -964,21 +952,43 @@ a.pagination-item:hover {
     font-weight: bolder;
 }
 
-.listing-details-table {
+.listing-details-table,
+.listing-details-table-header {
     width: 100%;
 }
 
+.listing-details-table-small {
+    width: 100%;
+    font-size: 12px;
+}
+
 .listing-details-table th,
-.listing-details-table td {
+.listing-details-table td,
+.listing-details-table-small th,
+.listing-details-table-small td {
     padding: 0.5rem 0.5rem 0.5rem 0;
 }
 
-.listing-details-table th {
+.listing-details-table-header th {
+    /* padding: 0rem 1.5rem 0rem 0; */
+    width: 100%;
+    text-align: left;
+}
+
+.listing-details-table-header td {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    width: 100%;
+    text-align: right;
+}
+
+.listing-details-table th,
+.listing-details-table-small th {
     text-align: left;
     font-weight: 300;
 }
 
-.listing-details-table td {
+.listing-details-table td,
+.listing-details-table-small td {
     text-align: right;
 }
 
@@ -1000,11 +1010,11 @@ a.pagination-item:hover {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.25rem;
+    padding: 0.5rem;
     font-size: 14px;
     border: 1px solid var(--primary-button-border-color);
-    border-radius: 1rem;
+    /* border-radius: 1rem; */
     text-decoration: none;
     font-weight: bold;
     margin-bottom: 0.1rem;
@@ -1032,8 +1042,8 @@ a.pagination-item:hover {
 .listing-details-edit:hover,
 .listing-details-relist:hover,
 .listing-details-delete:hover {
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
+    /* border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem; */
     background-color: rgba(0, 0, 0, 0.1);
     color: #0056b3;
 }
@@ -1069,6 +1079,11 @@ a.pagination-item:hover {
 
 .listing-specifications > li > svg {
     width: 18px;
+}
+
+.td > div > a > svg {
+    width: 12px;
+    margin-right: 5px;
 }
 
 .add-new-listing-form .form-content {
@@ -1303,21 +1318,44 @@ a.pagination-item:hover {
 }
 
 .page-my-listings .btn-edit,
-.page-my-listings .btn-delete {
+.page-my-listings .btn-delete,
+.page-my-listings .btn-relist,
+.page-quotes-index .btn-edit,
+.page-quotes-index .btn-delete,
+.page-quotes-index .btn-relist,
+.page-orders-index .btn-edit,
+.page-orders-index .btn-delete,
+.page-orders-index .btn-relist {
     padding: 0.25rem 0.5rem;
     background-color: transparent;
+    width: 100%;
+    justify-content: flex-start;
 }
 
 .page-my-listings .btn-edit:hover,
-.page-my-listings .btn-delete:hover {
+.page-my-listings .btn-delete:hover,
+.page-my-listings .btn-relist:hover,
+.page-quotes-index .btn-edit:hover,
+.page-quotes-index .btn-delete:hover,
+.page-quotes-index .btn-relist:hover,
+.page-orders-index .btn-edit:hover,
+.page-orders-index .btn-delete:hover,
+.page-orders-index .btn-relist:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.page-my-listings .btn-edit {
+.page-my-listings .btn-edit,
+.page-quotes-index .btn-edit,
+.page-orders-index .btn-edit {
     color: #448eef;
 }
 
-.page-my-listings .btn-delete {
+.page-my-listings .btn-relist {
+    color: green;
+}
+
+.page-my-listings .btn-delete,
+.page-quotes-index .btn-delete {
     color: #f16060;
 }
 
@@ -1649,7 +1687,7 @@ input#phone[readonly] {
 .page-email-index .card-header,
 .page-quotes-index .card-header,
 .page-orders-index .card-header {
-    padding-top: 15px !important;
+    /* padding-top: 2px !important; */
     background-color: white;
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 0;
@@ -1714,22 +1752,45 @@ input#phone[readonly] {
     display: inline-block;
 }
 
-.quote-status-open {
+.quote-status-open,
+.listing-status-open,
+.order-status-created {
     background-color: #e3f2fd;
     color: #0d47a1;
 }
 
-.quote-status-accepted {
+.order-status-dispatched-to-specialist,
+.order-status-specialist-assessing,
+.order-status-specialist-repairing,
+.order-status-dispatched-to-customer {
+    background-color: #bbdefb;
+    color: #e08554;
+}
+
+.order-status-price-adjustment-requested {
+    background-color: #bbdefb;
+    color: #b71c1c;
+}
+
+.quote-status-accepted,
+.listing-status-closed-order-created,
+.order-status-price-adjustment-approved,
+.order-status-received-by-customer {
     background-color: #e8f5e9;
     color: #1b5e20;
 }
 
-.quote-status-rejected {
+.quote-status-rejected,
+.listing-status-closed-retracted,
+.order-status-price-adjustment-rejected,
+.order-status-cancelled {
     background-color: #ffebee;
     color: #b71c1c;
 }
 
-.quote-status-expired {
+.quote-status-expired,
+.listing-status-closed-expired,
+.order-status-closed {
     background-color: #eeeeee;
     color: #616161;
 }
@@ -1770,10 +1831,10 @@ input#phone[readonly] {
     position: relative;
 }
 
-.quote-status-badge {
+/* .quote-status-badge {
     position: relative;
     z-index: 10;
-}
+} */
 
 .status-open {
     background-color: #e3f2fd;
@@ -1912,6 +1973,8 @@ input#phone[readonly] {
 
 .quote-description-text {
     white-space: pre-line;
+    font-weight: normal;
+    font-style: italic;
 }
 
 .contact-item {
@@ -2086,6 +2149,105 @@ input[type="checkbox"]:disabled {
 .inline-form {
     display: inline-block;
     margin-left: 10px;
+}
+
+.actions-cell {
+    text-align: center !important;
+}
+
+.actions-cell .flex {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.actions-cell .btn {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.actions-cell .btn svg {
+    width: 12px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+.actions-cell form {
+    width: 100%;
+    text-align: center;
+}
+
+.action-buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    margin: 0 auto;
+    max-width: 130px;
+}
+
+.action-buttons-container .btn {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.btn svg,
+.action-buttons-container svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+}
+
+.text-center.py-large svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    stroke: #718096;
+    stroke-width: 1;
+}
+
+.btn-edit {
+    color: #4a5568;
+    background-color: #edf2f7;
+}
+
+.btn-edit:hover {
+    background-color: #e2e8f0;
+}
+
+.btn-delete {
+    color: #e53e3e;
+    background-color: #fed7d7;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.btn-delete:hover {
+    background-color: #feb2b2;
+}
+
+.btn-relist {
+    color: #3182ce;
+    background-color: #bee3f8;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.btn-relist:hover {
+    background-color: #90cdf4;
 }
 
 @media screen and (max-width: 1200px) {
@@ -2362,11 +2524,11 @@ input[type="checkbox"]:disabled {
         align-items: flex-start;
     }
 
-    .quote-status-badge {
+    /* .quote-status-badge {
         position: static;
         margin-top: 10px;
         display: inline-block;
-    }
+    } */
 
     .quote-actions {
         margin-top: 20px !important;

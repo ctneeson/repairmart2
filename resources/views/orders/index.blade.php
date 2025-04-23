@@ -1,19 +1,16 @@
 <x-app-layout title="Orders" bodyClass="page-orders-index">
     <main>
-        <div class="container-small">
-            <div class="d-flex justify-content-between align-items-center mb-medium">
-                <h1 class="page-title">Orders</h1>
-            </div>
+        <div class="container">
+            <h1 class="order-details-page-title">Orders</h1>
 
-            <div class="card">
-                <div class="card-header"
-                    style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0;">
+            <div class="card p-medium">
+                <div class="card-header">
                     <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         @if(auth()->user()->hasRole('customer'))
                         <li class="nav-item">
-                            <a class="nav-link {{ !auth()->user()->hasRole('specialist') ? 'active' : '' }}"
+                            <a class="nav-link {{ auth()->user()->hasRole('customer') ? 'active' : '' }}"
                                 href="#customer-orders">
-                                My Orders
+                                Customer Orders
                                 @if($customerOrders->where('status_id', 1)->count() > 0)
                                     <span class="badge rounded-pill"
                                         style="color: white; background-color: #3490dc;
@@ -27,11 +24,10 @@
                         
                         @if(auth()->user()->hasRole('specialist'))
                         <li class="nav-item">
-                            <a class="nav-link {{ !auth()->user()->hasRole('customer')
-                                || (auth()->user()->hasRole('customer')
-                                && auth()->user()->hasRole('specialist')) ? 'active' : '' }}"
+                            <a class="nav-link {{ auth()->user()->hasRole('specialist')
+                                && !auth()->user()->hasRole('customer') ? 'active' : '' }}"
                                 href="#specialist-orders">
-                                Repair Orders
+                                Specialist Orders
                                 @if($specialistOrders->where('status_id', 1)->count() > 0)
                                     <span class="badge rounded-pill"
                                         style="color: white; background-color: #38a169; margin-left: 5px;">
@@ -47,62 +43,87 @@
                 <div class="tab-content p-medium">
                     <!-- Customer Orders Tab -->
                     @if(auth()->user()->hasRole('customer'))
-                    <div class="tab-pane {{ !auth()->user()->hasRole('specialist')
-                            ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
                         id="customer-orders"
-                        style="{{ !auth()->user()->hasRole('specialist')
-                            ? '' : 'display: none;' }}">
+                        style="{{ auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
                         @if($customerOrders->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Listing</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Specialist</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Created</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">Actions</th>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Listing</th>
+                                            <th>Specialist</th>
+                                            <th>Created</th>
+                                            <th>Status</th>
+                                            <th style="min-width: 120px; width: 120px;">Amount</th>
+                                            <th style="text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($customerOrders as $order)
-                                            <tr style="border-bottom: 1px solid #e2e8f0; 
-                                                {{ $order->status_id === 1
-                                                    ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
-                                                <td data-label="Listing"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    <a href="{{ route('listings.show', $order->quote->listing->id) }}"
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                      $attachmentUrl = $order->listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+                                                      $filePath = $order->listing->primaryAttachment ? Storage::disk('public')->path($order->listing->primaryAttachment->path) : public_path($attachmentUrl);
+                                                      $mimeType = $order->listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+                                                    @endphp
+                                                    @if (str_starts_with($mimeType, 'image/'))
+                                                      <img
+                                                        src="{{ $attachmentUrl }}"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @elseif (str_starts_with($mimeType, 'video/'))
+                                                      <video
+                                                        src="{{ $attachmentUrl }}"
+                                                        class="my-listings-img-thumbnail"
+                                                      ></video>
+                                                    @else
+                                                      <img
+                                                        src="/img/no-photo-available.jpg"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @endif
+                                                </td>
+                                                <td data-label="Listing">
+                                                    <a href="{{ route('listings.show', $order->listing->id) }}"
                                                         class="text-decoration-none">
-                                                        {{ $order->quote->listing->title }}
+                                                        {{ $order->listing->title }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Specialist"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Specialist">
                                                     <a href="{{ route('profile.show', $order->repairSpecialist) }}"
                                                         class="text-decoration-none">
                                                         {{ $order->repairSpecialist->name }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Created"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $order->created_at->format('M j, Y') }}
+                                                <td data-label="Created">
+                                                    {{ $order->created_at->format('Y-m-d') }}
                                                 </td>
-                                                <td data-label="Status"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    <span class="badge bg-{{ $order->status->color }}">
+                                                <td data-label="Status">
+                                                    <span class="badge
+                                                        order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">
                                                         {{ $order->status->name }}
                                                     </span>
                                                 </td>
-                                                <td data-label="Amount"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $order->currency->symbol }} {{ number_format($order->amount, 2) }}
+                                                <td data-label="Amount">
+                                                    {{ $order->currency->iso_code }} {{ number_format($order->amount, 2) }}
                                                 </td>
-                                                <td data-label="Actions" 
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                                    <div class="order-action-buttons">
+                                                <td data-label="Actions" class="actions-cell">
+                                                    <div class="action-buttons-container">
                                                         <a href="{{ route('orders.show', $order->id) }}"
-                                                            class="btn btn-sm btn-outline-primary btn-block text-center">
+                                                            class="btn btn-edit">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke-width="1.5" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                </path>
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                            </svg>
                                                             View
                                                         </a>
                                                     </div>
@@ -119,7 +140,7 @@
                         @else
                             <div class="text-center py-large">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1" stroke="#718096" style="width: 64px; height: 64px; margin: 0 auto 20px;">
+                                    stroke-width="1" stroke="#718096">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5
                                             7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621
@@ -135,66 +156,88 @@
                     
                     <!-- Specialist Orders Tab -->
                     @if(auth()->user()->hasRole('specialist'))
-                    <div class="tab-pane {{ !auth()->user()->hasRole('customer')
-                            || (auth()->user()->hasRole('customer')
-                            && auth()->user()->hasRole('specialist'))
-                            ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ auth()->user()->hasRole('specialist')
+                        && !auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
                         id="specialist-orders"
-                        style="{{ !auth()->user()->hasRole('customer')
-                            || (auth()->user()->hasRole('customer')
-                            && auth()->user()->hasRole('specialist'))
-                            ? '' : 'display: none;' }}">
+                        style="{{ auth()->user()->hasRole('specialist')
+                            && !auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
                         @if($specialistOrders->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Listing</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Customer</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Created</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">Actions</th>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Listing</th>
+                                            <th>Customer</th>
+                                            <th>Created</th>
+                                            <th>Status</th>
+                                            <th style="min-width: 120px; width: 120px;">Amount</th>
+                                            <th style="text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($specialistOrders as $order)
-                                            <tr style="border-bottom: 1px solid #e2e8f0; 
-                                                {{ $order->status_id === 1
-                                                    ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
-                                                <td data-label="Listing"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    <a href="{{ route('listings.show', $order->quote->listing->id) }}"
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                      $attachmentUrl = $order->listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+                                                      $filePath = $order->listing->primaryAttachment ? Storage::disk('public')->path($order->listing->primaryAttachment->path) : public_path($attachmentUrl);
+                                                      $mimeType = $order->listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+                                                    @endphp
+                                                    @if (str_starts_with($mimeType, 'image/'))
+                                                      <img
+                                                        src="{{ $attachmentUrl }}"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @elseif (str_starts_with($mimeType, 'video/'))
+                                                      <video
+                                                        src="{{ $attachmentUrl }}"
+                                                        class="my-listings-img-thumbnail"
+                                                      ></video>
+                                                    @else
+                                                      <img
+                                                        src="/img/no-photo-available.jpg"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @endif
+                                                </td>
+                                                <td data-label="Listing">
+                                                    <a href="{{ route('listings.show', $order->listing->id) }}"
                                                         class="text-decoration-none">
-                                                        {{ $order->quote->listing->title }}
+                                                        {{ $order->listing->title }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Customer"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Customer">
                                                     <a href="{{ route('profile.show', $order->customer) }}"
                                                         class="text-decoration-none">
                                                         {{ $order->customer->name }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Created"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $order->created_at->format('M j, Y') }}
+                                                <td data-label="Created">
+                                                    {{ $order->created_at->format('Y-m-d') }}
                                                 </td>
-                                                <td data-label="Status"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Status">
                                                     <span class="badge bg-{{ $order->status->color }}">
                                                         {{ $order->status->name }}
                                                     </span>
                                                 </td>
-                                                <td data-label="Amount"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $order->currency->symbol }} {{ number_format($order->amount, 2) }}
+                                                <td data-label="Amount">
+                                                    {{ $order->currency->iso_code }} {{ number_format($order->amount, 2) }}
                                                 </td>
-                                                <td data-label="Actions" 
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                                    <div class="order-action-buttons">
+                                                <td data-label="Actions" class="actions-cell">
+                                                    <div class="action-buttons-container">
                                                         <a href="{{ route('orders.show', $order->id) }}"
-                                                            class="btn btn-sm btn-outline-primary btn-block text-center">
+                                                            class="btn btn-edit">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke-width="1.5" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                </path>
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                            </svg>
                                                             View
                                                         </a>
                                                     </div>
@@ -211,8 +254,7 @@
                         @else
                             <div class="text-center py-large">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1" stroke="#718096" 
-                                    style="width: 64px; height: 64px; margin: 0 auto 20px;">
+                                    stroke-width="1" stroke="#718096">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125
                                             1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75

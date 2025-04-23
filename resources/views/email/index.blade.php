@@ -1,20 +1,18 @@
 <x-app-layout title="Messages" bodyClass="page-email-index">
     <main>
         <div class="container-small">
-            <div class="d-flex justify-content-between align-items-center mb-medium">
-                <h1 class="page-title">Messages</h1>
-                
-                @if(auth()->user()->hasRole('admin'))
-                    <a href="{{ route('email.create') }}" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        New Message
-                    </a>
-                @endif
-            </div>
+            <h1 class="email-index-page-title">Messages</h1>
+            
+            @if(auth()->user()->hasRole('admin'))
+                <a href="{{ route('email.create') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; margin-right: 5px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    New Message
+                </a>
+            @endif
 
-            <div class="card">
+            <div class="card p-medium">
                 <div class="card-header" style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0;">
                     <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         <li class="nav-item">

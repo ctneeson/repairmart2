@@ -1,18 +1,15 @@
 <x-app-layout title="Quotes" bodyClass="page-quotes-index">
     <main>
-        <div class="container-small">
-            <div class="d-flex justify-content-between align-items-center mb-medium">
-                <h1 class="page-title">Quotes</h1>
-            </div>
+        <div class="container">
+            <h1 class="quote-details-page-title">Quotes</h1>
 
-            <div class="card">
-                <div class="card-header"
-                    style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0;">
+            <div class="card p-medium">
+                <div class="card-header">
                     <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         @if(auth()->user()->hasRole('customer'))
                         <li class="nav-item">
                             <a class="nav-link {{ auth()->user()->hasRole('customer') ? 'active' : '' }}"
-                               href="#received">
+                                href="#received">
                                 Quotes Received
                                 @if($receivedPendingCount > 0)
                                     <span class="badge rounded-pill"
@@ -53,55 +50,81 @@
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Listing</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Created</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Delivery Method</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Updated</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">Actions</th>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Listing</th>
+                                            <th>Expiry</th>
+                                            <th>Status</th>
+                                            <th>Delivery Method</th>
+                                            <th style="min-width: 120px; width: 120px;">Amount</th>
+                                            <th>Updated</th>
+                                            <th style="text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($receivedQuotes as $quote)
-                                            <tr style="border-bottom: 1px solid #e2e8f0; 
-                                                {{ $quote->status->name === 'Open'
-                                                    ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
-                                                <td data-label="Listing"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                      $attachmentUrl = $quote->listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+                                                      $filePath = $quote->listing->primaryAttachment ? Storage::disk('public')->path($quote->listing->primaryAttachment->path) : public_path($attachmentUrl);
+                                                      $mimeType = $quote->listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+                                                    @endphp
+                                                    @if (str_starts_with($mimeType, 'image/'))
+                                                      <img
+                                                        src="{{ $attachmentUrl }}"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @elseif (str_starts_with($mimeType, 'video/'))
+                                                      <video
+                                                        src="{{ $attachmentUrl }}"
+                                                        class="my-listings-img-thumbnail"
+                                                      ></video>
+                                                    @else
+                                                      <img
+                                                        src="/img/no-photo-available.jpg"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @endif
+                                                </td>
+                                                <td data-label="Listing">
                                                     <a href="{{ route('listings.show', $quote->listing->id) }}"
                                                         class="text-decoration-none">
                                                         {{ $quote->listing->title }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Created"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                                                    {{ $quote->listing->getPublishedDate() }}
+                                                <td data-label="Expiry">
+                                                    {{ $quote->listing->getExpiryDateAttribute()->format('Y-m-d') }}
                                                 </td>
-                                                <td data-label="Status"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Status">
                                                     <span class="badge
                                                         quote-status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}">
                                                         {{ $quote->status->name }}
                                                     </span>
                                                 </td>
-                                                <td data-label="Delivery Method"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Delivery Method">
                                                     {{ $quote->deliveryMethod->name }}
                                                 </td>
-                                                <td data-label="Amount"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Amount">
                                                     {{ $quote->currency->iso_code }} {{ number_format($quote->amount, 2) }}
                                                 </td>
-                                                <td data-label="Updated"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Updated">
                                                     {{ $quote->getUpdatedDate() }}
                                                 </td>
-                                                <td data-label="Actions" style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                                    <div class="quote-action-buttons">
+                                                <td data-label="Actions" class="actions-cell">
+                                                    <div class="action-buttons-container">
                                                         <a href="{{ route('quotes.show', $quote->id) }}"
-                                                            class="btn btn-sm btn-outline-primary btn-block mb-1 text-center">
+                                                            class="btn btn-edit">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke-width="1.5" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                </path>
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                            </svg>
                                                             View
                                                         </a>
                                                     </div>
@@ -118,7 +141,7 @@
                         @else
                             <div class="text-center py-large">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1" stroke="#718096" style="width: 64px; height: 64px; margin: 0 auto 20px;">
+                                    stroke-width="1" stroke="#718096">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5
                                             7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621
@@ -143,57 +166,91 @@
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Listing</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Published</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Delivery Method</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Updated</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">Actions</th>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Listing</th>
+                                            <th>Published</th>
+                                            <th>Status</th>
+                                            <th>Delivery Method</th>
+                                            <th style="min-width: 120px; width: 120px;">Amount</th>
+                                            <th>Updated</th>
+                                            <th style="text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($submittedQuotes as $quote)
-                                            <tr style="border-bottom: 1px solid #e2e8f0; {{ $quote->status->name === 'Open' ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
-                                                <td data-label="Listing"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                      $attachmentUrl = $quote->listing->primaryAttachment?->getUrl() ?: '/img/no-photo-available.jpg';
+                                                      $filePath = $quote->listing->primaryAttachment ? Storage::disk('public')->path($quote->listing->primaryAttachment->path) : public_path($attachmentUrl);
+                                                      $mimeType = $quote->listing->primaryAttachment ? mime_content_type($filePath) : 'image/jpeg';
+                                                    @endphp
+                                                    @if (str_starts_with($mimeType, 'image/'))
+                                                      <img
+                                                        src="{{ $attachmentUrl }}"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @elseif (str_starts_with($mimeType, 'video/'))
+                                                      <video
+                                                        src="{{ $attachmentUrl }}"
+                                                        class="my-listings-img-thumbnail"
+                                                      ></video>
+                                                    @else
+                                                      <img
+                                                        src="/img/no-photo-available.jpg"
+                                                        alt=""
+                                                        class="my-listings-img-thumbnail"
+                                                      />
+                                                    @endif
+                                                </td>
+                                                <td data-label="Listing">
                                                     <a href="{{ route('listings.show', $quote->listing->id) }}"
                                                         class="text-decoration-none">
                                                         {{ $quote->listing->title }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Created"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Created">
                                                     {{ $quote->listing->getPublishedDate() }}
                                                 </td>
-                                                <td data-label="Status"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Status">
                                                     <span class="badge quote-status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}">
                                                         {{ $quote->status->name }}
                                                     </span>
                                                 </td>
-                                                <td data-label="Delivery Method"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Delivery Method">
                                                     {{ $quote->deliveryMethod->name }}
                                                 </td>
-                                                <td data-label="Amount"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Amount">
                                                     {{ $quote->currency->iso_code }} {{ number_format($quote->amount, 2) }}
                                                 </td>
-                                                <td data-label="Updated"
-                                                    style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td data-label="Updated">
                                                     {{ $quote->getUpdatedDate() }}
                                                 </td>
-                                                <td data-label="Actions" style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                                    <div class="quote-action-buttons">
+                                                <td data-label="Actions" class="actions-cell">
+                                                    <div class="action-buttons-container">
                                                         <a href="{{ route('quotes.show', $quote->id) }}"
-                                                            class="btn btn-sm btn-outline-primary btn-block mb-1 text-center">
+                                                            class="btn btn-edit">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke-width="1.5" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                </path>
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                            </svg>
                                                             View
                                                         </a>
                                                         @if($quote->status->name === 'Open')
                                                             <a href="{{ route('quotes.edit', $quote->id) }}"
-                                                                class="btn btn-sm btn-outline-secondary btn-block mb-1 text-center">
+                                                                class="btn btn-edit">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                                <path stroke-linecap="round"
+                                                                    stroke-linejoin="round"
+                                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                                </svg>
                                                                 Edit
                                                             </a>
                                                             <form action="{{ route('quotes.destroy', $quote->id) }}" 
@@ -203,7 +260,14 @@
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
-                                                                    class="btn btn-sm btn-outline-danger btn-block text-center">
+                                                                    class="btn btn-delete">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                                            <line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
+                                                                        </svg>
                                                                     Delete
                                                                 </button>
                                                             </form>
@@ -222,8 +286,7 @@
                         @else
                             <div class="text-center py-large">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1" stroke="#718096"
-                                    style="width: 64px; height: 64px; margin: 0 auto 20px;">
+                                    stroke-width="1" stroke="#718096">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125
                                             1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75

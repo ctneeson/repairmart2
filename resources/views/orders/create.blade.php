@@ -148,12 +148,20 @@
                                     view listing
                                 </a>
                         </h3>
-                        <div class="listing-meta">
-                            <span class="badge bg-info">{{ $quote->listing->manufacturer->name }}</span>
-                            @foreach($quote->listing->products as $product)
-                                <span class="badge bg-secondary">{{ $product->category }} > {{ $product->subcategory }}</span>
-                            @endforeach
-                        </div>
+                        <table class="listing-details-table-small">
+                            <tbody>
+                                <tr>
+                                    <th>Manufacturer</th>
+                                    <td>{{ $quote->listing->manufacturer->name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Product(s)</th>
+                                @foreach($quote->listing->products as $product)
+                                    <td colspan="2">{{ $product->category }} > {{ $product->subcategory }}</td>
+                                @endforeach
+                                </tr>
+                            </tbody>
+                        </table>
                         @if($quote->listing->primaryAttachment)
                         <div class="listing-thumbnail mb-small">
                             @if(Str::contains($quote->listing->primaryAttachment->mime_type, 'image'))

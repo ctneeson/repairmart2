@@ -1,23 +1,15 @@
 <x-app-layout title="View Quote">
     <main>
         <div class="container-small">
-            <div class="quote-header" style="margin-bottom: 1rem !important; position: relative; display: block; clear: both;">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h1 class="mb-0">Quote #{{ $quote->id }}</h1>
-                    
-                    <div class="quote-status-badge status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}" 
-                        style="float: right; clear: both; position: relative; z-index: 10;">
-                        {{ $quote->status->name }}
-                    </div>
-                </div>
-                
-                <!-- Clear both to ensure details start below the status badge -->
-                <div style="clear: both;"></div>
-                
+            <div class="flex items-center">
+                <h1 class="quote-details-page-title">Quote #{{ $quote->id }}</h1>
+                <span class="quote-status-badge status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}">
+                    {{ $quote->status->name }}
+                </span>
             </div>
 
             <!-- Quote Details Card -->
-            <div class="card p-large mb-large">
+            <div class="card p-large my-medium">
                 <div class="row">
                     <!-- Left Column: Quote Information -->
                     <div class="col-md-8 pe-md-4">
@@ -27,16 +19,16 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="detail-group">
-                                        <label>Amount</label>
-                                        <div class="detail-value">
+                                        <label style="font-weight: bold">Amount</label>
+                                        <div class="detail-value quote-description-text">
                                             {{ $quote->currency->iso_code}} {{ number_format($quote->amount, 2) }}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="detail-group">
-                                        <label>Turnaround Time</label>
-                                        <div class="detail-value">
+                                        <label style="font-weight: bold">Turnaround Time</label>
+                                        <div class="detail-value quote-description-text">
                                             {{ $quote->turnaround }} {{ Str::plural('day', $quote->turnaround) }}
                                         </div>
                                     </div>
@@ -46,16 +38,16 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="detail-group">
-                                        <label>Delivery Method</label>
-                                        <div class="detail-value">
+                                        <label style="font-weight: bold">Delivery Method</label>
+                                        <div class="detail-value quote-description-text">
                                             {{ $quote->deliveryMethod->name }}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="detail-group">
-                                        <label>Created On</label>
-                                        <div class="detail-value">
+                                        <label style="font-weight: bold">Created On</label>
+                                        <div class="detail-value quote-description-text">
                                             {{ $quote->created_at->format('d M Y, H:i') }}
                                         </div>
                                     </div>
@@ -65,7 +57,7 @@
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <div class="detail-group">
-                                        <label>Quote Description</label>
+                                        <label style="font-weight: bold">Quote Description</label>
                                         <div class="detail-value quote-description-text">
                                             {!! nl2br(e($quote->description)) !!}
                                         </div>
@@ -156,24 +148,6 @@
                                     </div>
                                 </div>
                             @endif
-                            <div class="row mt-4">
-                                <div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                    @if (auth()->id() === $quote->listing->user_id)
-                                    <a href="{{ route('email.create', ['quote_id' => $quote->id, 'recipient_ids[]' => $quote->user_id]) }}"
-                                        class="listing-details-email btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                            <polyline points="22,6 12,13 2,6"></polyline>
-                                        </svg>
-                                        Contact Repair Specialist
-                                    </a>
-                                    @endif
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -181,20 +155,35 @@
                     <div class="col-md-4">
                         <div class="contact-sidebar">
                             <h2 class="mb-small">Listing Details</h2>
-                            <h3>{{ $quote->listing->title }}
-                                <a href="{{ route('listings.show', $quote->listing_id) }}" 
-                                    class="btn btn-outline-secondary btn-sm mt-2" 
-                                    target="_blank" 
-                                    rel="noopener">
-                                     view listing
-                                 </a>
-                            </h3>
-                            <div class="listing-meta">
-                                <span class="badge bg-info">{{ $quote->listing->manufacturer->name }}</span>
-                                @foreach($quote->listing->products as $product)
-                                    <span class="badge bg-secondary">{{ $product->category }} > {{ $product->subcategory }}</span>
-                                @endforeach
-                            </div>
+                            <table class="listing-details-table-header">
+                                <tbody>
+                                    <tr>
+                                        <th><h3>{{ $quote->listing->title }}</h3></th>
+                                        <td>
+                                            <a href="{{ route('listings.show', $quote->listing_id) }}" 
+                                                class="btn" 
+                                                target="_blank" 
+                                                rel="noopener">
+                                                view
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="listing-details-table-small">
+                                <tbody>
+                                    <tr>
+                                        <th>Manufacturer</th>
+                                        <td>{{ $quote->listing->manufacturer->name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Product(s)</th>
+                                    @foreach($quote->listing->products as $product)
+                                        <td colspan="2">{{ $product->category }} > {{ $product->subcategory }}</td>
+                                    @endforeach
+                                    </tr>
+                                </tbody>
+                            </table>
                             @if($quote->listing->primaryAttachment)
                             <div class="listing-thumbnail mb-small">
                                 @if(Str::contains($quote->listing->primaryAttachment->mime_type, 'image'))
@@ -347,8 +336,21 @@
                 </div>
             </div>
             <div class="quote-actions-right">
+                @if (auth()->id() === $quote->customer->id)
+                <a href="{{ route('email.create', ['quote_id' => $quote->id, 'recipient_ids[]' => $quote->user_id]) }}"
+                    class="listing-details-email btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    Contact Repair Specialist
+                </a>
+                @endif
                 @if(auth()->id() === $quote->customer->id && $quote->status_id === 1)
-                <a href="{{ route('orders.create', $quote) }}" class="btn btn-primary">
+                <a href="{{ route('orders.create', $quote) }}" class="btn btn-primary"
+                    style="margin-bottom: 0.1rem;">
                     Accept Quote
                 </a>
                 @endif

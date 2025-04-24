@@ -22,7 +22,21 @@
         </svg>
         </button>
         <div class="navbar-auth">
-        <a href="{{route('listings.create')}}" class="btn btn-add-new-listing">
+            <a href="{{route('listings.search')}}" class="btn btn-add-new-listing">
+                <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                style="width: 18px; margin-right: 4px"
+                >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Search Listings
+            </a>
+            <a href="{{route('listings.create')}}" class="btn btn-add-new-listing">
             <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

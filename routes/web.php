@@ -27,6 +27,8 @@ Route::get('/listings/search', [ListingController::class, 'search'])->name('list
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/activity-summary', [DashboardController::class, 'activitySummary'])
+        ->name('dashboard.activitySummary');
     // User Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

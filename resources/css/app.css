@@ -106,6 +106,7 @@ hr {
     display: flex;
     margin-left: -0.5rem;
     margin-right: -0.5rem;
+    width: 100%;
 }
 
 .col {
@@ -356,6 +357,20 @@ select:focus {
     border-bottom: 1px solid #e2e8f0;
 }
 
+.table th {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.table td {
+    font-size: 0.9rem;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.4rem;
+}
+
 html,
 body {
     min-height: 100%;
@@ -502,7 +517,7 @@ main {
 
 .card {
     background-color: white;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     border-radius: 0.5rem;
 }
 
@@ -771,9 +786,38 @@ main {
     justify-content: space-between;
 }
 
+.card-title {
+    font-size: 20px;
+    font-weight: bolder;
+    margin-bottom: 0.5rem;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* .card-body {
+    flex: 1 0 auto;
+    padding: 0rem 1.5rem;
+} */
+.card-body {
+    padding: 0rem 1.5rem;
+}
+
+.card-header {
+    border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
+    padding: 0rem 1.5rem;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
+    font-size: 0.9rem;
+}
+
+.pagination .page-item .page-link {
+    padding: 0.25rem 0.5rem;
 }
 
 .pagination-item {
@@ -957,7 +1001,8 @@ a.pagination-item:hover {
     width: 100%;
 }
 
-.listing-details-table-small {
+.listing-details-table-small,
+.dashboard-activity-table-small {
     width: 100%;
     font-size: 12px;
 }
@@ -990,6 +1035,17 @@ a.pagination-item:hover {
 .listing-details-table td,
 .listing-details-table-small td {
     text-align: right;
+}
+
+.dashboard-activity-table-small th {
+    padding-right: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.dashboard-activity-table-small td {
+    text-align: right;
+    font-weight: bold;
 }
 
 .listing-details-owner {
@@ -1699,9 +1755,14 @@ input#phone[readonly] {
     margin-top: 5px;
 }
 
+.page-dashboard .nav-tabs .nav-item {
+    margin-top: 0;
+}
+
 .page-email-index .nav-tabs .nav-link,
 .page-quotes-index .nav-tabs .nav-link,
-.page-orders-index .nav-tabs .nav-link {
+.page-orders-index .nav-tabs .nav-link,
+.page-dashboard .nav-tabs .nav-link {
     cursor: pointer;
     padding: 0.75rem 1rem;
     border-top-left-radius: 0.25rem;
@@ -1715,7 +1776,8 @@ input#phone[readonly] {
 
 .page-email-index .nav-tabs .nav-link.active,
 .page-quotes-index .nav-tabs .nav-link.active,
-.page-orders-index .nav-tabs .nav-link.active {
+.page-orders-index .nav-tabs .nav-link.active,
+.page-dashboard .nav-tabs .nav-link.active {
     color: #3490dc;
     border-bottom: 2px solid #3490dc;
     background-color: transparent;
@@ -1723,7 +1785,8 @@ input#phone[readonly] {
 
 .page-email-index .card-header-tabs,
 .page-quotes-index .card-header-tabs,
-.page-orders-index .card-header-tabs {
+.page-orders-index .card-header-tabs,
+.page-dashboard .card-header-tabs {
     margin-right: 0;
     margin-bottom: -1px;
     margin-left: 0;
@@ -1731,7 +1794,8 @@ input#phone[readonly] {
 
 .page-email-index .nav-tabs,
 .page-quotes-index .nav-tabs,
-.page-orders-index .nav-tabs {
+.page-orders-index .nav-tabs,
+.page-dashboard .nav-tabs {
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     flex-wrap: wrap;
@@ -1914,6 +1978,14 @@ input#phone[readonly] {
     padding-right: 5px;
     padding-left: 5px;
     box-sizing: border-box;
+}
+
+.col-md-6 {
+    width: 50% !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .quote-details .col-md-12 {
@@ -2250,6 +2322,43 @@ input[type="checkbox"]:disabled {
     background-color: #90cdf4;
 }
 
+.card.h-100 {
+    height: 100% !important;
+}
+
+.row-eq-height {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row-eq-height > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.row-eq-height .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+#activityTabs {
+    border-bottom: 1px solid #dee2e6;
+}
+
+#activityTabs .nav-link {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+#activityTabsContent {
+    padding-top: 1rem;
+}
+
 @media screen and (max-width: 1200px) {
     .listing-items-listing {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2391,6 +2500,8 @@ input[type="checkbox"]:disabled {
 @media screen and (max-width: 680px) {
     .row {
         flex-direction: column;
+        margin-left: -15px;
+        margin-right: -15px;
     }
 
     .navbar {
@@ -2545,6 +2656,14 @@ input[type="checkbox"]:disabled {
         flex: 0 0 100%;
         max-width: 100%;
         margin-bottom: 1rem;
+    }
+
+    .col-md-6 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        padding-left: 15px;
+        padding-right: 15px;
     }
 
     .col-md-8,

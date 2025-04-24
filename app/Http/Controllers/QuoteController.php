@@ -204,10 +204,12 @@ class QuoteController extends Controller
                 ->with('error', $response->message());
         }
 
+        $user = auth()->user();
+
         // Get all delivery methods
         $deliveryMethods = DeliveryMethod::all();
 
-        return view('quotes.edit', compact('quote', 'deliveryMethods'));
+        return view('quotes.edit', compact('quote', 'user', 'deliveryMethods'));
     }
 
     /**

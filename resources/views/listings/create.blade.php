@@ -148,8 +148,21 @@
                                 <div class="col">
                                     <div class="form-group @error('country_id') has-error @enderror">
                                         <label>Country</label>
-                                        <x-select-country-all id="countrySelect" :value="old('country_id', auth()->user()->country_id)" />
-                                        <p class="error-message">{{ $errors->first('country_id') }}</p>
+                                        <!-- Always include a hidden country_id field for default location -->
+                                        <input type="hidden" 
+                                            name="{{ old('use_default_location', '1') == '1' ? 'country_id' : '_country_id' }}" 
+                                            id="hidden_country_id" 
+                                            value="{{ old('country_id', auth()->user()->country_id) }}">
+                                        
+                                        <x-select-country-all 
+                                            name="{{ old('use_default_location', '1') == '1' ? '_country_id' : 'country_id' }}"
+                                            id="countrySelect"
+                                            value="{{ old('country_id', auth()->user()->country_id) }}" 
+                                            :disabled="old('use_default_location', '1') == '1'" />
+                                        
+                                        @error('country_id')
+                                            <p class="error-message">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col">
@@ -241,7 +254,25 @@
         </div>
     </main>
 
-    @include('js.listings-create-toggle-address-inputs')
+    @push('styles')
+    <style>
+        #countrySelect, 
+        #countrySelect:disabled, 
+        #address-fields select:disabled {
+            opacity: 0.7 !important;
+            background-color: #f5f5f5 !important;
+            color: #6c757d !important;
+            display: inline-block !important; /* Changed from block to inline-block */
+            visibility: visible !important;
+            pointer-events: none !important;
+            border: 1px solid #ced4da !important;
+        }
+    </style>
+    @endpush
+
+    @push('scripts')
+        @include('js.listings-create-toggle-address-inputs')
+    @endpush
 
     @vite([
         'resources/js/listings-create-dynamic-product-select.js',

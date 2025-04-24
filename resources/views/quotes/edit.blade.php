@@ -363,12 +363,27 @@
                                             value="{{ old('country_id', $quote->country_id) }}"
                                             {{ old('use_default_location', $quote->use_default_location) != true ? 'disabled' : '' }}>
                                         
-                                        <x-select-country-all 
-                                            name="{{ old('use_default_location', $quote->use_default_location) ? '_country_id' : 'country_id' }}"
-                                            id="visible_country_id"
-                                            value="{{ old('country_id', $quote->country_id) }}"
-                                            :disabled="old('use_default_location', $quote->use_default_location) ? true : false"
-                                            required="true" />
+                                        <!-- Use regular select instead of component when disabled -->
+                                        @if(old('use_default_location', $quote->use_default_location))
+                                            <select 
+                                                name="_country_id" 
+                                                id="country_id" 
+                                                class="form-select" 
+                                                disabled>
+                                                @foreach(App\Models\Country::orderBy('name')->get() as $country)
+                                                    <option value="{{ $country->id }}" {{ old('country_id', $quote->country_id) == $country->id ? 'selected' : '' }}>
+                                                        {{ $country->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <x-select-country-all 
+                                                name="country_id"
+                                                id="country_id"
+                                                value="{{ old('country_id', $quote->country_id) }}" 
+                                                required="true" />
+                                        @endif
+                                        
                                         @error('country_id')
                                             <p class="error-message">{{ $message }}</p>
                                         @enderror
@@ -468,6 +483,21 @@
                 </div>
         </div>
     </main>
+
+    @push('scripts')
+    <!-- User data required for the reset functionality -->
+    <div id="user-data" 
+         data-user="{{ json_encode([
+             'address_line1' => $user->address_line1,
+             'address_line2' => $user->address_line2,
+             'city' => $user->city,
+             'postcode' => $user->postcode,
+             'phone' => $user->phone,
+             'country_id' => $user->country_id
+         ]) }}" 
+         hidden>
+    </div>
+    @endpush
 
     @vite(['resources/js/quote-edit.js'])
 

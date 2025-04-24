@@ -3,181 +3,106 @@ document.addEventListener("DOMContentLoaded", function () {
         "use-default-location"
     );
     const addressFieldsContainer = document.getElementById("address-fields");
-    const addressFields = document.querySelectorAll(
-        "#address-fields input, #address-fields select"
-    );
-    const phoneField = document.getElementById("phone");
+    const countrySelect = document.getElementById("countrySelect");
 
-    // Make sure the checkbox exists before continuing
+    // Exit if required elements don't exist
     if (!useDefaultLocationCheckbox || !addressFieldsContainer) {
         console.error("Required elements not found for address toggle");
         return;
     }
 
-    // Debugging - log what we find
-    console.log(
-        "Address toggle initialized with checkbox state:",
-        useDefaultLocationCheckbox.checked
-    );
-
-    // Get the original listing data (to restore when unchecking the box)
-    const listingData = {
-        address_line1:
-            document.getElementById("address_line1")?.dataset.original || "",
-        address_line2:
-            document.getElementById("address_line2")?.dataset.original || "",
-        city: document.getElementById("city")?.dataset.original || "",
-        postcode: document.getElementById("postcode")?.dataset.original || "",
-        country_id:
-            document.getElementById("countrySelect")?.dataset.original || "",
-        phone: phoneField?.dataset.original || "",
-    };
-
-    // User data for default address
-    const userData = {
-        address_line1:
-            document.getElementById("address_line1")?.dataset.user || "",
-        address_line2:
-            document.getElementById("address_line2")?.dataset.user || "",
-        city: document.getElementById("city")?.dataset.user || "",
-        postcode: document.getElementById("postcode")?.dataset.user || "",
-        country_id:
-            document.getElementById("countrySelect")?.dataset.user || "",
-        phone: phoneField?.dataset.user || "",
-    };
-
-    console.log("User data:", userData);
-    console.log("Listing data:", listingData);
-
     // Function to toggle address fields
     function toggleAddressFields() {
-        const useDefaultLocation = useDefaultLocationCheckbox.checked;
-        console.log(
-            "Toggle called - Using default address:",
-            useDefaultLocation
-        );
+        const useDefault = useDefaultLocationCheckbox.checked;
+        console.log("Toggle address fields - Using default:", useDefault);
 
-        // Visual indication for the container
-        if (useDefaultLocation) {
+        // Toggle visual indication
+        if (useDefault) {
             addressFieldsContainer.classList.add("fields-readonly");
         } else {
             addressFieldsContainer.classList.remove("fields-readonly");
         }
 
-        // Toggle editability for address fields
-        addressFields.forEach((field) => {
-            // Don't disable the fields, just make them read-only
-            // This ensures form values are still submitted
-            field.readOnly = useDefaultLocation;
+        // Get all input fields in the address section (excluding hidden and checkbox inputs)
+        const addressInputs = addressFieldsContainer.querySelectorAll(
+            "input:not([type=hidden]):not([type=checkbox])"
+        );
 
-            if (field.tagName.toLowerCase() === "select") {
-                field.disabled = useDefaultLocation; // Use disabled for selects
-                field.style.pointerEvents = useDefaultLocation
-                    ? "none"
-                    : "auto";
+        // Toggle each field and set appropriate values
+        addressInputs.forEach((field) => {
+            field.readOnly = useDefault;
+            field.style.backgroundColor = useDefault ? "#f5f5f5" : "";
+            field.style.color = useDefault ? "#666666" : "";
+
+            // IMPORTANT: When using default address, always reset to user's default values
+            // regardless of what was manually entered
+            if (useDefault) {
+                // Use the user's default value from data-user attribute
+                // If data-user is empty, the field should be empty too
+                field.value = field.dataset.user || "";
+                console.log(
+                    `Reset ${field.id} to user default:`,
+                    field.dataset.user || "(empty)"
+                );
+            } else if (!useDefault && field.dataset.original) {
+                // When not using default, restore to the original listing value
+                field.value = field.dataset.original || "";
             }
-
-            field.style.backgroundColor = useDefaultLocation ? "#f5f5f5" : "";
-            field.style.color = useDefaultLocation ? "#666" : "";
         });
 
-        // Set values based on checkbox state
-        if (useDefaultLocation) {
-            // Use user's default address
-            if (document.getElementById("address_line1")) {
-                document.getElementById("address_line1").value =
-                    userData.address_line1;
-            }
-            if (document.getElementById("address_line2")) {
-                document.getElementById("address_line2").value =
-                    userData.address_line2;
-            }
-            if (document.getElementById("city")) {
-                document.getElementById("city").value = userData.city;
-            }
-            if (document.getElementById("postcode")) {
-                document.getElementById("postcode").value = userData.postcode;
-            }
-            if (phoneField) {
-                phoneField.value = userData.phone;
-            }
+        // Handle the country dropdown
+        if (countrySelect) {
+            // 1. Toggle disabled state
+            countrySelect.disabled = useDefault;
 
-            // Set country dropdown
-            const countrySelect = document.getElementById("countrySelect");
-            if (countrySelect && userData.country_id) {
+            // 2. Apply visual styling (the CSS already handles this, but we'll be explicit)
+            countrySelect.style.backgroundColor = useDefault ? "#f5f5f5" : "";
+            countrySelect.style.color = useDefault ? "#666666" : "";
+
+            // 3. Set the correct country value
+            if (useDefault && countrySelect.dataset.user) {
+                // Find and select the user's default country
+                const userCountryId = countrySelect.dataset.user;
+                for (let i = 0; i < countrySelect.options.length; i++) {
+                    if (countrySelect.options[i].value == userCountryId) {
+                        countrySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            } else if (!useDefault && countrySelect.dataset.original) {
+                // Restore original listing country
                 for (let i = 0; i < countrySelect.options.length; i++) {
                     if (
-                        countrySelect.options[i].value === userData.country_id
+                        countrySelect.options[i].value ==
+                        countrySelect.dataset.original
                     ) {
                         countrySelect.selectedIndex = i;
                         break;
                     }
                 }
             }
-        } else {
-            // Restore the listing's original address values
-            if (document.getElementById("address_line1")) {
-                document.getElementById("address_line1").value =
-                    listingData.address_line1;
-            }
-            if (document.getElementById("address_line2")) {
-                document.getElementById("address_line2").value =
-                    listingData.address_line2;
-            }
-            if (document.getElementById("city")) {
-                document.getElementById("city").value = listingData.city;
-            }
-            if (document.getElementById("postcode")) {
-                document.getElementById("postcode").value =
-                    listingData.postcode;
-            }
-            if (phoneField) {
-                phoneField.value = listingData.phone;
-            }
+        }
 
-            // Restore country dropdown
-            const countrySelect = document.getElementById("countrySelect");
-            if (countrySelect && listingData.country_id) {
-                for (let i = 0; i < countrySelect.options.length; i++) {
-                    if (
-                        countrySelect.options[i].value ===
-                        listingData.country_id
-                    ) {
-                        countrySelect.selectedIndex = i;
-                        break;
-                    }
-                }
+        // Update hidden country field for form submission if necessary
+        const hiddenCountryId = document.getElementById("hidden_country_id");
+        if (hiddenCountryId && countrySelect) {
+            if (useDefault) {
+                // When using default location, use the user's default country ID
+                hiddenCountryId.value = countrySelect.dataset.user || "";
+            } else {
+                // When not using default, use whatever is selected in the dropdown
+                hiddenCountryId.value = countrySelect.value;
             }
         }
     }
 
-    // Add CSS for visual indication
-    const style = document.createElement("style");
-    style.textContent = `
-        .fields-readonly {
-            opacity: 0.9;
-            position: relative;
-        }
-        .fields-readonly::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(245, 245, 245, 0.1);
-            pointer-events: none;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Initial setup
+    // Set initial state
     toggleAddressFields();
 
     // Add event listener for checkbox changes
     useDefaultLocationCheckbox.addEventListener("change", toggleAddressFields);
 
-    // Log when the change event fires
+    // Add logging for debugging
     useDefaultLocationCheckbox.addEventListener("change", function () {
         console.log("Checkbox changed to:", this.checked);
     });

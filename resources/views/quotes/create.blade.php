@@ -374,7 +374,7 @@
                                         
                                         <x-select-country-all 
                                             name="{{ old('use_default_location', '1') == '1' ? '_country_id' : 'country_id' }}"
-                                            id="visible_country_id"
+                                            id="country_id"
                                             value="{{ old('country_id', $user->country_id) }}" 
                                             :disabled="old('use_default_location', '1') == '1'"
                                             required="true" />

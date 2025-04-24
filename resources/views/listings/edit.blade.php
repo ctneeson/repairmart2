@@ -166,11 +166,35 @@
                                 <div class="col">
                                     <div class="form-group @error('country_id') has-error @enderror">
                                         <label>Country</label>
-                                        <x-select-country-all 
-                                            id="countrySelect" 
-                                            :value="old('country_id', $listing->country_id)" 
-                                            data-original="{{ $listing->country_id }}"
-                                            data-user="{{ auth()->user()->country_id }}" />
+                                        <!-- Always include a hidden country_id field for form submission -->
+                                        <input type="hidden" 
+                                            name="{{ old('use_default_location', $listing->use_default_location) ? 'country_id' : '_country_id' }}" 
+                                            id="hidden_country_id" 
+                                            value="{{ old('country_id', $listing->country_id) }}">
+                                        
+                                        <!-- Use regular select instead of component when default location is used -->
+                                        @if(old('use_default_location', $listing->use_default_location))
+                                            <select 
+                                                name="_country_id" 
+                                                id="countrySelect" 
+                                                class="form-select" 
+                                                disabled
+                                                data-user="{{ auth()->user()->country_id }}"
+                                                data-original="{{ $listing->country_id }}">
+                                                @foreach(App\Models\Country::orderBy('name')->get() as $country)
+                                                    <option value="{{ $country->id }}" {{ old('country_id', $listing->country_id) == $country->id ? 'selected' : '' }}>
+                                                        {{ $country->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <x-select-country-all 
+                                                name="country_id"
+                                                id="countrySelect"
+                                                value="{{ old('country_id', $listing->country_id) }}"
+                                                data-user="{{ auth()->user()->country_id }}"
+                                                data-original="{{ $listing->country_id }}" />
+                                        @endif
                                         <p class="error-message">{{ $errors->first('country_id') }}</p>
                                     </div>
                                 </div>
@@ -287,6 +311,23 @@
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Debug the country dropdown
+        const countrySelect = document.getElementById('countrySelect');
+        console.log('Country Select Element:', countrySelect);
+        if (countrySelect) {
+            console.log('Style:', getComputedStyle(countrySelect).display);
+            console.log('Disabled:', countrySelect.disabled);
+            console.log('Parent visibility:', getComputedStyle(countrySelect.parentNode).display);
+        } else {
+            console.error('Country select not found!');
+        }
+    });
+    </script>
+    @endpush
+
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
         console.log('Reset button script loaded');
         
         const resetButton = document.querySelector('.btn.btn-default[type="button"]');
@@ -314,6 +355,47 @@
         });
     });
     </script>
+    @endpush
+
+    @push('styles')
+    <style>
+        /* Ensure country dropdown is always visible with correct styling */
+        #countrySelect,
+        #countrySelect:disabled {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 0.7 !important;
+            background-color: #f5f5f5 !important;
+            color: #666666 !important;
+            border: 1px solid #ced4da !important;
+            pointer-events: none !important;
+        }
+        
+        /* Style for when dropdown is enabled */
+        #countrySelect:not(:disabled) {
+            opacity: 1 !important;
+            background-color: #ffffff !important;
+            color: #333333 !important;
+            pointer-events: auto !important;
+        }
+        
+        /* Visual indication for readonly fields */
+        .fields-readonly {
+            opacity: 0.9;
+            position: relative;
+        }
+        
+        .fields-readonly::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(245, 245, 245, 0.1);
+            pointer-events: none;
+        }
+    </style>
     @endpush
 
 </x-app-layout>

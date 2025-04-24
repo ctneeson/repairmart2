@@ -1,5 +1,7 @@
 import axios from "axios";
 import "./bootstrap";
+import jQuery from "jquery";
+window.$ = jQuery;
 
 // Import your custom JavaScript files
 import "./listings-search-dropdown";

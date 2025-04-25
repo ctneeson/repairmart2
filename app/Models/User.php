@@ -89,7 +89,7 @@ class User extends Authenticatable implements MustVerifyEmail
             Listing::class, // The final model we want to access
             Quote::class, // The intermediate model
             'user_id', // Foreign key on the quotes table
-            'listing_id', // Foreign key on the listings table
+            'id', // Foreign key on the listings table
             'id', // Local key on the users table
             'id' // Local key on the quotes table
         );
@@ -112,30 +112,31 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    public function customerOrders(): HasManyThrough
+    /**
+     * Get orders where the user is the customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function customerOrders(): HasMany
     {
-        return $this->hasManyThrough(
-            Order::class, // The final model we want to access
-            Quote::class, // The intermediate model
-            'listing_id', // Foreign key on the quotes table
-            'quote_id', // Foreign key on the orders table
-            'id', // Local key on the users table
-            'id' // Local key on the listings table
-        );
+        return $this->hasMany(Order::class, 'customer_id');
     }
 
-    public function repairSpecialistOrders(): HasManyThrough
+    /**
+     * Get orders where the user is the specialist.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function repairSpecialistOrders(): HasMany
     {
-        return $this->hasManyThrough(
-            Order::class, // The final model we want to access
-            Quote::class, // The intermediate model
-            'user_id', // Foreign key on the quotes table
-            'quote_id', // Foreign key on the orders table
-            'id', // Local key on the users table
-            'id' // Local key on the quotes table
-        );
+        return $this->hasMany(Order::class, 'specialist_id');
     }
 
+    /**
+     * Get the user's roles.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'users_roles');

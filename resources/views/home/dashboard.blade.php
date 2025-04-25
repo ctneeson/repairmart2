@@ -7,7 +7,7 @@
                 <!-- Quick Actions Row -->
                 <div class="row mb-4 mb-medium">
                     <div class="col-md-6 mb-md-0">
-                        <div class="card h-100">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header" style="display: flex !important; justify-content: space-between !important; flex-wrap: nowrap !important;">
                                 <h5 class="card-title mb-0">Activity Summary</h5>
                                 <div style="align-self: flex-end !important;">
@@ -22,7 +22,7 @@
                                 </div>
                             </div>
 
-                            <div class="card-body">
+                            <div class="card-body flex-grow-1">
                                 <div class="row">
                                     <div class="col">
                                         <!-- Tab Navigation -->
@@ -102,11 +102,11 @@
                     </div>
                     <div class="col-md-6 mb-md-0">
                     {{-- <div class="col-md-12" style="width: 100%; padding-left: 15px; padding-right: 15px;"> --}}
-                        <div class="card h-100">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Quick Actions</h5>
                             </div>
-                            <div class="card-body mb-small">
+                            <div class="card-body flex-grow-1 mb-small">
                                 <div class="d-flex flex-wrap gap-2">
                                     <a href="{{ route('watchlist.index') }}"
                                         class="btn btn-add-new-listing">
@@ -149,11 +149,11 @@
                 <div class="row mb-4 mb-medium">
                     <!-- Messages Panel -->
                     <div class="col-md-6 mb-md-0">
-                        <div class="card h-100">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header bg-primary text-white">
                                 <h5 class="card-title mb-0">Messages</h5>
                             </div>
-                            <div class="card-body d-flex flex-column">
+                            <div class="card-body flex-grow-1">
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <div>
                                         <h4 class="mb-0" style="margin-top: 0.7rem; margin-bottom: 0.3rem;">
@@ -208,11 +208,11 @@
                 
                     <!-- Listings Panel (Customers only) -->
                     <div class="col-md-6 mb-md-0">
-                        <div class="card h-100">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header bg-success text-white">
                                 <h5 class="card-title mb-0">Listings</h5>
                             </div>
-                            <div class="card-body d-flex flex-column">
+                            <div class="card-body flex-grow-1">
                                 @if(auth()->user()->hasRole('customer'))
                                     <div class="mb-3">
                                         <div class="d-flex align-items-center justify-content-between">
@@ -265,11 +265,13 @@
                                 @endif
                             </div>
                             <div class="card-footer mt-auto">
+                                @if(auth()->user()->hasRole('customer'))
                                 <a href="{{ route('listings.index') }}"
                                     class="btn btn-sm btn-outline-success w-100">
                                     <i class="bi bi-person-lines-fill"></i>
                                     View My Listings
                                 </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -279,11 +281,11 @@
                 <div class="row mb-4">
                     <!-- Quotes Panel (Specialists only) -->
                     <div class="col-md-6 mb-md-0">
-                        <div class="card h-100 mn-medium">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header bg-info text-white">
                                 <h5 class="card-title mb-0">Quotes</h5>
                             </div>
-                            <div class="card-body d-flex flex-column">
+                            <div class="card-body flex-grow-1">
                                 @if(auth()->user()->hasRole('specialist'))
                                     <div class="mb-3">
                                         <div class="d-flex align-items-center justify-content-between">
@@ -337,18 +339,20 @@
                                 @endif
                             </div>
                             <div class="card-footer mt-auto">
+                                @if(auth()->user()->hasRole('specialist'))
                                 <a href="{{ route('quotes.index') }}"
                                     class="btn btn-sm btn-outline-info w-100">
                                     <i class="bi bi-tools"></i>
                                     View My Quotes
                                 </a>
+                                @endif
                             </div>
                         </div>
                     </div>
                 
                     <!-- Orders Panel -->
                     <div class="col-md-6 mb-md-0">
-                        <div class="card h-100">
+                        <div class="card h-100 d-flex flex-column">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Orders</h5>
                                 <ul class="nav nav-tabs card-header-tabs" id="ordersTabGroup" style="margin-left: 1rem; margin-bottom: -0.5rem;">
@@ -384,7 +388,7 @@
                                 </ul>
                             </div>
                     
-                            <div class="tab-content p-medium" id="ordersTabContent" style="flex-grow: 1;">
+                            <div class="tab-content p-medium flex-grow-1" id="ordersTabContent">
                                 <!-- Customer Orders Tab -->
                                 @if(auth()->user()->hasRole('customer'))
                                 <div class="tab-pane {{ auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
@@ -408,8 +412,11 @@
                                                                 </a>
                                                             </td>
                                                             <td>
-                                                                <span class="badge bg-{{ $order->status->name == 'Pending' ? 'secondary' : 'primary' }}">
+                                                                <span class="badge order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">
                                                                     {{ $order->status->name }}
+                                                                    @if($order->status->name === 'Closed' && $order->customer_feedback_id === null)
+                                                                        <small class="awaiting-feedback">: awaiting feedback</small>
+                                                                    @endif
                                                                 </span>
                                                             </td>
                                                         </tr>
@@ -448,8 +455,11 @@
                                                                 </a>
                                                             </td>
                                                             <td>
-                                                                <span class="badge bg-{{ $order->status->name == 'Pending' ? 'secondary' : 'primary' }}">
+                                                                <span class="badge order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">
                                                                     {{ $order->status->name }}
+                                                                    @if($order->status->name === 'Closed' && $order->specialist_feedback_id === null)
+                                                                        <small class="awaiting-feedback">: awaiting feedback</small>
+                                                                    @endif
                                                                 </span>
                                                             </td>
                                                         </tr>

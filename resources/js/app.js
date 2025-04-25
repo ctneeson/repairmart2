@@ -634,7 +634,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sortingDropdown.addEventListener("change", (ev) => {
             const url = new URL(window.location.href);
-            url.searchParams.set("sort", ev.target.value);
+
+            // Check if dropdown has a value
+            if (ev.target.value) {
+                url.searchParams.set("sort", ev.target.value);
+            } else {
+                // If "Order By" (empty value) is selected, remove the sort parameter
+                url.searchParams.delete("sort");
+            }
+
             window.location.href = url.toString();
         });
     };

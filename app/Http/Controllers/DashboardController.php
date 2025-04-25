@@ -218,52 +218,31 @@ class DashboardController extends Controller
     {
         $closedStatusId = OrderStatus::where('name', 'Closed')->first()->id ?? null;
 
-        // Get customer orders data
-        $customerOrdersByStatus = collect();
         $activeCustomerOrders = collect();
-
-        $customerOrdersByStatus = Order::where('customer_id', $user->id)
-            ->select('status_id', DB::raw('count(*) as count'))
-            ->groupBy('status_id')
-            ->get()
-            ->map(function ($item) {
-                $status = OrderStatus::find($item->status_id);
-                return [
-                    'status_name' => $status ? $status->name : 'Unknown',
-                    'count' => $item->count,
-                    'status_id' => $item->status_id
-                ];
-            });
-
-        $activeCustomerOrders = Order::where('customer_id', $user->id)
-            ->when($closedStatusId, function ($query) use ($closedStatusId) {
-                return $query->where('status_id', '!=', $closedStatusId);
-            })
-            ->with(['listing', 'status'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'customer_orders_page');
-
-        // Get specialist orders data
-        $specialistOrdersByStatus = collect();
         $activeSpecialistOrders = collect();
 
-        if ($user->hasRole('specialist')) {
-            $specialistOrdersByStatus = Order::where('specialist_id', $user->id)
-                ->select('status_id', DB::raw('count(*) as count'))
-                ->groupBy('status_id')
-                ->get()
-                ->map(function ($item) {
-                    $status = OrderStatus::find($item->status_id);
-                    return [
-                        'status_name' => $status ? $status->name : 'Unknown',
-                        'count' => $item->count,
-                        'status_id' => $item->status_id
-                    ];
-                });
+        if ($user->hasRole('customer')) {
+            $activeCustomerOrders = Order::where('customer_id', $user->id)
+                ->where(function ($query) use ($closedStatusId) {
+                    $query->where('status_id', '!=', $closedStatusId)
+                        ->orWhere(function ($q) use ($closedStatusId) {
+                            $q->where('status_id', $closedStatusId)
+                                ->whereNull('customer_feedback_id');
+                        });
+                })
+                ->with(['listing', 'status'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(5, ['*'], 'customer_orders_page');
+        }
 
+        if ($user->hasRole('specialist')) {
             $activeSpecialistOrders = Order::where('specialist_id', $user->id)
-                ->when($closedStatusId, function ($query) use ($closedStatusId) {
-                    return $query->where('status_id', '!=', $closedStatusId);
+                ->where(function ($query) use ($closedStatusId) {
+                    $query->where('status_id', '!=', $closedStatusId)
+                        ->orWhere(function ($q) use ($closedStatusId) {
+                            $q->where('status_id', $closedStatusId)
+                                ->whereNull('specialist_feedback_id');
+                        });
                 })
                 ->with(['listing', 'status'])
                 ->orderBy('created_at', 'desc')
@@ -271,9 +250,7 @@ class DashboardController extends Controller
         }
 
         return [
-            'customerOrdersByStatus' => $customerOrdersByStatus,
             'activeCustomerOrders' => $activeCustomerOrders,
-            'specialistOrdersByStatus' => $specialistOrdersByStatus,
             'activeSpecialistOrders' => $activeSpecialistOrders
         ];
     }

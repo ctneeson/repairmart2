@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\FeedbackType;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Gate;
@@ -252,7 +253,6 @@ class ProfileController extends Controller
                 ->with('error', 'User not found.');
         }
 
-        // Load additional data based on user roles
         $isCustomer = $user->hasRole('customer');
         $isSpecialist = $user->hasRole('specialist');
 
@@ -261,12 +261,72 @@ class ProfileController extends Controller
         $specialistOrderCount = 0;
 
         if ($isCustomer) {
-            $listingCount = $user->listingsCreated()->count();
+            $listingCount = $user->listingsCreated()
+                ->whereHas('status', function ($query) {
+                    $query->where('name', 'Open');
+                })
+                ->count();
             $customerOrderCount = $user->customerOrders()->count();
         }
 
         if ($isSpecialist) {
+            $quoteCount = $user->quotesCreated()
+                ->whereHas('status', function ($query) {
+                    $query->where('name', 'Open');
+                })
+                ->count();
             $specialistOrderCount = $user->repairSpecialistOrders()->count();
+        }
+
+        // Get all feedback types
+        $feedbackTypes = FeedbackType::orderBy('id')->get();
+
+        // Initialize the counts array
+        $feedbackCounts = [];
+
+        foreach ($feedbackTypes as $type) {
+            $feedbackCounts[$type->id] = [
+                'name' => $type->name,
+                'count' => 0
+            ];
+        }
+
+        // Get feedback received as a specialist (from customers)
+        if ($isSpecialist) {
+            $specialistFeedbackCounts = \DB::table('orders')
+                ->join('feedback_types', 'orders.customer_feedback_id', '=', 'feedback_types.id')
+                ->join('order_statuses', 'orders.status_id', '=', 'order_statuses.id')
+                ->where('orders.specialist_id', $user->id) // Fix: This should be specialist_id, not customer_id
+                ->where('orders.customer_feedback_id', '!=', null)
+                ->where('order_statuses.name', '=', 'Closed')
+                ->groupBy('feedback_types.id', 'feedback_types.name')
+                ->select('feedback_types.id', 'feedback_types.name', \DB::raw('count(*) as count'))
+                ->get();
+
+            foreach ($specialistFeedbackCounts as $feedback) {
+                if (isset($feedbackCounts[$feedback->id])) {
+                    $feedbackCounts[$feedback->id]['count'] += $feedback->count;
+                }
+            }
+        }
+
+        // Get feedback received as a customer (from specialists)
+        if ($isCustomer) {
+            $customerFeedbackCounts = \DB::table('orders')
+                ->join('feedback_types', 'orders.specialist_feedback_id', '=', 'feedback_types.id')
+                ->join('order_statuses', 'orders.status_id', '=', 'order_statuses.id')
+                ->where('orders.customer_id', $user->id)
+                ->where('orders.specialist_feedback_id', '!=', null)
+                ->where('order_statuses.name', '=', 'Closed')
+                ->groupBy('feedback_types.id', 'feedback_types.name')
+                ->select('feedback_types.id', 'feedback_types.name', \DB::raw('count(*) as count'))
+                ->get();
+
+            foreach ($customerFeedbackCounts as $feedback) {
+                if (isset($feedbackCounts[$feedback->id])) {
+                    $feedbackCounts[$feedback->id]['count'] += $feedback->count;
+                }
+            }
         }
 
         return view('profile.show', compact(
@@ -274,8 +334,11 @@ class ProfileController extends Controller
             'isCustomer',
             'isSpecialist',
             'listingCount',
+            'quoteCount',
             'customerOrderCount',
-            'specialistOrderCount'
+            'specialistOrderCount',
+            'feedbackTypes',
+            'feedbackCounts'
         ));
     }
 }

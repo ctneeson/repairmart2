@@ -343,4 +343,31 @@ class Listing extends Model
 
         return $this->expiry_date->lt(Carbon::now()->startOfDay());
     }
+
+    /**
+     * Scope a query to order by expiry date.
+     */
+    public function scopeOrderByExpiryDate($query, $direction = 'asc')
+    {
+        $driver = \DB::connection()->getDriverName();
+
+        switch ($driver) {
+            case 'mysql':
+                return $query->orderByRaw("DATE_ADD(published_at, INTERVAL expiry_days DAY) {$direction}");
+
+            case 'sqlite':
+                return $query->orderByRaw("date(published_at, '+' || expiry_days || ' days') {$direction}");
+
+            case 'pgsql':
+                return $query->orderByRaw("(published_at + (expiry_days || ' days')::interval) {$direction}");
+
+            case 'sqlsrv':
+                return $query->orderByRaw("DATEADD(day, expiry_days, published_at) {$direction}");
+
+            default:
+                // Fallback for other database systems
+                return $query->orderBy('published_at', $direction)
+                    ->orderBy('expiry_days', $direction);
+        }
+    }
 }

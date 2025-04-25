@@ -385,7 +385,7 @@ class OrderController extends Controller
         ]);
 
         // Check if the order is in Closed status (id = 7)
-        if ($order->status_id != 7) {
+        if ($order->status->name != 'Closed') {
             return redirect()->route('orders.show', $order)
                 ->with('error', 'Feedback can only be added when the order is closed.');
         }

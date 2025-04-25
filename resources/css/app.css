@@ -761,6 +761,18 @@ main {
     text-transform: uppercase;
 }
 
+.order-status-badge-small {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
 .btn-heart {
     width: 32px;
     height: 32px;
@@ -1850,6 +1862,19 @@ input#phone[readonly] {
 .order-status-cancelled {
     background-color: #ffebee;
     color: #b71c1c;
+}
+
+.feedback-rating-positive {
+    background-color: #28a745;
+    color: white;
+}
+.feedback-rating-neutral {
+    background-color: #ffc107;
+    color: black;
+}
+.feedback-rating-negative {
+    background-color: #dc3545;
+    color: white;
 }
 
 .quote-status-expired,

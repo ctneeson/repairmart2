@@ -20,6 +20,7 @@
                             <div class="col">
                             </div>
                             <div class="col">
+                                @if(auth()->user()->id !== $user->id)
                                 <a href="{{ route('email.create', ['recipient_ids' => [$user->id]]) }}"
                                     class="listing-details-email btn">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -31,6 +32,7 @@
                                     </svg>
                                     Message User
                                  </a>
+                                 @endif
                             </div>
                         </div>
                         
@@ -42,7 +44,7 @@
                             <div class="row mb-4">
                                 <div class="col md-6">
                                     <div class="detail-group">
-                                        <label>Member since:</label>
+                                        <label>Member since</label>
                                         <div class="detail-value">
                                         {{ $user->created_at->format('F j, Y') }}
                                         <span class="text-sm text-gray-500">({{ $user->created_at->diffForHumans() }})</span>
@@ -51,29 +53,7 @@
                                 </div>
                                 <div class="col md-6">
                                     <div class="detail-group">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
-                                            <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493
-                                                31.493 0 0 1 8 14.58a31.481 31.481 0 0
-                                                1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3
-                                                6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8
-                                                16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
-                                            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3
-                                                3 0 0 0 0 6z"/>
-                                        </svg>
-                                        <span class="font-semibold">
-                                            {{ $user->city }}, {{ $user->country->name ?? 'Unknown' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-4">
-                                <div class="col md-6">
-                                    <div class="detail-group">
-                                        <label>Roles:</label>
+                                        <label>Roles</label>
                                         <div class="detail-value">
                                             @foreach($user->roles as $role)
                                             > {{ ucfirst($role->name) }} <br>
@@ -81,23 +61,79 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row mb-4">
                                 <div class="col md-6">
+                                    <div class="detail-group">
+                                        <label>Location</label>
+                                        <div class="detail-value">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                                                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493
+                                                    31.493 0 0 1 8 14.58a31.481 31.481 0 0
+                                                    1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3
+                                                    6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8
+                                                    16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                                                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3
+                                                    3 0 0 0 0 6z"/>
+                                            </svg>
+                                            <span class="font-semibold">
+                                                {{ $user->city }}, {{ $user->country->name ?? 'Unknown' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col md-6">
+                                    <div class="detail-group">
+                                        <label>Feedback Summary</label>
+                                        <table class="table table-striped table-bordered mt-2">
+                                            <tbody>
+                                                @foreach($feedbackTypes as $type)
+                                                    <tr>
+                                                        <td class="badge feedback-rating-{{ strtolower(str_replace(' ', '-', $type->name)) }}" 
+                                                            style="width: 50%">
+                                                            {{ $type->name }}
+                                                        </td>
+                                                        <td>{{ $feedbackCounts[$type->id]['count'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                             <h4 class="font-semibold text-lg mb-3">Activity Summary</h4>
                             <div class="row mb-4">
-                                @if($isCustomer)
+                                @if($isCustomer || $isSpecialist)
                                 <div class="col md-6">
                                     <div class="detail-group">
-                                        <span class="text-gray-600">Repair Listings Created:</span>
-                                        <span class="font-semibold">{{ $listingCount }}</span>
-                                        @if($listingCount > 0)
-                                        <br>
-                                        <a href="{{ route('listings.search', ['user_id' => $user->id]) }}" 
-                                            class="text-sm text-blue-600 hover:underline">
-                                            View Listings
-                                        </a>
-                                        @endif
+                                        <table class="table table-striped table-bordered mt-2">
+                                            <tbody>
+                                                @if ($isCustomer)
+                                                <tr>
+                                                    <td>Open Listings</td>
+                                                    <td>{{ $listingCount }}</td>
+                                                    @if($listingCount > 0)
+                                                    <td>
+                                                        <a href="{{ route('listings.search', ['user_id' => $user->id]) }}" 
+                                                        class="text-sm text-blue-600 hover:underline">
+                                                        View
+                                                        </a>
+                                                    </td>
+                                                    @endif
+                                                </tr>
+                                                @endif
+                                                @if ($isSpecialist)
+                                                <tr>
+                                                    <td>Open Quotes</td>
+                                                    <td>{{ $quoteCount }}</td>
+                                                </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                                 @endif
@@ -105,15 +141,22 @@
                                 @if($isCustomer || $isSpecialist)
                                 <div class="col md-6">
                                     <div class="detail-group">
-                                        @if($isCustomer)
-                                        <span class="text-gray-600">Orders Placed as Customer:</span>
-                                        <span class="font-semibold">{{ $customerOrderCount }}</span>
-                                        @endif
-                                        <br>
-                                        @if($isSpecialist)
-                                        <span class="text-gray-600">Orders Handled as Specialist:</span>
-                                        <span class="font-semibold">{{ $specialistOrderCount }}</span>
-                                        @endif
+                                        <table class="table table-striped table-bordered mt-2">
+                                            <tbody>
+                                                @if($isCustomer)
+                                                <tr>
+                                                    <td>Orders Placed</td>
+                                                    <td>{{ $customerOrderCount }}</td>
+                                                </tr>
+                                                @endif
+                                                @if($isSpecialist)
+                                                <tr>
+                                                    <td>Orders Handled</td>
+                                                    <td>{{ $specialistOrderCount }}</td>
+                                                </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                                 @endif

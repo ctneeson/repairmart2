@@ -527,9 +527,9 @@
                                 </form>
                             </div>
                                 @elseif(auth()->id() === $order->customer_id && !empty($order->customer_feedback_id))
-                                    <div class="col-md-6">
+                                    <div class="col-md-8">
                                         <div class="card p-3">
-                                            <h4>Your Feedback</h4>
+                                            <h3>Your Feedback</h3>
                                             <div class="feedback-rating mb-2">
                                                 <strong>Rating:</strong> {{ $order->customerFeedbackType->name }}
                                             </div>
@@ -543,7 +543,7 @@
                                 @if(auth()->id() === $order->specialist_id && empty($order->specialist_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
-                                            <h4>Specialist Feedback</h4>
+                                            <h3>Specialist Feedback</h3>
                                             <form action="{{ route('orders.feedback', $order) }}" method="POST">
                                                 @csrf
                                                 <div class="mb-3">
@@ -568,7 +568,7 @@
                                 @elseif(auth()->id() === $order->specialist_id && !empty($order->specialist_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
-                                            <h4>Your Feedback</h4>
+                                            <h3>Your Feedback</h3>
                                             <div class="feedback-rating mb-2">
                                                 <strong>Rating:</strong> {{ $order->specialistFeedbackType->name }}
                                             </div>
@@ -583,9 +583,12 @@
                                 @if(auth()->id() === $order->customer_id && !empty($order->specialist_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
-                                            <h4>Specialist's Feedback</h4>
+                                            <h3>Specialist's Feedback</h3>
                                             <div class="feedback-rating mb-2">
-                                                <strong>Rating:</strong> {{ $order->specialistFeedbackType->name }}
+                                                <strong>Rating:</strong>
+                                                <span class="badge order-status-badge-small feedback-rating-{{strtolower(str_replace(' ', '-', $order->specialistFeedbackType->name)) }}">
+                                                    {{ $order->specialistFeedbackType->name }}
+                                                </span>
                                             </div>
                                             <div class="feedback-comment">
                                                 <strong>Comment:</strong> {{ $order->specialist_feedback }}
@@ -595,9 +598,12 @@
                                 @elseif(auth()->id() === $order->specialist_id && !empty($order->customer_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
-                                            <h4>Customer's Feedback</h4>
+                                            <h3>Customer's Feedback</h3>
                                             <div class="feedback-rating mb-2">
-                                                <strong>Rating:</strong> {{ $order->customerFeedbackType->name }}
+                                                <strong>Rating:</strong>
+                                                <span class="badge order-status-badge-small feedback-rating-{{strtolower(str_replace(' ', '-', $order->customerFeedbackType->name)) }}">
+                                                    {{ $order->customerFeedbackType->name }}
+                                                </span>
                                             </div>
                                             <div class="feedback-comment">
                                                 <strong>Comment:</strong> {{ $order->customer_feedback }}
@@ -606,36 +612,37 @@
                                     </div>
                                 @endif
                             </div>
-                        @endif
-                        <div class="col-md-4">
-                            <div class="contact-sidebar">
-                                <h3 class="mb-3">Manage Status</h3>
-                                <span class="label">Current Status:</span> 
-                                <span class="badge bg-{{ $order->status->color }} fs-6">{{ $order->status->name }}</span>
-                            
-                                @if(count($allowedStatuses) > 0)
-                                    <form action="{{ route('orders.update-status', $order) }}"
-                                        method="POST"
-                                        id="statusUpdateForm">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div class="form-group">
-                                            <select name="status_id" id="status_id" class="form-select">
-                                                @foreach($allowedStatuses as $status)
-                                                    <option value="{{ $status->id }}">{{ $status->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="d-flex align-center mt-3">
-                                            <button type="submit" class="btn btn-primary">Update Status</button>
-                                        </div>
-                                    </form>
-                                @else
-                                    <div class="alert alert-info">
-                                        No status changes are available for your role at this time.
+                        @endif                        
+                    </div>
+                    <div class="col-md-4">
+                        <div class="contact-sidebar">
+                            <h3 class="mb-3">Manage Status</h3>
+                            <span class="label" style="font-size: 12px; font-weight: bold;">Current Status:</span> 
+                            <span class="badge order-status-badge-small
+                                order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">{{ $order->status->name }}</span>
+                        
+                            @if(count($allowedStatuses) > 0)
+                                <form action="{{ route('orders.update-status', $order) }}"
+                                    method="POST"
+                                    id="statusUpdateForm">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div class="form-group">
+                                        <select name="status_id" id="status_id" class="form-select">
+                                            @foreach($allowedStatuses as $status)
+                                                <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                @endif
-                            </div>
+                                    <div class="d-flex align-center mt-3">
+                                        <button type="submit" class="btn btn-primary">Update Status</button>
+                                    </div>
+                                </form>
+                            @else
+                                <div class="alert alert-info">
+                                    No status changes are available for your role at this time.
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -107,6 +107,9 @@
                                                     <span class="badge
                                                         order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">
                                                         {{ $order->status->name }}
+                                                        @if($order->status->name === 'Closed' && $order->customer_feedback_id === null)
+                                                            <small class="awaiting-feedback">: awaiting feedback</small>
+                                                        @endif
                                                     </span>
                                                 </td>
                                                 <td data-label="Amount">
@@ -219,8 +222,12 @@
                                                     {{ $order->created_at->format('Y-m-d') }}
                                                 </td>
                                                 <td data-label="Status">
-                                                    <span class="badge bg-{{ $order->status->color }}">
+                                                    <span class="badge
+                                                        order-status-{{ strtolower(str_replace(' ', '-', $order->status->name)) }}">
                                                         {{ $order->status->name }}
+                                                        @if($order->status->name === 'Closed' && $order->specialist_feedback_id === null)
+                                                            <small class="awaiting-feedback">: awaiting feedback</small>
+                                                        @endif
                                                     </span>
                                                 </td>
                                                 <td data-label="Amount">

@@ -18,9 +18,10 @@
     
               <select class="sort-dropdown">
                 <option value="">Order By</option>
-                <option value="-published_at">Most recent</option>
-                <option value="budget">Budget Asc.</option>
-                <option value="-budget">Budget Desc.</option>
+                <option value="-published_at" {{ request('sort') == '-published_at' ? 'selected' : '' }}>Published (desc.)</option>
+                <option value="published_at" {{ request('sort') == 'published_at' ? 'selected' : '' }}>Published (asc.)</option>
+                <option value="expiry_asc" {{ request('sort') == 'expiry_asc' ? 'selected' : '' }}>Expiry Date (asc.)</option>
+                <option value="expiry_desc" {{ request('sort') == 'expiry_desc' ? 'selected' : '' }}>Expiry Date (desc.)</option>
               </select>
             </div>
             <div class="search-listing-results-wrapper">

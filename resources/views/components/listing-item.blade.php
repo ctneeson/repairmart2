@@ -71,6 +71,19 @@
         @endauth
       </div>
       <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->title}}</h2>
+      <p class="listing-item-price">
+        Published: {{ $listing->published_at ? $listing->published_at->format('Y-m-d') : 'Not yet published' }}
+      </p>
+
+      <p class="listing-item-price">
+        Expires: {{ $listing->expiryDate ? $listing->expiryDate->format('Y-m-d') : 'No expiry date' }}
+        @if($listing->expiryDate && $listing->expiryDate->isFuture())
+          <span class="text-muted">({{ $listing->expiryDate->diffForHumans() }})</span>
+        @elseif($listing->expiryDate && $listing->expiryDate->isPast())
+          <span class="text-danger">(Expired)</span>
+        @endif
+      </p>
+      
       <p class="listing-item-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
       <hr />
       <p class="m-0">

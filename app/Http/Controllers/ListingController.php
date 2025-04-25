@@ -229,6 +229,7 @@ class ListingController extends Controller
         $products = $request->product_ids;
         $countries = $request->country_ids;
         $manufacturers = $request->manufacturer_ids;
+        $userId = $request->user_id;
         $sort = $request->input('sort', '-published_at');
         $page = $request->input('page', 1);
 
@@ -237,12 +238,13 @@ class ListingController extends Controller
             'products' => $products,
             'countries' => $countries,
             'manufacturers' => $manufacturers,
+            'user_id' => $userId, // Add this to the cache key
             'sort' => $sort,
             'page' => $page
         ]));
 
         // Cache only the query results, not the view
-        $listings = cache()->remember($cacheKey, 300, function () use ($products, $countries, $manufacturers, $sort) {
+        $listings = cache()->remember($cacheKey, 300, function () use ($products, $countries, $manufacturers, $userId, $sort) {
             // Start with active listings (published, open, not expired)
             $query = Listing::active()
                 ->with([
@@ -268,7 +270,16 @@ class ListingController extends Controller
                 $query->whereIn('country_id', $countries);
             }
 
-            if (str_starts_with($sort, '-')) {
+            // Add the user_id filter if provided
+            if ($userId) {
+                $query->where('user_id', $userId);
+            }
+
+            if ($sort === 'expiry_asc') {
+                $query->orderByExpiryDate('asc');
+            } else if ($sort === 'expiry_desc') {
+                $query->orderByExpiryDate('desc');
+            } else if (str_starts_with($sort, '-')) {
                 $sort = substr($sort, 1);
                 $query->orderBy($sort, 'desc');
             } else {

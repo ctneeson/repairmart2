@@ -82,6 +82,9 @@
             </li>
             @endif
             <li>
+                <a href="{{ route('profile.show', auth()->user()) }}">My Profile</a>
+            </li>
+            <li>
                 <a href="{{ route('email.index') }}">My Messages</a>
             </li>
             <li>

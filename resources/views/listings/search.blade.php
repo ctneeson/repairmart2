@@ -27,7 +27,7 @@
             <div class="search-listing-results-wrapper">
               <div class="search-listings-sidebar">
                 <div class="card card-found-listings">
-                  <p class="m-0">Found <strong>{{ $listings->total() }}</strong> listings</p>
+                  <p class="m-0">Found <strong>{{ $listings->total() }}</strong> {{ Str::plural('listing', $listings->total()) }}</p>
     
                   <button class="close-filters-button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px">
@@ -38,10 +38,18 @@
                   </button>
                 </div>
     
-                <!-- Find a listing form -->
                 <section class="find-a-listing">
                   <form action="" method="GET" class="find-a-listing-form card flex p-medium">
                     <div class="find-a-listing-inputs">
+                      <div class="form-group">
+                        <label for="search_text">Search term</label>
+                        <input type="text" 
+                            id="search_text" 
+                            name="search_text" 
+                            class="form-control" 
+                            placeholder="Search listings by title or description"
+                            value="{{ request('search_text') }}">
+                      </div>
                       <div class="form-group">
                         <x-select-manufacturer />
                       </div>
@@ -52,7 +60,7 @@
                         <x-select-country />
                       </div>
                     </div>
-                    <div class="flex">
+                    <div class="flex my-medium justify-center">
                       <button class="btn btn-primary btn-find-a-listing-submit" style="width: 50%">
                         Search
                       </button>

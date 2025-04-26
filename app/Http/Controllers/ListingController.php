@@ -226,32 +226,183 @@ class ListingController extends Controller
     }
 
     /**
+     * Setup SQLite FTS for listings.
+     */
+    private function setupSqliteFTS()
+    {
+        // Only run this once per request
+        static $ftsSetup = false;
+        if ($ftsSetup)
+            return;
+
+        try {
+            // First check if FTS5 is available
+            \DB::select('SELECT fts5(?)', ['test']);
+
+            // Try to create the FTS table if it doesn't exist
+            \DB::statement('CREATE VIRTUAL TABLE IF NOT EXISTS listings_fts USING fts5(title, description)');
+
+            // Check if we need to populate it
+            $ftsCount = cache()->remember('listings_fts_count', 300, function () {
+                try {
+                    return \DB::scalar('SELECT COUNT(*) FROM listings_fts');
+                } catch (\Exception $e) {
+                    \Log::error("Error counting FTS entries: " . $e->getMessage());
+                    return 0;
+                }
+            });
+            $listingsCount = Listing::published()
+                ->whereNull('deleted_at')
+                ->count();
+
+            if ($ftsCount != $listingsCount) {
+                \DB::statement('DELETE FROM listings_fts');
+
+                $listings = Listing::active()
+                    ->select('id', 'title', 'description')
+                    ->get();
+
+                foreach ($listings as $listing) {
+                    $title = str_replace("'", "''", $listing->title);
+                    $description = str_replace("'", "''", $listing->description);
+
+                    \DB::statement(
+                        "INSERT INTO listings_fts(rowid, title, description) VALUES (?, ?, ?)",
+                        [$listing->id, $title, $description]
+                    );
+                }
+
+                \Log::info("Rebuilt FTS index with {$listingsCount} listings");
+            }
+
+            $ftsSetup = true;
+        } catch (\Exception $e) {
+            \Log::error("Error setting up SQLite FTS: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Summary of debugFTS
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $searchText
+     * @return never
+     */
+    private function debugFTS(Request $request, $searchText)
+    {
+        $this->setupSqliteFTS();
+
+        $result = \DB::select('SELECT rowid, title, description FROM listings_fts');
+
+        $entries = [];
+        foreach ($result as $row) {
+            $entries[] = [
+                'rowid' => $row->rowid,
+                'title' => $row->title,
+                'description_preview' => substr($row->description, 0, 100) . '...',
+            ];
+        }
+
+        // Test the actual search query
+        $words = explode(' ', trim($searchText));
+        $searchTerms = implode(' OR ', array_map(function ($word) {
+            return $word . '*';
+        }, $words));
+
+        // Try the actual query
+        $matchingIds = [];
+        $ftsWorking = true;
+
+        try {
+            $matches = \DB::select("SELECT rowid FROM listings_fts WHERE listings_fts MATCH ?", [$searchTerms]);
+            $matchingIds = array_map(function ($item) {
+                return $item->rowid;
+            }, $matches);
+        } catch (\Exception $e) {
+            $matchingIds = ['Error: ' . $e->getMessage()];
+            $ftsWorking = false;
+        }
+
+        // Compare with LIKE search
+        $likeMatches = [];
+        try {
+            $term = '%' . $searchText . '%';
+            $likeResults = \DB::table('listings')
+                ->select('id', 'title', 'description')
+                ->where('title', 'LIKE', $term)
+                ->orWhere('description', 'LIKE', $term)
+                ->get();
+
+            $likeMatches = $likeResults->pluck('id')->toArray();
+        } catch (\Exception $e) {
+            $likeMatches = ['Error: ' . $e->getMessage()];
+        }
+
+        dd([
+            'fts_entries_count' => count($entries),
+            'fts_sample' => array_slice($entries, 0, 5),
+            'search_text' => $searchText,
+            'search_terms' => $searchTerms,
+            'matching_ids_fts' => $matchingIds,
+            'matching_ids_like' => $likeMatches,
+            'fts_working' => $ftsWorking,
+            'differences' => [
+                'in_like_not_in_fts' => array_diff($likeMatches, $matchingIds),
+                'in_fts_not_in_like' => array_diff($matchingIds, $likeMatches),
+            ]
+        ]);
+    }
+
+    /**
      * Search for listings based on filters.
      */
     public function search(Request $request)
     {
+        // Parse request parameters
         $products = $request->product_ids;
         $countries = $request->country_ids;
         $manufacturers = $request->manufacturer_ids;
         $userId = $request->user_id;
+        $searchText = $request->input('search_text');
         $sort = $request->input('sort', '-published_at');
         $page = $request->input('page', 1);
 
-        // Create a cache key based on the search parameters
+        // Debug mode
+        if ($request->has('debug') && $searchText) {
+            return $this->debugFTS($request, $searchText);
+        }
+
+        // Build cache key
         $cacheKey = 'listing_search_' . md5(json_encode([
             'products' => $products,
             'countries' => $countries,
             'manufacturers' => $manufacturers,
-            'user_id' => $userId, // Add this to the cache key
+            'user_id' => $userId,
+            'search_text' => $searchText,
             'sort' => $sort,
             'page' => $page
         ]));
 
-        // Cache only the query results, not the view
-        $listings = cache()->remember($cacheKey, 300, function () use ($products, $countries, $manufacturers, $userId, $sort) {
-            // Start with active listings (published, open, not expired)
-            $query = Listing::active()
-                ->with([
+        // Cache the search results
+        $listings = cache()->remember(
+            $cacheKey,
+            300,
+            function () use ($products, $countries, $manufacturers, $userId, $searchText, $sort) {
+                // Start with active listings
+                $query = Listing::active();
+
+                // Apply text search if provided
+                if ($searchText) {
+                    $this->applyTextSearch($query, $searchText);
+                }
+
+                // Apply filters
+                $this->applyStandardFilters($query, $products, $countries, $manufacturers, $userId);
+
+                // Apply sorting
+                $this->applySorting($query, $sort);
+
+                // Load relationships
+                $query->with([
                     'country',
                     'manufacturer',
                     'currency',
@@ -260,48 +411,154 @@ class ListingController extends Controller
                     'watchlistUsers'
                 ]);
 
-            if ($manufacturers) {
-                $query->whereIn('manufacturer_id', $manufacturers);
+                return $query->paginate(15)->withQueryString();
             }
+        );
 
-            if ($products) {
-                $query->whereHas('products', function ($q) use ($products) {
-                    $q->whereIn('product_id', $products);
-                });
-            }
-
-            if ($countries) {
-                $query->whereIn('country_id', $countries);
-            }
-
-            // Add the user_id filter if provided
-            if ($userId) {
-                $query->where('user_id', $userId);
-            }
-
-            if ($sort === 'expiry_asc') {
-                $query->orderByExpiryDate('asc');
-            } else if ($sort === 'expiry_desc') {
-                $query->orderByExpiryDate('desc');
-            } else if (str_starts_with($sort, '-')) {
-                $sort = substr($sort, 1);
-                $query->orderBy($sort, 'desc');
-            } else {
-                $query->orderBy($sort, 'asc');
-            }
-
-            return $query->paginate(15)->withQueryString();
-        });
-
-        // Add this for debugging time zone issues:
-        // dd([
-        //     'server_time' => now()->format('Y-m-d H:i:s e'),
-        //     'utc_time' => now()->setTimezone('UTC')->format('Y-m-d H:i:s e')
-        // ]);
-
-        // Generate and return the view with the cached results
         return view('listings.search', ['listings' => $listings]);
     }
+
+    /**
+     * Apply text search logic based on database driver
+     */
+    private function applyTextSearch($query, $searchText)
+    {
+        $driver = \DB::connection()->getDriverName();
+
+        switch ($driver) {
+            case 'mysql':
+                // MySQL full-text search
+                $query->whereRaw('MATCH(title, description) AGAINST(? IN BOOLEAN MODE)', [$searchText . '*']);
+                break;
+
+            case 'pgsql':
+                // PostgreSQL full-text search
+                $searchTermFormatted = implode(' & ', array_filter(explode(' ', $searchText)));
+                $query->whereRaw("to_tsvector('english', title || ' ' || description) @@ to_tsquery('english', ?)", [$searchTermFormatted]);
+                break;
+
+            case 'sqlsrv':
+                // SQL Server full-text search
+                $query->whereRaw("CONTAINS((title, description), ?)", [$searchText]);
+                break;
+
+            case 'sqlite':
+                if ($this->isFtsWorking()) {
+                    try {
+                        $searchTerm = $searchText . '*';
+                        $ftsMatches = \DB::select("SELECT rowid FROM listings_fts WHERE listings_fts MATCH ?", [$searchTerm]);
+
+                        if (count($ftsMatches) > 0) {
+                            $ftsIds = array_map(function ($match) {
+                                return $match->rowid;
+                            }, $ftsMatches);
+
+                            $query->whereIn('id', $ftsIds);
+                            \Log::info("Using SQLite FTS for search: " . $searchText);
+                            return;
+                        }
+                    } catch (\Exception $e) {
+                        \Log::info("SQLite FTS search failed: " . $e->getMessage());
+                    }
+                }
+
+                // Fallback to LIKE search
+                $this->applyLikeSearch($query, $searchText);
+                break;
+
+            default:
+                // Default to LIKE search for other drivers
+                $this->applyLikeSearch($query, $searchText);
+                break;
+        }
+    }
+
+    /**
+     * Apply LIKE-based search
+     */
+    private function applyLikeSearch($query, $searchText)
+    {
+        $words = preg_split('/\s+/', $searchText, -1, PREG_SPLIT_NO_EMPTY);
+
+        $query->where(function ($q) use ($words) {
+            foreach ($words as $word) {
+                $term = '%' . $word . '%';
+                $q->where(function ($innerQ) use ($term) {
+                    $innerQ->where('title', 'LIKE', $term)
+                        ->orWhere('description', 'LIKE', $term);
+                });
+            }
+        });
+
+        \Log::info("Using LIKE search for: " . $searchText);
+    }
+
+    /**
+     * Apply standard filters (products, countries, manufacturers, user)
+     */
+    private function applyStandardFilters($query, $products, $countries, $manufacturers, $userId)
+    {
+        if ($manufacturers) {
+            $query->whereIn('manufacturer_id', $manufacturers);
+        }
+
+        if ($products) {
+            $query->whereHas('products', function ($q) use ($products) {
+                $q->whereIn('product_id', $products);
+            });
+        }
+
+        if ($countries) {
+            $query->whereIn('country_id', $countries);
+        }
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+    }
+
+    /**
+     * Apply sorting based on the sort parameter
+     */
+    private function applySorting($query, $sort)
+    {
+        if ($sort === 'expiry_asc') {
+            $query->orderByExpiryDate('asc');
+        } else if ($sort === 'expiry_desc') {
+            $query->orderByExpiryDate('desc');
+        } else if (str_starts_with($sort, '-')) {
+            $sort = substr($sort, 1);
+            $query->orderBy($sort, 'desc');
+        } else {
+            $query->orderBy($sort, 'asc');
+        }
+    }
+
+    /**
+     * Test if SQLite FTS is working properly
+     * 
+     * @return bool
+     */
+    private function isFtsWorking()
+    {
+        try {
+            // Check if FTS5 is available
+            \DB::select('SELECT fts5(?)', ['test']);
+
+            // Setup FTS table
+            $this->setupSqliteFTS();
+
+            // Try a simple search to verify it works
+            $testQuery = \DB::select("SELECT rowid FROM listings_fts WHERE listings_fts MATCH ?", ['test*']);
+
+            // If we get here without exceptions, FTS is working
+            return true;
+        } catch (\Exception $e) {
+            \Log::error("FTS not working: " . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Show the attachments for a listing.

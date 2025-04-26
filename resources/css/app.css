@@ -721,7 +721,7 @@ main {
 
 .btn-find-a-listing-reset,
 .btn-find-a-listing-submit {
-    width: 100%;
+    width: 10%;
     padding: 0.5rem;
     margin: 0.25rem;
     height: 40px;
@@ -1522,6 +1522,16 @@ a.pagination-item:hover {
     width: 300px;
 }
 
+.find-a-listing-form label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.find-a-listing-form .form-group {
+    margin-bottom: 0;
+}
+
 .search-listings-sidebar .find-a-listing-form {
     flex-direction: column;
 }
@@ -1603,6 +1613,7 @@ a.pagination-item:hover {
 .dropdown-toggle-wrapper {
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .dropdown-toggle {

@@ -393,4 +393,36 @@ class Listing extends Model
                     ->orderBy('expiry_days', $direction);
         }
     }
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        parent::booted();
+
+        // Update FTS when a listing is saved
+        static::saved(function (Listing $listing) {
+            if (\DB::connection()->getDriverName() === 'sqlite') {
+                $title = str_replace("'", "''", $listing->title);
+                $description = str_replace("'", "''", $listing->description);
+
+                // Delete any existing entry
+                \DB::statement("DELETE FROM listings_fts WHERE rowid = {$listing->id}");
+
+                // Insert the new entry
+                \DB::statement("INSERT INTO listings_fts(rowid, title, description) 
+                            VALUES ({$listing->id}, '{$title}', '{$description}')");
+            }
+        });
+
+        // Remove from FTS when a listing is deleted
+        static::deleted(function (Listing $listing) {
+            if (\DB::connection()->getDriverName() === 'sqlite') {
+                \DB::statement("DELETE FROM listings_fts WHERE rowid = {$listing->id}");
+            }
+        });
+    }
 }

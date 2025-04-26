@@ -28,6 +28,34 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('pagination');
         View::share("year", date('Y'));
 
+        Listing::created(function ($listing) {
+            if (\DB::connection()->getDriverName() === 'sqlite') {
+                // Add to FTS
+                \DB::statement(
+                    "INSERT INTO listings_fts(rowid, title, description) VALUES (?, ?, ?)",
+                    [$listing->id, $listing->title, $listing->description]
+                );
+            }
+        });
+
+        Listing::updated(function ($listing) {
+            if (\DB::connection()->getDriverName() === 'sqlite') {
+                // Update in FTS
+                \DB::statement("DELETE FROM listings_fts WHERE rowid = ?", [$listing->id]);
+                \DB::statement(
+                    "INSERT INTO listings_fts(rowid, title, description) VALUES (?, ?, ?)",
+                    [$listing->id, $listing->title, $listing->description]
+                );
+            }
+        });
+
+        Listing::deleted(function ($listing) {
+            if (\DB::connection()->getDriverName() === 'sqlite') {
+                // Remove from FTS
+                \DB::statement("DELETE FROM listings_fts WHERE rowid = ?", [$listing->id]);
+            }
+        });
+
         // Gate::before(function (User $user, string $ability) {
         //     if ($user->hasRole('admin')) {
         //         return Response::allow();

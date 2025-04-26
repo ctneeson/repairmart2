@@ -45,6 +45,8 @@ return new class extends Migration {
             $table->index('manufacturer_id');
             $table->index('country_id');
             $table->index('use_default_location');
+            $table->index('title');
+            $table->index('description');
         });
     }
 
@@ -59,6 +61,8 @@ return new class extends Migration {
             $table->dropIndex('manufacturer_id');
             $table->dropIndex('country_id');
             $table->dropIndex('use_default_location');
+            $table->dropIndex('title');
+            $table->dropIndex('description');
         });
 
         Schema::dropIfExists('listings');

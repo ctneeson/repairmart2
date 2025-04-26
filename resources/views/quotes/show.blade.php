@@ -361,16 +361,6 @@
                     </a>
                 @endif
                 
-                @if(auth()->user()->roles->where('name', 'admin')->count() > 0)
-                    <div class="dropdown d-inline-block">
-                        <button class="btn btn-secondary dropdown-toggle" type="button"
-                            id="adminActionsDropdown" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Admin Actions
-                        </button>
-                        <!-- dropdown menu -->
-                    </div>
-                @endif
             </div>
         </div>
     </main>

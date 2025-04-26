@@ -240,7 +240,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="p-medium" style="width: 100%">
+                <div class="p-medium text-right">
                     <div class="flex justify-end gap-1">
                         <button type="button" id="cancel-btn" class="btn btn-default"
                             data-return-url="{{ url()->previous() }}">

@@ -16,19 +16,20 @@ use Illuminate\Support\Str;
 class EmailController extends Controller
 {
     /**
-     * Display a listing of the emails.
+     * Display the email creation form.
      *
-     * @return \Illuminate\View\View|\Illuminate\Contracts\View\View
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function create(Request $request)
     {
-        // Get all users that can receive messages
-        $users = User::whereNotNull('email')
-            ->where('id', '!=', auth()->id())
-            ->orderBy('name')
-            ->get();
+        // Check if recipient_ids are provided - redirect if not
+        if (!$request->has('recipient_ids')) {
+            return redirect()->route('profile.search')
+                ->with('error', 'Please select at least one recipient before creating a message.');
+        }
 
-        // Initialize variables for pre-filling
+        // Initialize variables
         $prefilled = false;
         $recipient = null;
         $recipients = null;
@@ -37,26 +38,33 @@ class EmailController extends Controller
         $quote = null;
         $order = null;
 
-        // Check if recipient_ids are provided in the request
-        if ($request->has('recipient_ids')) {
-            $recipientIds = $request->input('recipient_ids');
+        // Process recipient_ids from the request
+        $recipientIds = $request->input('recipient_ids');
 
-            // Handle both array and single value
-            if (is_array($recipientIds)) {
-                if (count($recipientIds) === 1) {
-                    // Single recipient
-                    $recipient = User::find($recipientIds[0]);
-                    $prefilled = true;
-                } else {
-                    // Multiple recipients
-                    $recipients = User::whereIn('id', $recipientIds)->get();
-                    $prefilled = true;
-                }
+        // Handle both array and single value
+        if (is_array($recipientIds)) {
+            if (count($recipientIds) === 1) {
+                // Single recipient
+                $recipient = User::find($recipientIds[0]);
             } else {
-                // Single recipient passed as non-array
-                $recipient = User::find($recipientIds);
-                $prefilled = true;
+                // Multiple recipients
+                $recipients = User::whereIn('id', $recipientIds)->get();
             }
+            $prefilled = true;
+        } else {
+            // Single recipient passed as non-array
+            $recipient = User::find($recipientIds);
+            $prefilled = true;
+        }
+
+        // Validate that recipients exist
+        if (
+            (!$recipient && !$recipients) ||
+            ($recipients && $recipients->count() == 0) ||
+            ($recipient && !$recipient->exists)
+        ) {
+            return redirect()->route('profile.search')
+                ->with('error', 'One or more selected recipients could not be found.');
         }
 
         // Check if listing_id is provided
@@ -66,13 +74,6 @@ class EmailController extends Controller
             if ($listing) {
                 // Pre-fill subject if listing exists
                 $subject = "RE: {$listing->title}";
-                $prefilled = true;
-
-                // If no recipient specified but listing exists, set recipient to listing owner
-                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
-                    $recipient = $listing->user;
-                    $prefilled = true;
-                }
             }
         }
 
@@ -83,19 +84,6 @@ class EmailController extends Controller
             if ($quote) {
                 // Pre-fill subject if quote exists
                 $subject = "RE: Quote #{$quote->id} - {$quote->listing->title}";
-                $prefilled = true;
-
-                // If no recipient specified but quote exists, set recipient based on context
-                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
-                    if (auth()->id() === $quote->user_id) {
-                        // If the current user is the quote creator, set recipient to listing owner
-                        $recipient = $quote->listing->user;
-                    } else {
-                        // Otherwise, set recipient to quote creator
-                        $recipient = $quote->user;
-                    }
-                    $prefilled = true;
-                }
             }
         }
 
@@ -106,24 +94,10 @@ class EmailController extends Controller
             if ($order) {
                 // Pre-fill subject if order exists
                 $subject = "RE: Order #{$order->id} - {$order->quote->listing->title}";
-                $prefilled = true;
-
-                // If no recipient specified but order exists, set recipient based on context
-                if (!$recipient && !$recipients && !$request->has('recipient_ids')) {
-                    if (auth()->id() === $order->quote->user_id) {
-                        // If current user is specialist, set recipient to customer
-                        $recipient = $order->customer;
-                    } else {
-                        // Otherwise, set recipient to specialist
-                        $recipient = $order->quote->user;
-                    }
-                    $prefilled = true;
-                }
             }
         }
 
         return view('email.create', compact(
-            'users',
             'prefilled',
             'recipient',
             'recipients',

@@ -25,6 +25,12 @@ class Email extends Model
         'updated_at',
     ];
 
+    protected $casts = [
+        'read_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');

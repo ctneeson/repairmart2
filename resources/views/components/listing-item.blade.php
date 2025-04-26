@@ -70,25 +70,42 @@
         </button>
         @endauth
       </div>
-      <h2 class="listing-item-title">{{$listing->manufacturer->name}} - {{$listing->title}}</h2>
-      <p class="listing-item-price">
-        Published: {{ $listing->published_at ? $listing->published_at->format('Y-m-d') : 'Not yet published' }}
-      </p>
+      <table>
+        <tbody>
+          <tr style="font-weight: bold;">
+            <td colspan="2" class="listing-item-label"
+              style="text-transform: uppercase">{{$listing->manufacturer->name}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <h2 class="listing-item-title">{{$listing->title}}</h2>
 
-      <p class="listing-item-price">
-        Expires: {{ $listing->expiryDate ? $listing->expiryDate->format('Y-m-d') : 'No expiry date' }}
-        @if($listing->expiryDate && $listing->expiryDate->isFuture())
-          <span class="text-muted">({{ $listing->expiryDate->diffForHumans() }})</span>
-        @elseif($listing->expiryDate && $listing->expiryDate->isPast())
-          <span class="text-danger">(Expired)</span>
-        @endif
-      </p>
-      
-      <p class="listing-item-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
-      <hr />
+      <table class="table table-sm table-borderless">
+        <tbody>
+          <tr>
+            <td class="listing-item-label">Published:</td>
+            <td class="listing-item-value text-right" style="font-size: 12px;">{{ $listing->published_at ? $listing->published_at->format('Y-m-d') : 'Not yet published' }}</td>
+          </tr>
+          <tr>
+            <td class="listing-item-label">Expiry:</td>
+            <td class="listing-item-value text-right" style="font-size: 12px;">
+              {{ $listing->expiryDate ? $listing->expiryDate->format('Y-m-d') : 'No expiry date' }}
+              @if($listing->expiryDate && $listing->expiryDate->isFuture())
+                <span class="text-muted">({{ $listing->expiryDate->diffForHumans() }})</span>
+              @elseif($listing->expiryDate && $listing->expiryDate->isPast())
+                <span class="text-danger">(Expired)</span>
+              @endif
+            </td>
+          </tr>
+          <tr>
+            <td class="listing-item-label">Budget:</td>
+            <td class="listing-item-value text-right">{{$listing->currency->iso_code}} {{$listing->budget}}</td>
+          </tr>
+        </tbody>
+      </table>
       <p class="m-0">
         @foreach($listing->products as $product)
-          <span class="listing-item-badge">{{$product->subcategory}}</span>
+          <span class="listing-item-badge">{{$product->category}}: {{$product->subcategory}}</span>
         @endforeach
       </p>
     </div>

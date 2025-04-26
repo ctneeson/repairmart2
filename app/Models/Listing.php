@@ -280,7 +280,8 @@ class Listing extends Model
      */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('published_at', '<', now());
+        $now = now()->setTimezone('UTC');
+        return $query->where('published_at', '<=', $now);
     }
 
     /**
@@ -291,13 +292,35 @@ class Listing extends Model
      */
     public function scopeNotExpired(Builder $query): Builder
     {
-        $today = Carbon::now()->startOfDay();
+        // Use UTC consistently with published_at
+        $today = Carbon::now()->setTimezone('UTC')->startOfDay();
         $earliestValidPublishDate = $today->copy()->subDays(config('app.max_listing_expiry_days', 90));
 
         return $query->where(function ($query) use ($today, $earliestValidPublishDate) {
-            // If published more recently than the earliest valid date, compare days difference
-            $query->where('published_at', '>=', $earliestValidPublishDate)
-                ->whereRaw('(julianday(?) - julianday(published_at)) <= expiry_days', [$today->format('Y-m-d')]);
+            // For SQLite (which you seem to be using)
+            $driver = \DB::connection()->getDriverName();
+
+            if ($driver === 'sqlite') {
+                // SQLite date calculation
+                $query->where('published_at', '>=', $earliestValidPublishDate)
+                    ->whereRaw("date(published_at, '+' || expiry_days || ' days') >= ?", [$today->format('Y-m-d')]);
+            } elseif ($driver === 'mysql') {
+                // MySQL date calculation
+                $query->where('published_at', '>=', $earliestValidPublishDate)
+                    ->whereRaw("DATE_ADD(published_at, INTERVAL expiry_days DAY) >= ?", [$today->format('Y-m-d')]);
+            } elseif ($driver === 'pgsql') {
+                // PostgreSQL date calculation
+                $query->where('published_at', '>=', $earliestValidPublishDate)
+                    ->whereRaw("(published_at + (expiry_days || ' days')::interval) >= ?", [$today->format('Y-m-d')]);
+            } elseif ($driver === 'sqlsrv') {
+                // SQL Server date calculation
+                $query->where('published_at', '>=', $earliestValidPublishDate)
+                    ->whereRaw("DATEADD(day, expiry_days, published_at) >= ?", [$today->format('Y-m-d')]);
+            } else {
+                // Generic fallback using julianday (though this may not work on all databases)
+                $query->where('published_at', '>=', $earliestValidPublishDate)
+                    ->whereRaw('(julianday(?) - julianday(published_at)) <= expiry_days', [$today->format('Y-m-d')]);
+            }
         });
     }
 

@@ -273,7 +273,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-medium" style="width: 100%">
+                <div class="p-medium text-right">
                     <div class="flex justify-end gap-1">
                         <a href="{{ route('listings.show', $listing) }}" class="btn btn-default">Cancel</a>
                         <button type="button" class="btn btn-default">Reset</button>

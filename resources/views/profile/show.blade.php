@@ -54,9 +54,19 @@
                                 <div class="col md-6">
                                     <div class="detail-group">
                                         <label>Roles</label>
-                                        <div class="detail-value">
+                                        <div class="detail-value d-flex flex-wrap gap-2">
                                             @foreach($user->roles as $role)
-                                            > {{ ucfirst($role->name) }} <br>
+                                                @php
+                                                    $roleClass = match(strtolower($role->name)) {
+                                                        'customer' => 'bg-customer',
+                                                        'specialist' => 'bg-specialist',
+                                                        'admin' => 'bg-admin',
+                                                        default => 'bg-default'
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $roleClass }} role-badge">
+                                                    {{ ucfirst($role->name) }}
+                                                </span>
                                             @endforeach
                                         </div>
                                     </div>
@@ -97,7 +107,7 @@
                                                             style="width: 50%">
                                                             {{ $type->name }}
                                                         </td>
-                                                        <td>{{ $feedbackCounts[$type->id]['count'] }}</td>
+                                                        <td style="text-align-last: right">{{ $feedbackCounts[$type->id]['count'] }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -115,9 +125,9 @@
                                                 @if ($isCustomer)
                                                 <tr>
                                                     <td>Open Listings</td>
-                                                    <td>{{ $listingCount }}</td>
+                                                    <td style="text-align-last: right">{{ $listingCount }}</td>
                                                     @if($listingCount > 0)
-                                                    <td>
+                                                    <td style="text-align-last: right">
                                                         <a href="{{ route('listings.search', ['user_id' => $user->id]) }}" 
                                                         class="text-sm text-blue-600 hover:underline">
                                                         View
@@ -129,7 +139,7 @@
                                                 @if ($isSpecialist)
                                                 <tr>
                                                     <td>Open Quotes</td>
-                                                    <td>{{ $quoteCount }}</td>
+                                                    <td style="text-align-last: right">{{ $quoteCount }}</td>
                                                 </tr>
                                                 @endif
                                             </tbody>
@@ -146,13 +156,13 @@
                                                 @if($isCustomer)
                                                 <tr>
                                                     <td>Orders Placed</td>
-                                                    <td>{{ $customerOrderCount }}</td>
+                                                    <td style="text-align-last: right">{{ $customerOrderCount }}</td>
                                                 </tr>
                                                 @endif
                                                 @if($isSpecialist)
                                                 <tr>
                                                     <td>Orders Handled</td>
-                                                    <td>{{ $specialistOrderCount }}</td>
+                                                    <td style="text-align-last: right">{{ $specialistOrderCount }}</td>
                                                 </tr>
                                                 @endif
                                             </tbody>

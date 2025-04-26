@@ -83,7 +83,9 @@ class ListingController extends Controller
                 'country_id' => $validated['country_id'] ?? null,
                 'phone' => $validated['phone'] ?? null,
                 'expiry_days' => $validated['expiry_days'],
-                'published_at' => $validated['published_at'] ?? null,
+                'published_at' => $validated['published_at']
+                    ? \Carbon\Carbon::parse($validated['published_at'])
+                        ->startOfDay()->setTimezone('UTC') : now(),
             ]);
 
             // Attach products to the listing
@@ -180,7 +182,9 @@ class ListingController extends Controller
             // Reset the expiration and status for relisted listings
             $validated['status_id'] = 1; // Open
             $validated['expired_at'] = null;
-            $validated['published_at'] = $request->published_at ?? now();
+            $validated['published_at'] = $validated['published_at']
+                ? \Carbon\Carbon::parse($validated['published_at'])
+                    ->startOfDay()->setTimezone('UTC') : now();
 
             // Clear the relisting flag from session
             session()->forget('is_relisting');
@@ -288,6 +292,12 @@ class ListingController extends Controller
 
             return $query->paginate(15)->withQueryString();
         });
+
+        // Add this for debugging time zone issues:
+        // dd([
+        //     'server_time' => now()->format('Y-m-d H:i:s e'),
+        //     'utc_time' => now()->setTimezone('UTC')->format('Y-m-d H:i:s e')
+        // ]);
 
         // Generate and return the view with the cached results
         return view('listings.search', ['listings' => $listings]);

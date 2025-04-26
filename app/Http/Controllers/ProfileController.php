@@ -100,6 +100,63 @@ class ProfileController extends Controller
         $selectedRoles = $validated['role'] ?? [];
         unset($validated['role']);
 
+        // Get current roles
+        $currentRoles = $targetUser->roles->pluck('name')->toArray();
+
+        // Check if user is trying to remove the customer role
+        if (in_array('customer', $currentRoles) && !in_array('customer', $selectedRoles)) {
+            // Check if user has open listings
+            $hasOpenListings = $targetUser->listingsCreated()
+                ->whereHas('status', function ($query) {
+                    $query->where('name', 'Open');
+                })->exists();
+
+            if ($hasOpenListings) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Cannot remove Customer role: User has open listings. Please close or transfer all listings first.');
+            }
+
+            // Check if user has active orders as a customer
+            $hasActiveCustomerOrders = $targetUser->customerOrders()
+                ->whereHas('status', function ($query) {
+                    $query->whereNotIn('name', ['Closed', 'Cancelled']);
+                })->exists();
+
+            if ($hasActiveCustomerOrders) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Cannot remove Customer role: User has active orders as a customer. Please wait until all orders are closed or cancelled.');
+            }
+        }
+
+        // Check if user is trying to remove the specialist role
+        if (in_array('specialist', $currentRoles) && !in_array('specialist', $selectedRoles)) {
+            // Check if user has open quotes
+            $hasOpenQuotes = $targetUser->quotesCreated()
+                ->whereHas('status', function ($query) {
+                    $query->where('name', 'Open');
+                })->exists();
+
+            if ($hasOpenQuotes) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Cannot remove Specialist role: User has open quotes. Please withdraw or close all quotes first.');
+            }
+
+            // Check if user has active orders as a specialist
+            $hasActiveSpecialistOrders = $targetUser->repairSpecialistOrders()
+                ->whereHas('status', function ($query) {
+                    $query->whereNotIn('name', ['Closed', 'Cancelled']);
+                })->exists();
+
+            if ($hasActiveSpecialistOrders) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Cannot remove Specialist role: User has active orders as a specialist. Please wait until all orders are closed or cancelled.');
+            }
+        }
+
         // Update user basic attributes
         $targetUser->update($validated);
 
@@ -256,7 +313,9 @@ class ProfileController extends Controller
         $isCustomer = $user->hasRole('customer');
         $isSpecialist = $user->hasRole('specialist');
 
+        // Initialize all count variables with default values
         $listingCount = 0;
+        $quoteCount = 0;  // Initialize this variable here
         $customerOrderCount = 0;
         $specialistOrderCount = 0;
 

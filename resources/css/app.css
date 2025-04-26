@@ -588,6 +588,18 @@ main {
     transition: all 0.3s;
 }
 
+.btn-dashboard-quick-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+    width: calc(33% - 0.25rem);
+    min-width: 120px;
+}
+
 .btn-add-new-listing:hover,
 .btn-add-new-listing:focus {
     color: white;
@@ -740,7 +752,7 @@ main {
     background-color: #e5e5e5;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 12px;
     display: block;
     margin-bottom: 2px;
 }
@@ -882,7 +894,9 @@ a.pagination-item:hover {
 .listing-details-page-title,
 .quote-details-page-title,
 .order-details-page-title,
-.email-index-page-title {
+.email-index-page-title,
+.email-create-page-title,
+.email-show-page-title {
     margin-top: 0;
     margin-bottom: 0.25rem;
 }
@@ -1154,14 +1168,16 @@ a.pagination-item:hover {
     margin-right: 5px;
 }
 
-.add-new-listing-form .form-content {
+.add-new-listing-form .form-content,
+.email-form .form-content {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     padding: 1rem;
 }
 
-.add-new-listing-form .form-details {
+.add-new-listing-form .form-details,
+.email-form .form-details {
     flex: 1;
 }
 
@@ -1972,7 +1988,8 @@ input#phone[readonly] {
     margin-top: 15px !important;
 }
 
-.quote-actions-right {
+.quote-actions-right,
+.message-actions-right {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -1980,7 +1997,8 @@ input#phone[readonly] {
     margin-bottom: 1rem !important;
 }
 
-.quote-details .row {
+.quote-details .row,
+.message-details .row {
     display: flex;
     flex-wrap: wrap;
     padding-top: 0.25rem;
@@ -1989,7 +2007,8 @@ input#phone[readonly] {
     width: 100%;
 }
 
-.quote-details .col-md-3 {
+.quote-details .col-md-3,
+.message-details .col-md-3 {
     flex: 0 0 25%;
     max-width: 25%;
     padding-right: 5px;
@@ -1997,7 +2016,8 @@ input#phone[readonly] {
     box-sizing: border-box;
 }
 
-.quote-details .col-md-6 {
+.quote-details .col-md-6,
+.message-details .col-md-6 {
     flex: 0 0 50%;
     max-width: 50%;
     padding-right: 5px;
@@ -2013,7 +2033,8 @@ input#phone[readonly] {
     padding-right: 15px;
 }
 
-.quote-details .col-md-12 {
+.quote-details .col-md-12,
+.message-details .col-md-12 {
     flex: 0 0 100%;
     max-width: 100%;
     padding-right: 5px;
@@ -2029,9 +2050,23 @@ input#phone[readonly] {
     height: 100%;
 }
 
+.detail-group-auto {
+    margin-bottom: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    height: auto;
+}
+
 .detail-value {
     font-size: 1.125rem;
     font-weight: 500;
+}
+
+.col-md-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    position: relative;
 }
 
 .col-md-8 {
@@ -2384,6 +2419,39 @@ input[type="checkbox"]:disabled {
     padding-top: 1rem;
 }
 
+.role-badge {
+    flex: 1 0 80px;
+    text-align: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+    max-width: 120px;
+}
+
+.bg-customer {
+    background-color: #0056b3;
+    color: white;
+}
+
+.bg-specialist {
+    background-color: #28a745;
+    color: white;
+}
+
+.bg-admin {
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+}
+
+.bg-default {
+    background-color: #718096;
+    color: white;
+}
+
 @media screen and (max-width: 1200px) {
     .listing-items-listing {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2454,16 +2522,19 @@ input[type="checkbox"]:disabled {
         display: none;
     }
 
-    .add-new-listing-form .form-details {
+    .add-new-listing-form .form-details,
+    .email-form .form-details {
         order: 2;
     }
 
-    .add-new-listing-form .form-attachments {
+    .add-new-listing-form .form-attachments,
+    .email-form .form-attachments {
         border-left: none;
         order: 1;
     }
 
-    .add-new-listing-form .form-content {
+    .add-new-listing-form .form-content,
+    .email-form .form-content {
         flex-direction: column;
         align-items: stretch;
     }
@@ -2488,7 +2559,8 @@ input[type="checkbox"]:disabled {
         order: 1;
     }
 
-    .add-new-listing-form .form-content .form-attachments {
+    .add-new-listing-form .form-content .form-attachments,
+    .email-form .form-content .form-attachments {
         align-self: center;
     }
 
@@ -2677,7 +2749,8 @@ input[type="checkbox"]:disabled {
         margin-top: 1.5rem;
     }
 
-    .quote-details .col-md-6 {
+    .quote-details .col-md-6,
+    .message-details .col-md-6 {
         flex: 0 0 100%;
         max-width: 100%;
         margin-bottom: 1rem;

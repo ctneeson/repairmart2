@@ -1,41 +1,77 @@
 <x-app-layout title="Quotes" bodyClass="page-quotes-index">
     <main>
+        @if(app()->environment('local'))
+            <div class="alert alert-debug mb-medium">
+                <strong>Debug Info:</strong>
+                <ul>
+                    <li>Active Tab: {{ $activeTab }}</li>
+                    <li>User Roles: {{ implode(', ', auth()->user()->roles->pluck('name')->toArray()) }}</li>
+                    <li>Filter Listing ID: {{ request('listing_id') }}</li>
+                    <li>Filter Listing Object: {{ isset($filterListing) ? 'Yes (ID: '.$filterListing->id.')' : 'No' }}</li>
+                </ul>
+            </div>
+        @endif
         <div class="container">
             <h1 class="quote-details-page-title">Quotes</h1>
 
+            @if(isset($filterListing))
+                <div class="alert alert-info mb-medium">
+                    <div class="d-flex">
+                        <div>
+                            <span class="badge bg-default" style="font-size: 1rem">
+                                <strong>
+                                    Showing quotes for listing #{{ $filterListing->id }}:
+                                </strong> {{ $filterListing->title }}
+                            </span>
+                            <a href="{{ route('quotes.index') }}"
+                                class="btn btn-sm btn-outline-primary">
+                                Clear filter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if(isset($filterListing))
+                <div class="alert alert-info mb-medium">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Showing quotes for listing #{{ $filterListing->id }}:</strong> 
+                            {{ $filterListing->title }}
+                        </div>
+                        <a href="{{ route('quotes.index', ['tab' => $activeTab]) }}" 
+                        class="btn btn-sm btn-outline-primary">
+                            Clear filter
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <div class="card p-medium">
                 <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
+                    <ul class="nav nav-tabs">
                         @if(auth()->user()->hasRole('customer'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ auth()->user()->hasRole('customer') ? 'active' : '' }}"
-                                href="#received">
-                                Quotes Received
-                                @if($receivedPendingCount > 0)
-                                    <span class="badge rounded-pill"
-                                        style="color: white; background-color: #3490dc;
-                                            margin-left: 5px;">
-                                        ({{ $receivedPendingCount }})
-                                    </span>
-                                @endif
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ $activeTab === 'received' ? 'active' : '' }}" 
+                                   href="{{ route('quotes.index', ['tab' => 'received', 'listing_id' => request('listing_id')]) }}">
+                                    Quotes Received
+                                    @if($receivedPendingCount > 0)
+                                        <span class="badge bg-primary">{{ $receivedPendingCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         
                         @if(auth()->user()->hasRole('specialist'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ auth()->user()->hasRole('specialist')
-                                && !auth()->user()->hasRole('customer') ? 'active' : '' }}"
-                               href="#submitted">
-                                Quotes Submitted
-                                @if($submittedOpenCount > 0)
-                                    <span class="badge rounded-pill"
-                                        style="color: white; background-color: #38a169; margin-left: 5px;">
-                                        ({{ $submittedOpenCount }})
-                                    </span>
-                                @endif
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ $activeTab === 'submitted' ? 'active' : '' }}" 
+                                    href="{{ route('quotes.index', ['tab' => 'submitted', 'listing_id' => request('listing_id')]) }}">
+                                    Quotes Submitted
+                                    @if($submittedOpenCount > 0)
+                                        <span class="badge bg-primary">{{ $submittedOpenCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                     </ul>
                 </div>
@@ -43,9 +79,9 @@
                 <div class="tab-content p-medium">
                     <!-- Quotes Received Tab -->
                     @if(auth()->user()->hasRole('customer'))
-                    <div class="tab-pane {{ auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ $activeTab === 'received' ? 'show active' : 'fade' }}"
                         id="received"
-                        style="{{ auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
+                        style="{{ $activeTab === 'received' ? '' : 'display: none;' }}">
                         @if($receivedQuotes->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
@@ -136,7 +172,7 @@
                             </div>
                             
                             <div class="mt-medium">
-                                {{ $receivedQuotes->links() }}
+                                {{ $receivedQuotes->appends(['tab' => $activeTab, 'listing_id' => request('listing_id')])->links() }}
                             </div>
                         @else
                             <div class="text-center py-large">
@@ -157,11 +193,9 @@
                     
                     <!-- Quotes Submitted Tab -->
                     @if(auth()->user()->hasRole('specialist'))
-                    <div class="tab-pane {{ auth()->user()->hasRole('specialist')
-                        && !auth()->user()->hasRole('customer') ? 'show active' : 'fade' }}"
+                    <div class="tab-pane {{ $activeTab === 'submitted' ? 'show active' : 'fade' }}"
                         id="submitted"
-                        style="{{ auth()->user()->hasRole('specialist')
-                            && !auth()->user()->hasRole('customer') ? '' : 'display: none;' }}">
+                        style="{{ $activeTab === 'submitted' ? '' : 'display: none;' }}">
                         @if($submittedQuotes->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
@@ -281,7 +315,7 @@
                             </div>
                             
                             <div class="mt-medium">
-                                {{ $submittedQuotes->links() }}
+                                {{ $submittedQuotes->appends(['tab' => $activeTab, 'listing_id' => request('listing_id')])->links() }}
                             </div>
                         @else
                             <div class="text-center py-large">
@@ -308,55 +342,14 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get all elements
-            const tabs = document.querySelectorAll('.nav-link');
-            const tabContents = document.querySelectorAll('.tab-pane');
-            
-            // On initial load, hide any non-active tab content
-            tabContents.forEach(content => {
-                if (!content.classList.contains('active')) {
-                    content.style.display = 'none';
-                } else {
+            // Just ensure initial visibility based on active class
+            document.querySelectorAll('.tab-pane').forEach(content => {
+                if (content.classList.contains('active')) {
                     content.style.display = 'block';
-                }
-            });
-            
-            // Add click handlers to each tab
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Get the target tab ID from the href attribute
-                    const targetId = this.getAttribute('href').substring(1);
-                    showTab(targetId);
-                });
-            });
-            
-            function showTab(tabId) {
-                // Hide all tab contents
-                tabContents.forEach(content => {
+                } else {
                     content.style.display = 'none';
-                    content.classList.remove('show', 'active');
-                });
-                
-                // Remove active class from all tabs
-                tabs.forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Show the selected tab content
-                const selectedTab = document.getElementById(tabId);
-                if (selectedTab) {
-                    selectedTab.style.display = 'block';
-                    selectedTab.classList.add('show', 'active');
-                    
-                    // Add active class to the selected tab
-                    const activeTabLink = document.querySelector(`.nav-link[href="#${tabId}"]`);
-                    if (activeTabLink) {
-                        activeTabLink.classList.add('active');
-                    }
                 }
-            }
+            });
         });
     </script>
     @endpush

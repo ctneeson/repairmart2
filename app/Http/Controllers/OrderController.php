@@ -71,19 +71,16 @@ class OrderController extends Controller
      */
     public function store(Request $request, Quote $quote)
     {
-        // Add some debugging to see what's happening
         \Log::info('Order store method called');
         \Log::info('Request data:', $request->all());
 
-        // Validation
         $validated = $request->validate([
             'comment' => 'nullable|string|max:255',
-            'attachments.*' => 'nullable|file|max:10240', // 10MB max per file
+            'attachments.*' => 'nullable|file|max:10240',
         ]);
 
         \Log::info('Validation passed');
 
-        // Authorization check
         if (!auth()->user()->can('create', [Order::class, $quote])) {
             return redirect()->route('quotes.show', $quote->id)
                 ->with('error', 'You are not authorized to create this order.');
@@ -91,11 +88,9 @@ class OrderController extends Controller
 
         \Log::info('Authorization passed');
 
-        // Start DB transaction
         DB::beginTransaction();
 
         try {
-            // Create the order with default values
             $order = Order::create([
                 'quote_id' => $quote->id,
                 'customer_id' => $quote->listing->user_id,
@@ -107,6 +102,37 @@ class OrderController extends Controller
             ]);
 
             \Log::info('Order created with ID: ' . $order->id);
+
+            $openStatusId = \DB::table('quote_statuses')->where('name', 'Open')->value('id');
+            $orderCreatedStatusId = \DB::table('quote_statuses')
+                ->where('name', 'Closed-Order Created')->value('id');
+            $rejectedStatusId = \DB::table('quote_statuses')
+                ->where('name', 'Closed-Rejected')->value('id');
+
+            if (!$openStatusId || !$orderCreatedStatusId || !$rejectedStatusId) {
+                throw new \Exception('Required quote status not found in database');
+            }
+
+            // Update the current quote status to "Closed-Order Created"
+            $quote->status_id = $orderCreatedStatusId;
+            $quote->save();
+
+            \Log::info('Updated Quote #' . $quote->id . ' status to Closed-Order Created');
+
+            // Get the listing ID from the current quote
+            $listingId = $quote->listing_id;
+
+            // Find all other open quotes for the same listing and update them to "Closed-Rejected"
+            $otherOpenQuotes = Quote::where('listing_id', $listingId)
+                ->where('id', '!=', $quote->id)
+                ->where('status_id', $openStatusId)
+                ->get();
+
+            foreach ($otherOpenQuotes as $otherQuote) {
+                $otherQuote->status_id = $rejectedStatusId;
+                $otherQuote->save();
+                \Log::info('Updated Quote #' . $otherQuote->id . ' status to Closed-Rejected');
+            }
 
             // Add system comment about order creation
             $order->comments()->create([
@@ -127,12 +153,11 @@ class OrderController extends Controller
 
             // Handle attachments
             if ($request->hasFile('attachments')) {
-                $position = 1; // Start position counter
+                $position = 1;
 
                 foreach ($request->file('attachments') as $file) {
                     $path = $file->store('attachments/orders', 'public');
 
-                    // Create the attachment record
                     $order->attachments()->create([
                         'path' => $path,
                         'position' => $position++,
@@ -153,7 +178,6 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
 
-            // Log the error
             \Log::error('Failed to create order: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
 

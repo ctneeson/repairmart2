@@ -7,7 +7,7 @@
                 <div class="card-header" style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0;">
                     <ul class="nav nav-tabs card-header-tabs" style="margin-left: 1rem;">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#inbox">
+                            <a class="nav-link {{ request('tab', 'inbox') === 'inbox' ? 'active' : '' }}" href="{{ route('email.index', ['tab' => 'inbox']) }}">
                                 Inbox
                                 @if($unreadCount > 0)
                                     <span class="badge rounded-pill" style="color: white; background-color: #3490dc; margin-left: 5px;">
@@ -17,30 +17,31 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#sent">Sent</a>
+                            <a class="nav-link {{ request('tab') === 'sent' ? 'active' : '' }}" href="{{ route('email.index', ['tab' => 'sent']) }}">Sent</a>
                         </li>
                     </ul>
                 </div>
 
                 <div class="tab-content p-medium">
                     <!-- Inbox Tab -->
-                    <div class="tab-pane fade show active" id="inbox">
+                    <div class="tab-pane fade {{ request('tab', 'inbox') === 'inbox' ? 'show active' : '' }}" id="inbox" 
+                         style="{{ request('tab', 'inbox') === 'inbox' ? '' : 'display: none;' }}">
                         @if($receivedEmails->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 30%;">From</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 45%;">Subject</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 15%;">Date</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 10%;">Status</th>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Subject</th>
+                                            <th>Date</th>
+                                            <th style="text-align: center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($receivedEmails as $email)
-                                            <tr style="border-bottom: 1px solid #e2e8f0; {{ is_null($email->read_at) ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">{{ $email->sender->name }}</td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                            <tr style="{{ is_null($email->read_at) ? 'font-weight: bold; background-color: #f8fafc;' : '' }}">
+                                                <td>{{ $email->sender->name }}</td>
+                                                <td>
                                                     <a href="{{ route('email.show', $email->id) }}" class="text-decoration-none">
                                                         {{ $email->subject }}
                                                         @if($email->attachments_count > 0)
@@ -50,12 +51,22 @@
                                                         @endif
                                                     </a>
                                                 </td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">{{ $email->created_at->format('M d, Y') }}</td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td>{{ $email->created_at->format('M d, Y') }}</td>
+                                                <td class="text-center">
                                                     @if(is_null($email->read_at))
-                                                        <span class="badge" style="background-color: #3490dc; color: white; padding: 3px 8px; border-radius: 9999px; font-size: 12px;">New</span>
+                                                        <span class="badge"
+                                                            style="background-color: #3490dc;
+                                                                color: white;
+                                                                padding: 3px 8px;
+                                                                border-radius: 9999px;
+                                                                font-size: 12px;">New</span>
                                                     @else
-                                                        <span class="badge" style="background-color: #718096; color: white; padding: 3px 8px; border-radius: 9999px; font-size: 12px;">Read</span>
+                                                        <span class="badge"
+                                                            style="background-color: #718096;
+                                                                color: white;
+                                                                padding: 3px 8px;
+                                                                border-radius: 9999px;
+                                                                font-size: 12px;">Read</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -79,27 +90,28 @@
                     </div>
                     
                     <!-- Sent Tab -->
-                    <div class="tab-pane fade" id="sent" style="display: none;">
+                    <div class="tab-pane fade {{ request('tab') === 'sent' ? 'show active' : '' }}" id="sent" 
+                         style="{{ request('tab') === 'sent' ? '' : 'display: none;' }}">
                         @if($sentEmails->count() > 0)
                             <div class="table-responsive">
                                 <table class="table" style="border-collapse: collapse; width: 100%;">
                                     <thead>
                                         <tr style="border-bottom: 2px solid #e2e8f0;">
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 30%;">To</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 45%;">Subject</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 15%;">Date</th>
-                                            <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; width: 10%;">Status</th>
+                                            <th>To</th>
+                                            <th>Subject</th>
+                                            <th>Date</th>
+                                            <th style="text-align: center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($sentEmails as $email)
-                                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td>
                                                     @foreach($email->recipients as $recipient)
                                                         <span>{{ $recipient->name }}</span>@if(!$loop->last),@endif
                                                     @endforeach
                                                 </td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td>
                                                     <a href="{{ route('email.show', $email->id) }}" class="text-decoration-none">
                                                         {{ $email->subject }}
                                                         @if($email->attachments_count > 0)
@@ -109,12 +121,22 @@
                                                         @endif
                                                     </a>
                                                 </td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">{{ $email->created_at->format('M d, Y') }}</td>
-                                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                                <td>{{ $email->created_at->format('M d, Y') }}</td>
+                                                <td class="text-center">
                                                     @if(is_null($email->read_at))
-                                                        <span class="badge" style="background-color: #718096; color: white; padding: 3px 8px; border-radius: 9999px; font-size: 12px;">Unread</span>
+                                                        <span class="badge"
+                                                            style="background-color: #718096;
+                                                                color: white;
+                                                                padding: 3px 8px;
+                                                                border-radius: 9999px;
+                                                                font-size: 12px;">Unread</span>
                                                     @else
-                                                        <span class="badge" style="background-color: #38a169; color: white; padding: 3px 8px; border-radius: 9999px; font-size: 12px;">Read</span>
+                                                        <span class="badge"
+                                                            style="background-color: #38a169;
+                                                                color: white;
+                                                                padding: 3px 8px;
+                                                                border-radius: 9999px;
+                                                                font-size: 12px;">Read</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -124,7 +146,7 @@
                             </div>
                             
                             <div class="mt-medium">
-                                {{ $sentEmails->links() }}
+                                {{ $sentEmails->appends(['tab' => 'sent'])->links() }}
                             </div>
                         @else
                             <div class="text-center py-large">
@@ -146,48 +168,4 @@
             </div>
         </div>
     </main>
-
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all elements
-            const tabs = document.querySelectorAll('.nav-link');
-            const tabContents = document.querySelectorAll('.tab-pane');
-            
-            // Add click handlers to each tab
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Get the target tab ID from the href attribute
-                    const targetId = this.getAttribute('href').substring(1);
-                    showTab(targetId);
-                });
-            });
-            
-            function showTab(tabId) {
-                // Hide all tab contents
-                tabContents.forEach(content => {
-                    content.style.display = 'none';
-                    content.classList.remove('show', 'active');
-                });
-                
-                // Remove active class from all tabs
-                tabs.forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Show the selected tab content
-                const selectedTab = document.getElementById(tabId);
-                selectedTab.style.display = 'block';
-                selectedTab.classList.add('show', 'active');
-                
-                // Add active class to the selected tab
-                const activeTabLink = document.querySelector(`.nav-link[href="#${tabId}"]`);
-                activeTabLink.classList.add('active');
-            }
-        });
-    </script>
-    @endpush
-
 </x-app-layout>

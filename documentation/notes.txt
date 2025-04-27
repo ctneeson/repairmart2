@@ -18,3 +18,8 @@ https://www.404media.co/all-50-states-have-now-introduced-right-to-repair-legisl
 
 
 https://laracasts.com/series/30-days-to-learn-laravel-11/episodes/12
+
+
+- Set Up the Cron Job
+php artisan schedule:run
+(php artisan listings:expire for demo)

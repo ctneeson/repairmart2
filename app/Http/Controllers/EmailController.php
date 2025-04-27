@@ -189,14 +189,14 @@ class EmailController extends Controller
             ->with(['sender', 'recipients'])
             ->withCount('attachments')
             ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'received');
+            ->paginate(20, ['*'], 'received');
 
         // Get sent emails (where the current user is the sender)
         $sentEmails = Email::where('sender_id', $user->id)
             ->with('recipients')
             ->withCount('attachments')
             ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'sent');
+            ->paginate(20, ['*'], 'sent');
 
         // Count unread messages
         $unreadCount = Email::whereHas('recipients', function ($query) use ($user) {

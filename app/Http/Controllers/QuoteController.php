@@ -15,36 +15,100 @@ use Illuminate\Support\Facades\Gate;
 class QuoteController extends Controller
 {
     /**
-     * Display a listing of the quotes.
+     * Display a listing of the quotes, optionally filtered by listing_id.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Check if the user can view quotes
         if (!Gate::allows('viewAny', Quote::class)) {
             return redirect()->route('home')
                 ->with('error', 'You do not have permission to view quotes.');
         }
 
         $user = auth()->user();
+        $listingId = $request->input('listing_id');
+        \Log::info('Initial listing ID: ' . $listingId);
+
+        // First, verify the listing exists before doing anything else
+        $filterListing = null;
+        if ($listingId) {
+            $filterListing = Listing::find($listingId);
+
+            if (!$filterListing) {
+                \Log::warning('Listing not found: ' . $listingId);
+                return redirect()->route('quotes.index')
+                    ->with('error', 'The specified listing does not exist.');
+            }
+
+            \Log::info('Filter Listing found: ' . $filterListing->title);
+        }
+
+        $defaultTab = $user->hasRole('specialist') && !$user->hasRole('customer')
+            ? 'submitted' : 'received';
+        $activeTab = $request->input('tab', $defaultTab);
+
+        \Log::info('Active Tab: ' . $activeTab);
+        \Log::info('Request Tab: ' . $request->input('tab'));
+        \Log::info('Default Tab: ' . $defaultTab);
+
+        // Only force tab change if the user doesn't have the required role AND has the alternative role
+        if ($activeTab === 'received' && !$user->hasRole('customer') && $user->hasRole('specialist')) {
+            $activeTab = 'submitted';
+        }
+
+        if ($activeTab === 'submitted' && !$user->hasRole('specialist') && $user->hasRole('customer')) {
+            $activeTab = 'received';
+        }
 
         // For customer role: Get quotes for listings created by the current user
         $receivedQuotes = collect();
         $receivedPendingCount = 0;
 
         if ($user->hasRole('customer')) {
-            $receivedQuotes = Quote::whereHas('listing', function ($query) use ($user) {
+            // Build the base query for received quotes
+            $receivedQuery = Quote::whereHas('listing', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            })->with(['listing', 'status', 'deliveryMethod', 'currency'])
-                ->latest()
-                ->paginate(10, ['*'], 'received_page');
+            });
 
-            $receivedPendingCount = Quote::whereHas('listing', function ($query) use ($user) {
+            if ($listingId) {
+                $receivedQuery->where('listing_id', $listingId);
+
+                // Only verify ownership if the user is accessing as a customer
+                if ($activeTab === 'received') {
+                    // Verify the listing belongs to the user
+                    $listingExists = Listing::where('id', $listingId)
+                        ->where('user_id', $user->id)
+                        ->exists();
+
+                    if (!$listingExists) {
+                        return redirect()->route('quotes.index')
+                            ->with('error', 'You do not have permission to view quotes for this listing.');
+                    }
+                }
+            }
+
+            $receivedQuotes = $receivedQuery
+                ->with(['listing', 'status', 'deliveryMethod', 'currency', 'customer'])
+                ->latest()
+                ->paginate(10, ['*'], 'received_page')
+                ->appends([
+                    'listing_id' => $listingId,
+                    'tab' => $activeTab
+                ]);
+
+            $pendingQuery = Quote::whereHas('listing', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->whereHas('status', function ($query) {
                 $query->where('name', 'Open');
-            })->count();
+            });
+
+            if ($listingId) {
+                $pendingQuery->where('listing_id', $listingId);
+            }
+
+            $receivedPendingCount = $pendingQuery->count();
         }
 
         // For specialist role: Get quotes created by the current user
@@ -52,22 +116,47 @@ class QuoteController extends Controller
         $submittedOpenCount = 0;
 
         if ($user->hasRole('specialist')) {
-            $submittedQuotes = Quote::where('user_id', $user->id)
+            $submittedQuery = Quote::where('user_id', $user->id);
+            \Log::info("Specialist section - Listing ID: " . $listingId);
+
+            if ($listingId) {
+                $submittedQuery->where('listing_id', $listingId);
+                \Log::info("Submitted Query with Listing ID: " . $listingId);
+
+                // We've already verified the listing exists at the beginning of the method,
+                // so we don't need to do it again here
+            }
+
+            $submittedQuotes = $submittedQuery
                 ->with(['listing', 'status', 'deliveryMethod', 'currency'])
                 ->latest()
-                ->paginate(10, ['*'], 'submitted_page');
+                ->paginate(10, ['*'], 'submitted_page')
+                ->appends([
+                    'listing_id' => $listingId,
+                    'tab' => $activeTab
+                ]);
 
-            $submittedOpenCount = Quote::where('user_id', $user->id)
+            $openSubmittedQuery = Quote::where('user_id', $user->id)
                 ->whereHas('status', function ($query) {
                     $query->where('name', 'Open');
-                })->count();
+                });
+
+            if ($listingId) {
+                $openSubmittedQuery->where('listing_id', $listingId);
+            }
+
+            $submittedOpenCount = $openSubmittedQuery->count();
         }
+
+        // Don't reassign $listingId or check for $filterListing here - we already did it at the top
 
         return view('quotes.index', compact(
             'receivedQuotes',
             'receivedPendingCount',
             'submittedQuotes',
-            'submittedOpenCount'
+            'submittedOpenCount',
+            'filterListing',
+            'activeTab'
         ));
     }
 
@@ -264,18 +353,49 @@ class QuoteController extends Controller
                 ->with('error', $response->message());
         }
 
-        // Delete all associated attachments
-        foreach ($quote->attachments as $attachment) {
-            // Delete the file from storage
-            Storage::disk('public')->delete($attachment->path);
-            // Delete the attachment record
-            $attachment->delete();
+        $openStatusId = \DB::table('quote_statuses')->where('name', 'Open')->value('id');
+
+        if ($quote->status_id != $openStatusId) {
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', 'Only open quotes can be retracted.');
         }
 
-        $quote->delete();
+        $retractedStatusId = \DB::table('quote_statuses')->where('name', 'Closed-Retracted')->value('id');
 
-        return redirect()->route('quotes.index')
-            ->with('success', 'Quote deleted successfully.');
+        if (!$retractedStatusId) {
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', 'Quote status "Closed-Retracted" not found.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Update the quote status to 'Closed-Retracted' before deleting
+            $quote->status_id = $retractedStatusId;
+            $quote->save();
+
+            // Delete all associated attachments
+            foreach ($quote->attachments as $attachment) {
+                Storage::disk('public')->delete($attachment->path);
+                $attachment->delete();
+            }
+
+            $quote->delete();
+
+            \Log::info('Quote #' . $quote->id . ' marked as Closed-Retracted and soft-deleted by user #' . auth()->id());
+
+            DB::commit();
+
+            return redirect()->route('quotes.index')
+                ->with('success', 'Quote retracted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Failed to retract quote: ' . $e->getMessage());
+
+            return redirect()->route('quotes.show', $quote->id)
+                ->with('error', 'Failed to retract quote: ' . $e->getMessage());
+        }
     }
 
     /**

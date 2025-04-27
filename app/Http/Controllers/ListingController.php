@@ -559,7 +559,6 @@ class ListingController extends Controller
         }
     }
 
-
     /**
      * Show the attachments for a listing.
      */

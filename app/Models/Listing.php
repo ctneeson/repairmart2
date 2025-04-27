@@ -159,6 +159,17 @@ class Listing extends Model
     }
 
     /*
+     * Check if the listing has a quote from a specific user.
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public function hasQuoteFromUser($userId)
+    {
+        return $this->quotes()->where('user_id', $userId)->exists();
+    }
+
+    /*
      * Get the order associated with the listing.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
@@ -235,6 +246,16 @@ class Listing extends Model
     public function getPublishedDate(): string
     {
         return (new Carbon($this->published_at))->format('Y-m-d');
+    }
+
+    /**
+     * Get the number of quotes received for the listing.
+     *
+     * @return int
+     */
+    public function getReceivedQuotesCountAttribute()
+    {
+        return $this->quotes()->count();
     }
 
     /**

@@ -78,6 +78,8 @@
                                     <p class="error-message">{{ $errors->first('expiry_days') }}</p>
                                 </div>
                             </div>
+                            <div class="col">
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col">

@@ -109,7 +109,13 @@
           </div>
           <div class="listing-details card">
             <div class="flex items-center justify-between">
-              <p class="listing-details-price">{{$listing->currency->iso_code}} {{$listing->budget}}</p>
+              <p class="listing-details-price">
+                @if(!$listing->currency && !$listing->budget)
+                  Budget not specified                  
+                @else
+                {{ $listing->currency->iso_code ?? '' }} {{ $listing->budget ?? '' }}
+                @endif
+              </p>
 
               @auth
               <button class="btn-heart text-primary"
@@ -217,9 +223,23 @@
             @endif
             {{-- Hide unless current user is a specialist or admin --}}
             @if (auth()->check() 
-                && auth()->user()->roles->whereIn('name', ['specialist', 'admin'])->count() > 0
+                && auth()->user()->hasRole('specialist')
                 && auth()->id() !== $listing->user_id
                 && $listing->status->name === 'Open')
+
+              @if($listing->hasQuoteFromUser(auth()->id()))
+              <a href="{{ route('quotes.index', ['listing_id' => $listing->id, 'tab' => 'submitted']) }}"
+                class="listing-details-edit btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                  View Submitted Quotes
+              </a>
+              @endif
+              
             <a href="{{route('quotes.create', $listing->id)}}"
                 class="listing-details-createquote btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -227,11 +247,35 @@
                     <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line>
                     <line x1="8" y1="12" x2="16" y2="12"></line>
                 </svg>
-                Create Quote
+                Create
+                @if($listing->hasQuoteFromUser(auth()->id()))
+                New
+                @endif Quote
             </a>
             @endif
             {{-- Hide unless current user is looking at their own listing --}}
             @if (auth()->id() === $listing->user_id && $listing->status->name === 'Open')
+
+              @if($listing->receivedQuotesCount > 0)
+                <label style="font-weight: bold;">
+                  Quotes Received: {{ $listing->receivedQuotesCount }}
+                </label>
+                <a href="{{ route('quotes.index', ['listing_id' => $listing->id, 'tab' => 'received']) }}" 
+                  class="listing-details-edit btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                    View Quotes
+                </a>
+              @else
+                <label style="font-weight: bold;">
+                  No quotes received yet
+                </label>
+              @endif
+
             <a href="{{route('listings.edit', $listing->id)}}" class="listing-details-edit btn">
                 <svg xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"

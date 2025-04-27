@@ -2294,11 +2294,15 @@ input[type="checkbox"]:disabled {
     margin-left: 10px;
 }
 
-.actions-cell {
+.actions-cell,
+.status-cell,
+.quotes-cell {
     text-align: center !important;
 }
 
-.actions-cell .flex {
+.actions-cell .flex,
+.status-cell .flex,
+.quotes-cell .flex {
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -2306,7 +2310,9 @@ input[type="checkbox"]:disabled {
     justify-content: center !important;
 }
 
-.actions-cell .btn {
+.actions-cell .btn,
+.status-cell .btn,
+.quotes-cell .btn {
     display: inline-flex;
     align-items: center;
     width: 100%;
@@ -2317,13 +2323,17 @@ input[type="checkbox"]:disabled {
     transition: background-color 0.2s;
 }
 
-.actions-cell .btn svg {
+.actions-cell .btn svg,
+.status-cell .btn svg,
+.quotes-cell .btn svg {
     width: 12px;
     margin-right: 5px;
     text-align: center;
 }
 
-.actions-cell form {
+.actions-cell form,
+.status-cell form,
+.quotes-cell form {
     width: 100%;
     text-align: center;
 }

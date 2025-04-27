@@ -13,7 +13,8 @@
                     <th>Manufacturer</th>
                     <th>Product Categories</th>
                     <th>Date</th>
-                    <th>Status</th>
+                    <th style="text-align: center;">Status</th>
+                    <th style="text-align: center;">Quotes</th>
                     <th style="text-align: center;">Actions</th>
                   </tr>
                 </thead>
@@ -59,9 +60,20 @@
                       @endforeach
                     </td>
                     <td>{{ $listing->getPublishedDate() }}</td>
-                    <td >
+                    <td class="status-cell">
                       <span class="badge listing-status-{{ strtolower(str_replace(' ', '-', $listing->status->name)) }}">
                         {{ $listing->status->name }}
+                      </span>
+                    </td>
+                    <td class="quotes-cell">
+                      <span>
+                        @if($listing->quotes->count() > 0)
+                        <a href="{{ route('quotes.index', ['listing_id' => $listing->id, 'tab' => 'received']) }}">
+                          {{ $listing->quotes->count() }}
+                        </a>
+                        @else
+                        {{ $listing->quotes->count() }}
+                        @endif
                       </span>
                     </td>
                     <td class="actions-cell">

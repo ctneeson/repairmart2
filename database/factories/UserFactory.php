@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\Country;
+use App\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -49,5 +50,48 @@ class UserFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Indicate that the model's email address should be verified.
+     */
+    public function verified(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the model should be a customer.
+     */
+    public function customer(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $customerRole = Role::where('name', 'customer')->first();
+            $user->roles()->attach($customerRole);
+        });
+    }
+
+    /**
+     * Indicate that the model should be a specialist.
+     */
+    public function specialist(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $specialistRole = Role::where('name', 'specialist')->first();
+            $user->roles()->attach($specialistRole);
+        });
+    }
+
+    /**
+     * Indicate that the model should be a admin.
+     */
+    public function admin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $adminRole = Role::where('name', 'admin')->first();
+            $user->roles()->attach($adminRole);
+        });
     }
 }

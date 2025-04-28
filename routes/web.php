@@ -8,13 +8,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 
 // Auth routes for signup, login, password reset, and socialite
-require_once __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
 // Auth routes for emails
-require_once __DIR__ . '/email.php';
+require __DIR__ . '/email.php';
 // Auth routes for quotes
-require_once __DIR__ . '/quotes.php';
+require __DIR__ . '/quotes.php';
 // Auth routes for orders
-require_once __DIR__ . '/orders.php';
+require __DIR__ . '/orders.php';
 
 
 // Logged in or logged out

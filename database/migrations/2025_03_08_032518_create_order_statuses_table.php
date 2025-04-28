@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->timestamp('deleted_at')->nullable();
         });
 
-        DB::table('order_status_transitions')->insert([
+        DB::table('order_statuses')->insert([
             ['name' => 'Created', 'amount_editable' => false],
             ['name' => 'Dispatched to Specialist', 'amount_editable' => false],
             ['name' => 'Specialist Assessing', 'amount_editable' => false],

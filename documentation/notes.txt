@@ -2,7 +2,7 @@ https://youtu.be/0M84Nk7iWkA?t=14608
 https://youtu.be/0M84Nk7iWkA?t=37421
 https://youtu.be/0M84Nk7iWkA?t=37363
 https://www.itsolutionstuff.com/post/laravel-10-google-autocomplete-address-exampleexample.html
-https://thecodeholic.teachable.com/courses/laravel-11-for-beginners/lectures/57069033
+https://thecodeholic.teachable.com/courses/laravel-11-for-beginners/lectures/57069036
 
 https://github.com/barryvdh/laravel-debugbar
 https://mailtrap.io/inboxes/3514435/messages/4761101409
@@ -16,10 +16,52 @@ https://www.404media.co/all-50-states-have-now-introduced-right-to-repair-legisl
 - Why Laravel?
   https://www.youtube.com/watch?v=2WjMrh7ZHIA
 
+ERD generation
+https://www.youtube.com/watch?v=cfztjPQplwI
+
 
 https://laracasts.com/series/30-days-to-learn-laravel-11/episodes/12
 
 
+*** EXPIRE LISTINGS ***
 - Set Up the Cron Job
 php artisan schedule:run
 (php artisan listings:expire for demo)
+
+
+*** SEND MAIL NOTIFICATIONS *** 
+Checking Your Current Configuration
+If your emails aren't being sent, check:
+
+If this is set to 'sync', the queue is processed immediately (simulating ->send()). If it's set to 'database', 'redis', etc., then you need to run a queue worker.
+
+Setting Up Queue Worker in Production
+On a production server, you'd use a process manager like Supervisor to keep the queue worker running:
+
+Install Supervisor:
+
+Create Configuration:
+
+Start Supervisor:
+
+For Development/Testing
+For quick testing, you can:
+
+Use sync Driver: This makes queued emails send immediately:
+
+Manually Process Queue: To test the real queue:
+
+or for just one job:
+
+Email Failed Jobs
+If emails fail to send, they'll be recorded in the failed_jobs table. You can:
+
+View failed jobs: php artisan queue:failed
+Retry all failed jobs: php artisan queue:retry all
+Delete failed jobs: php artisan queue:flush
+Summary
+If you want to actually use the queue system:
+
+Set QUEUE_CONNECTION=database in your .env file
+Run migrations to create queue tables
+Run a queue worker with php artisan queue:work

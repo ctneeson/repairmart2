@@ -527,11 +527,14 @@
                                 </form>
                             </div>
                                 @elseif(auth()->id() === $order->customer_id && !empty($order->customer_feedback_id))
-                                    <div class="col-md-8">
+                                    <div class="col-md-6">
                                         <div class="card p-3">
                                             <h3>Your Feedback</h3>
                                             <div class="feedback-rating mb-2">
-                                                <strong>Rating:</strong> {{ $order->customerFeedbackType->name }}
+                                                <strong>Rating:</strong>
+                                                <span class="badge order-status-badge-small feedback-rating-{{ strtolower(str_replace(' ', '-', $order->customerFeedbackType->name)) }}">
+                                                    {{ $order->customerFeedbackType->name }}
+                                                </span>
                                             </div>
                                             <div class="feedback-comment">
                                                 <strong>Comment:</strong> {{ $order->customer_feedback }}
@@ -570,7 +573,10 @@
                                         <div class="card p-3">
                                             <h3>Your Feedback</h3>
                                             <div class="feedback-rating mb-2">
-                                                <strong>Rating:</strong> {{ $order->specialistFeedbackType->name }}
+                                                <strong>Rating:</strong>
+                                                <span class="badge order-status-badge-small feedback-rating-{{ strtolower(str_replace(' ', '-', $order->specialistFeedbackType->name)) }}">
+                                                    {{ $order->specialistFeedbackType->name }}
+                                                </span>
                                             </div>
                                             <div class="feedback-comment">
                                                 <strong>Comment:</strong> {{ $order->specialist_feedback }}

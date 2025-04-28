@@ -1,16 +1,5 @@
 <x-app-layout title="Quotes" bodyClass="page-quotes-index">
     <main>
-        @if(app()->environment('local'))
-            <div class="alert alert-debug mb-medium">
-                <strong>Debug Info:</strong>
-                <ul>
-                    <li>Active Tab: {{ $activeTab }}</li>
-                    <li>User Roles: {{ implode(', ', auth()->user()->roles->pluck('name')->toArray()) }}</li>
-                    <li>Filter Listing ID: {{ request('listing_id') }}</li>
-                    <li>Filter Listing Object: {{ isset($filterListing) ? 'Yes (ID: '.$filterListing->id.')' : 'No' }}</li>
-                </ul>
-            </div>
-        @endif
         <div class="container">
             <h1 class="quote-details-page-title">Quotes</h1>
 
@@ -28,21 +17,6 @@
                                 Clear filter
                             </a>
                         </div>
-                    </div>
-                </div>
-            @endif
-
-            @if(isset($filterListing))
-                <div class="alert alert-info mb-medium">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Showing quotes for listing #{{ $filterListing->id }}:</strong> 
-                            {{ $filterListing->title }}
-                        </div>
-                        <a href="{{ route('quotes.index', ['tab' => $activeTab]) }}" 
-                        class="btn btn-sm btn-outline-primary">
-                            Clear filter
-                        </a>
                     </div>
                 </div>
             @endif

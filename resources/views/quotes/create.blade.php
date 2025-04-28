@@ -1,5 +1,13 @@
 <x-app-layout title="Create Quote">
     <main>
+        @if(isset($warningMessage))
+            <div class="alert alert-warning">
+                <p>{{ $warningMessage }}</p>
+                <a href="{{ route('quotes.edit', $existingQuote->id) }}" class="btn btn-sm btn-primary">
+                    Edit Existing Quote
+                </a>
+            </div>
+        @endif
         <div class="container-small">
             <h1 class="listing-details-page-title">Create a Quote</h1>
             <!-- Listing Summary Section -->

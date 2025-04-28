@@ -9,6 +9,10 @@ use App\Models\Quote;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Mail\ListingExpired;
+use App\Mail\QuoteExpired;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class ExpireListings extends Command
 {
@@ -97,6 +101,16 @@ class ExpireListings extends Command
                 $listing->save();
                 $listingCount++;
 
+                // Send email notification to the listing owner
+                try {
+                    $listingOwner = $listing->customer;
+                    \Mail::to($listingOwner->email)
+                        ->send(new ListingExpired($listing, $listingOwner));
+                    \Log::info("Listing expiry email sent to {$listingOwner->email} for listing #{$listing->id}");
+                } catch (\Exception $e) {
+                    \Log::error("Failed to send quote notification email: " . $e->getMessage());
+                }
+
                 // Find and update any open quotes associated with this listing
                 $openQuotes = Quote::where('listing_id', $listing->id)
                     ->where('status_id', $openQuoteStatusId)
@@ -106,6 +120,16 @@ class ExpireListings extends Command
                     $quote->status_id = $rejectedQuoteStatusId;
                     $quote->save();
                     $quoteCount++;
+
+                    // Send email notification to the quote owner
+                    try {
+                        $quoteOwner = $quote->repairSpecialist;
+                        \Mail::to($quoteOwner->email)
+                            ->send(new QuoteExpired($quote, $quoteOwner));
+                        \Log::info("Quote expiry email sent to {$quoteOwner->email} for listing #{$listing->id}");
+                    } catch (\Exception $e) {
+                        \Log::error("Failed to send quote notification email: " . $e->getMessage());
+                    }
 
                     Log::info("Quote #{$quote->id} for Listing #{$listing->id} marked as Closed-Rejected due to listing expiration");
                 }

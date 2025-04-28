@@ -11,6 +11,8 @@ use App\Http\Requests\StoreQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\Models\Quote;
 use Illuminate\Support\Facades\Gate;
+use App\Mail\QuoteReceived;
+use App\Mail\QuoteUpdated;
 
 class QuoteController extends Controller
 {
@@ -123,8 +125,6 @@ class QuoteController extends Controller
                 $submittedQuery->where('listing_id', $listingId);
                 \Log::info("Submitted Query with Listing ID: " . $listingId);
 
-                // We've already verified the listing exists at the beginning of the method,
-                // so we don't need to do it again here
             }
 
             $submittedQuotes = $submittedQuery
@@ -147,8 +147,6 @@ class QuoteController extends Controller
 
             $submittedOpenCount = $openSubmittedQuery->count();
         }
-
-        // Don't reassign $listingId or check for $filterListing here - we already did it at the top
 
         return view('quotes.index', compact(
             'receivedQuotes',
@@ -189,21 +187,28 @@ class QuoteController extends Controller
      * Store a newly created quote in storage.
      *
      * @param  \App\Http\Requests\StoreQuoteRequest  $request
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse|\Illuminate\Contracts\View\View
      */
     public function store(StoreQuoteRequest $request)
     {
         $validated = $request->validated();
 
-        // Start a database transaction
+        // Check if validation found an existing quote
+        if (isset($validated['existing_quote_id'])) {
+            return redirect()->route('quotes.edit', $validated['existing_quote_id'])
+                ->with('warning', 'You already have an open quote with the same details for this listing. You can edit it below instead of creating a duplicate.');
+        }
+
         DB::beginTransaction();
+
+        $openStatusId = \DB::table('quote_statuses')->where('name', 'Open')->value('id');
 
         try {
             // Create the quote
             $quote = Quote::create([
                 'user_id' => auth()->id(),
                 'listing_id' => $validated['listing_id'],
-                'status_id' => 1, // Default: Open
+                'status_id' => $openStatusId, // Default: Open
                 'currency_id' => $validated['currency_id'],
                 'deliverymethod_id' => $validated['deliverymethod_id'],
                 'amount' => $validated['amount'],
@@ -236,10 +241,16 @@ class QuoteController extends Controller
 
             // Send notification to the listing owner
             $listing = Listing::find($validated['listing_id']);
-            $listingOwner = $listing->user;
+            $listingOwner = $listing->customer;
 
-            // You can implement notification here
-            // Notification::send($listingOwner, new NewQuoteNotification($quote));
+            try {
+                \Mail::to($listingOwner->email)
+                    ->send(new QuoteReceived($quote, $listingOwner));
+                // ->queue(new QuoteReceived($quote, $listingOwner));
+                \Log::info("Quote notification email sent to {$listingOwner->email} for quote #{$quote->id}");
+            } catch (\Exception $e) {
+                \Log::error("Failed to send quote notification email: " . $e->getMessage());
+            }
 
             DB::commit();
 
@@ -319,6 +330,7 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validated();
+        $listingOwner = $quote->customer;
 
         // Handle the default location toggle
         if ($validated['use_default_location']) {
@@ -332,6 +344,15 @@ class QuoteController extends Controller
         }
 
         $quote->update($validated);
+
+        try {
+            \Mail::to($listingOwner->email)
+                ->send(new QuoteUpdated($quote, $listingOwner));
+            // ->queue(new QuoteUpdated($quote, $listingOwner));
+            \Log::info("Update notification email sent to {$listingOwner->email} for quote #{$quote->id}");
+        } catch (\Exception $e) {
+            \Log::error("Failed to send update notification email: " . $e->getMessage());
+        }
 
         return redirect()->route('quotes.show', $quote->id)
             ->with('success', 'Quote updated successfully.');

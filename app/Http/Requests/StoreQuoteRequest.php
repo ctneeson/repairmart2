@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Quote;
 
 class StoreQuoteRequest extends FormRequest
 {
@@ -23,7 +24,38 @@ class StoreQuoteRequest extends FormRequest
     {
         return [
             'user_id' => 'required|integer|exists:users,id',
-            'listing_id' => 'required|integer|exists:listings,id',
+            'listing_id' => [
+                'required',
+                'exists:listings,id',
+                function ($attribute, $value, $fail) {
+                    $openStatusId = \DB::table('quote_statuses')->where('name', 'Open')->value('id');
+
+                    $existingQuote = Quote::where('user_id', auth()->id())
+                        ->where('listing_id', $value)
+                        ->where('status_id', $openStatusId)
+                        ->where('currency_id', $this->currency_id)
+                        ->where('deliverymethod_id', $this->deliverymethod_id)
+                        ->where('address_line1', $this->address_line1)
+                        ->where(function ($query) {
+                            if (!empty($this->address_line2)) {
+                                $query->where('address_line2', $this->address_line2);
+                            } else {
+                                $query->whereNull('address_line2');
+                            }
+                        })
+                        ->where('city', $this->city)
+                        ->where('postcode', $this->postcode)
+                        ->where('country_id', $this->country_id)
+                        ->first();
+
+                    if ($existingQuote) {
+                        // Store the existing quote ID in the validator's data
+                        $this->merge(['existing_quote_id' => $existingQuote->id]);
+
+                        $fail('You already have an open quote with the same details for this listing.');
+                    }
+                },
+            ],
             'status_id' => 'required|integer|exists:quote_statuses,id',
             'currency_id' => 'required|integer|exists:currencies,id',
             'deliverymethod_id' => 'required|integer|exists:deliverymethods,id',

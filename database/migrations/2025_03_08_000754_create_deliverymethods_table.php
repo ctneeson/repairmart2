@@ -17,6 +17,13 @@ return new class extends Migration {
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
+
+        DB::table('deliverymethods')->insert([
+            ['name' => 'Pick-up/Drop-off at Customer'],
+            ['name' => 'Drop-off/Pick-up at Repair Specialist'],
+            ['name' => 'Postage (tracked)'],
+            ['name' => 'Postage (untracked)'],
+        ]);
     }
 
     /**

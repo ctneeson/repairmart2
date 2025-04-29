@@ -25,24 +25,21 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        $this->call(CountriesSeeder::class);
-        $this->call(CurrenciesSeeder::class);
-        $this->call(DeliveryMethodsSeeder::class);
-        $this->call(FeedbackTypesSeeder::class);
-        $this->call(ListingStatusesSeeder::class);
-        $this->call(ManufacturersSeeder::class);
-        $this->call(OrderStatusesSeeder::class);
-        $this->call(ProductsSeeder::class);
-        $this->call(QuoteStatusesSeeder::class);
-
         // Create system user
-        $systemUser = User::factory()->create([
-            'name' => 'RepairMart',
-            'email' => 'system@repairmart.net',
-        ]);
+        $systemUser = User::factory()
+            ->admin()
+            ->customer()
+            ->specialist()
+            ->verified()
+            ->create([
+                'name' => 'RepairMart',
+                'email' => 'system@repairmart.net',
+            ]);
 
         // Create a user with 5 listings
         $sidUser = User::factory()
+            ->customer()
+            ->verified()
             ->has(
                 Listing::factory()
                     ->count(5)
@@ -82,9 +79,12 @@ class DatabaseSeeder extends Seeder
         }
 
         // Create a new user with email connor@oilers.ca
-        $connorUser = User::factory()->create([
-            'email' => 'connor@oilers.ca',
-        ]);
+        $connorUser = User::factory()
+            ->specialist()
+            ->verified()
+            ->create([
+                'email' => 'connor@oilers.ca',
+            ]);
 
         // Generate 2 quotes for each listing created for the user with email sid@penguins.com
         foreach ($sidUser->listingsCreated as $listing) {

@@ -17,6 +17,13 @@ return new class extends Migration {
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
+
+        DB::table('listing_statuses')->insert([
+            ['name' => 'Open'],
+            ['name' => 'Closed-Expired'],
+            ['name' => 'Closed-Retracted'],
+            ['name' => 'Closed-Order Created'],
+        ]);
     }
 
     /**

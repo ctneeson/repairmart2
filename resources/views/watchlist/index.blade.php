@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="My Watchlist">
     <main>
         <!-- New Listings -->
         <section>

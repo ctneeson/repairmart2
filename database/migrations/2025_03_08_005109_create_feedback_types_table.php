@@ -17,6 +17,12 @@ return new class extends Migration {
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
         });
+
+        DB::table('feedback_types')->insert([
+            ['name' => 'Positive'],
+            ['name' => 'Neutral'],
+            ['name' => 'Negative'],
+        ]);
     }
 
     /**

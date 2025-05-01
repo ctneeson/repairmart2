@@ -302,11 +302,13 @@
         style="display: none;"
         ></div>
 
-    @vite([
-        'resources/js/listings-edit.js',
-        'resources/js/listings-create-dynamic-product-select.js',
-        'resources/js/listings-edit-toggle-address-inputs.js',
-      ])
+    @if(!app()->environment('testing'))
+        @vite([
+            'resources/js/listings-edit.js',
+            'resources/js/listings-create-dynamic-product-select.js',
+            'resources/js/listings-edit-toggle-address-inputs.js',
+        ])
+    @endif
 
     @push('scripts')
     <script>

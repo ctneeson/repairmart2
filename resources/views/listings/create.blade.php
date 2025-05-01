@@ -272,13 +272,16 @@
     </style>
     @endpush
 
+    @if(!app()->environment('testing'))
+        @vite([
+            'resources/js/listings-create-dynamic-product-select.js',
+            'resources/js/listings-create-reset-form.js',
+            'resources/js/listings-create-toggle-address-inputs.js',
+        ])
+    @endif
+
     @push('scripts')
         @include('js.listings-create-toggle-address-inputs')
     @endpush
-
-    @vite([
-        'resources/js/listings-create-dynamic-product-select.js',
-        'resources/js/listings-create-reset-form.js',
-    ])
 
 </x-app-layout>

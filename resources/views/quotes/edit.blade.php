@@ -499,6 +499,8 @@
     </div>
     @endpush
 
-    @vite(['resources/js/quote-edit.js'])
+    @if(!app()->environment('testing'))
+        @vite(['resources/js/quote-edit.js'])
+    @endif
 
 </x-app-layout>

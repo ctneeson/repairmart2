@@ -22,10 +22,11 @@ class ListingFactory extends Factory
      */
     public function definition(): array
     {
+        $customer = User::factory()->customer()->verified()->create();
         $useDefaultLocation = $this->faker->boolean(30);
 
         return [
-            'user_id' => User::inRandomOrder()->first()->id,
+            'user_id' => $customer->id,
             'status_id' => ListingStatus::first()->id,
             'manufacturer_id' => Manufacturer::inRandomOrder()->first()->id,
             'title' => Product::inRandomOrder()->first()->subcategory
@@ -34,12 +35,12 @@ class ListingFactory extends Factory
             'currency_id' => Currency::inRandomOrder()->first()->id,
             'budget' => $this->faker->randomFloat(2, 10, 1000),
             'use_default_location' => $useDefaultLocation,
-            'address_line1' => $useDefaultLocation ? null : $this->faker->streetAddress,
-            'address_line2' => $useDefaultLocation ? null : $this->faker->secondaryAddress,
-            'city' => $useDefaultLocation ? null : $this->faker->city,
-            'postcode' => $useDefaultLocation ? null : $this->faker->postcode,
-            'country_id' => $useDefaultLocation ? null : Country::inRandomOrder()->first()->id,
-            'phone' => $useDefaultLocation ? null : $this->faker->phoneNumber,
+            'address_line1' => $useDefaultLocation ? $customer->address_line1 : $this->faker->streetAddress,
+            'address_line2' => $useDefaultLocation ? $customer->address_line2 : $this->faker->secondaryAddress,
+            'city' => $useDefaultLocation ? $customer->city : $this->faker->city,
+            'postcode' => $useDefaultLocation ? $customer->postcode : $this->faker->postcode,
+            'country_id' => $useDefaultLocation ? $customer->country_id : Country::inRandomOrder()->first()->id,
+            'phone' => $useDefaultLocation ? $customer->phone : $this->faker->phoneNumber,
             'expiry_days' => $this->faker->randomElement([7, 14, 30, 60, 90]),
             'published_at' => ($this->faker->optional(0.9)->dateTimeBetween('-1 month', 'now') ?? now())->format('Y-m-d H:i:s'),
         ];

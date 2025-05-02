@@ -656,6 +656,8 @@
         </div>
     </main>
 
-    @vite(['resources/js/listings-attachments.js',])
+    @if(!app()->environment('testing'))
+        @vite(['resources/js/listings-attachments.js',])
+    @endif
 
 </x-app-layout>

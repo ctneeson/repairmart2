@@ -57,10 +57,10 @@ it('cannot access the Create Order page as a logged-in user with the customer ro
 /*** SHOW ORDER */
 it('redirects to the login page when accessing the View Order page as a guest user', function () {
     $customer = \App\Models\User::factory()->customer()->verified()->create();
-    $listing = \App\Models\Listing::factory()->create(['user_id' => $customer->id]);
     $specialist = \App\Models\User::factory()->specialist()->verified()->create();
+    $listing = \App\Models\Listing::factory()->create(['user_id' => $customer->id]);
     $quote = \App\Models\Quote::factory()->create(['listing_id' => $listing->id, 'user_id' => $specialist->id]);
-    $order = \App\Models\Order::factory()->create(['quote_id' => $quote->id]);
+    $order = \App\Models\Order::factory()->forQuote($quote)->create();
     /*
      * @var \Illuminate\Foundation\Testing\TestResponse $response
      */
@@ -73,7 +73,7 @@ it('can access the View Order page as the order\'s customer', function () {
     $specialist = \App\Models\User::factory()->specialist()->verified()->create();
     $listing = \App\Models\Listing::factory()->create(['user_id' => $customer->id]);
     $quote = \App\Models\Quote::factory()->create(['listing_id' => $listing->id, 'user_id' => $specialist->id]);
-    $order = \App\Models\Order::factory()->create(['quote_id' => $quote->id]);
+    $order = \App\Models\Order::factory()->forQuote($quote)->create();
     /*
      * @var \Illuminate\Foundation\Testing\TestResponse $response
      */
@@ -86,7 +86,7 @@ it('can access the View Order page as the order\'s specialist', function () {
     $specialist = \App\Models\User::factory()->specialist()->verified()->create();
     $listing = \App\Models\Listing::factory()->create(['user_id' => $customer->id]);
     $quote = \App\Models\Quote::factory()->create(['listing_id' => $listing->id, 'user_id' => $specialist->id]);
-    $order = \App\Models\Order::factory()->create(['quote_id' => $quote->id]);
+    $order = \App\Models\Order::factory()->forQuote($quote)->create();
     /*
      * @var \Illuminate\Foundation\Testing\TestResponse $response
      */

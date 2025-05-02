@@ -37,30 +37,34 @@ class DatabaseSeeder extends Seeder
             ]);
 
         // Create a user with 5 listings
-        $sidUser = User::factory()
+        $customer = User::factory()
             ->customer()
             ->verified()
             ->has(
                 Listing::factory()
                     ->count(5)
-                    ->has(
-                        Attachment::factory()->count(2)->state(new Sequence(
-                            ['position' => 1],
-                            ['position' => 2]
-                        )),
-                        'attachments'
-                    ), // Create 2 attachments for each listing with alternating positions
+                    ->afterCreating(function (Listing $listing) {
+                        // Create attachments with the correct user_id
+                        Attachment::factory()
+                            ->forListing($listing)
+                            ->count(2)
+                            ->state(new Sequence(
+                                ['position' => 1],
+                                ['position' => 2]
+                            ))
+                            ->create();
+                    }),
                 'listingsCreated'
             )
             ->create([
-                'email' => 'sid@penguins.com',
+                'email' => 'customer@customer.com',
             ]);
 
         // Get all product IDs
         $productIds = Product::pluck('id')->toArray();
 
         // Attach 2 existing products to each listing
-        foreach ($sidUser->listingsCreated as $listing) {
+        foreach ($customer->listingsCreated as $listing) {
             $randomProductIds = array_rand($productIds, 2);
             $listing->products()->attach([
                 $productIds[$randomProductIds[0]],
@@ -75,43 +79,54 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Create an entry in the emails_recipients table
-            $email->recipients()->attach($sidUser->id);
+            $email->recipients()->attach($customer->id);
         }
 
-        // Create a new user with email connor@oilers.ca
-        $connorUser = User::factory()
+        // Create a new specialist user
+        // with 2 quotes for each listing created for the customer user
+        $specialist = User::factory()
             ->specialist()
             ->verified()
             ->create([
-                'email' => 'connor@oilers.ca',
+                'email' => 'specialist@specialist.com',
             ]);
 
-        // Generate 2 quotes for each listing created for the user with email sid@penguins.com
-        foreach ($sidUser->listingsCreated as $listing) {
+        // Generate 2 quotes for each listing created for the customer user
+        foreach ($customer->listingsCreated as $listing) {
             $currencyId = $listing->currency_id;
             $amount = $listing->budget;
 
             // Create the first quote with deliverymethod_id = 2
             Quote::create([
-                'user_id' => $connorUser->id,
+                'user_id' => $specialist->id,
                 'listing_id' => $listing->id,
                 'status_id' => 1,
                 'currency_id' => $currencyId,
                 'deliverymethod_id' => 2,
                 'turnaround' => 10,
                 'use_default_location' => true,
+                'address_line1' => $specialist->address_line1,
+                'address_line2' => $specialist->address_line2,
+                'city' => $specialist->city,
+                'postcode' => $specialist->postcode,
+                'country_id' => $specialist->country_id,
                 'amount' => $amount,
             ]);
 
             // Create the second quote with deliverymethod_id = 3 and amount 10 units greater
             Quote::create([
-                'user_id' => $connorUser->id,
+                'user_id' => $specialist->id,
                 'listing_id' => $listing->id,
                 'status_id' => 1,
                 'currency_id' => $currencyId,
                 'deliverymethod_id' => 3,
                 'turnaround' => 15,
                 'use_default_location' => true,
+                'address_line1' => $specialist->address_line1,
+                'address_line2' => $specialist->address_line2,
+                'city' => $specialist->city,
+                'postcode' => $specialist->postcode,
+                'country_id' => $specialist->country_id,
                 'amount' => $amount + 10,
             ]);
         }

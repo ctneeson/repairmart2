@@ -341,6 +341,7 @@ class QuoteController extends Controller
             $validated['city'] = $user->city;
             $validated['postcode'] = $user->postcode;
             $validated['country_id'] = $user->country_id;
+            $validated['phone'] = $user->phone;
         }
 
         $quote->update($validated);

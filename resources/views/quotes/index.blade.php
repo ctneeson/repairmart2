@@ -177,7 +177,7 @@
                                         <tr>
                                             <th>Image</th>
                                             <th>Listing</th>
-                                            <th>Published</th>
+                                            <th>Expiry</th>
                                             <th>Status</th>
                                             <th>Delivery Method</th>
                                             <th style="min-width: 120px; width: 120px;">Amount</th>
@@ -219,8 +219,8 @@
                                                         {{ $quote->listing->title }}
                                                     </a>
                                                 </td>
-                                                <td data-label="Created">
-                                                    {{ $quote->listing->getPublishedDate() }}
+                                                <td data-label="Expiry">
+                                                    {{ $quote->listing->getExpiryDateAttribute()->format('Y-m-d') }}
                                                 </td>
                                                 <td data-label="Status">
                                                     <span class="badge quote-status-{{ strtolower(str_replace(' ', '-', $quote->status->name)) }}">
@@ -248,7 +248,7 @@
                                                                 </path>
                                                                 <circle cx="12" cy="12" r="3"></circle>
                                                             </svg>
-                                                            View
+                                                            view
                                                         </a>
                                                         @if($quote->status->name === 'Open')
                                                             <a href="{{ route('quotes.edit', $quote->id) }}"
@@ -259,7 +259,7 @@
                                                                     stroke-linejoin="round"
                                                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                                                 </svg>
-                                                                Edit
+                                                                edit
                                                             </a>
                                                             <form action="{{ route('quotes.destroy', $quote->id) }}" 
                                                                   method="POST" 
@@ -276,7 +276,7 @@
                                                                             d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                                                             <line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
                                                                         </svg>
-                                                                    Delete
+                                                                    delete
                                                                 </button>
                                                             </form>
                                                         @endif

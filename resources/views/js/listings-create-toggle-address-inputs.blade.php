@@ -1,20 +1,35 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Script loaded');
         const useDefaultLocationCheckbox = document.getElementById('use-default-location');
+        console.log('Checkbox found:', useDefaultLocationCheckbox);
         const addressFields = document.querySelectorAll('#address-fields input, #address-fields select');
-        const phoneField = document.getElementById('phone'); // Add the phone field
+        const phoneField = document.getElementById('phone');
         const countrySelect = document.getElementById('countrySelect');
         const hiddenCountryId = document.getElementById('hidden_country_id');
         
         // User data for default address and phone
         const userData = {
-            address_line1: "{{ auth()->user()->address_line1 ?? '' }}",
-            address_line2: "{{ auth()->user()->address_line2 ?? '' }}",
-            city: "{{ auth()->user()->city ?? '' }}",
-            postcode: "{{ auth()->user()->postcode ?? '' }}",
-            country_id: "{{ auth()->user()->country_id ?? '' }}",
-            phone: "{{ auth()->user()->phone ?? '' }}" // Add phone data
+            address_line1: {!! json_encode(auth()->user()->address_line1 ?? '') !!},
+            address_line2: {!! json_encode(auth()->user()->address_line2 ?? '') !!},
+            city: {!! json_encode(auth()->user()->city ?? '') !!},
+            postcode: {!! json_encode(auth()->user()->postcode ?? '') !!},
+            country_id: {!! json_encode(auth()->user()->country_id ?? '') !!},
+            phone: {!! json_encode(auth()->user()->phone ?? '') !!}
         };
+        console.log('User data:', userData);
+        
+        // Store the original values when the page loads
+        const originalValues = {};
+        addressFields.forEach(field => {
+            if (field.id) {
+                originalValues[field.id] = field.value;
+            }
+        });
+        if (phoneField) {
+            originalValues['phone'] = phoneField.value;
+        }
+        console.log('Original values:', originalValues);
         
         // Function to toggle address fields
         function toggleAddressFields() {
@@ -68,14 +83,14 @@
                 phoneField.style.color = useDefaultLocation ? '#666' : '';
             }
             
-            // Set values from user data if using default address
+            // Set values based on the checkbox state
             if (useDefaultLocation) {
-                document.getElementById('address_line1').value = userData.address_line1;
-                document.getElementById('address_line2').value = userData.address_line2;
-                document.getElementById('city').value = userData.city;
-                document.getElementById('postcode').value = userData.postcode;
+                // ONLY use the safe field setting method
+                safeSetFieldValue('address_line1', userData.address_line1);
+                safeSetFieldValue('address_line2', userData.address_line2);
+                safeSetFieldValue('city', userData.city);
+                safeSetFieldValue('postcode', userData.postcode);
                 
-                // Set phone value
                 if (phoneField) {
                     phoneField.value = userData.phone;
                 }
@@ -95,42 +110,38 @@
                     }
                 }
             } else {
-                // Clear values if not using default address
-                document.getElementById('address_line1').value = '';
-                document.getElementById('address_line2').value = '';
-                document.getElementById('city').value = '';
-                document.getElementById('postcode').value = '';
+                // Restore original values or clear if toggling for the first time
+                addressFields.forEach(field => {
+                    if (field.id && field.id !== 'hidden_country_id') {
+                        field.value = originalValues[field.id] || '';
+                    }
+                });
                 
-                // Clear phone value
                 if (phoneField) {
-                    phoneField.value = '';
-                }
-                
-                if (countrySelect) {
-                    countrySelect.selectedIndex = 0; // Select the first option
+                    phoneField.value = originalValues['phone'] || '';
                 }
             }
         }
         
-        // Add an immediate fix for the country dropdown visibility
-        if (countrySelect) {
-            // Ensure the country dropdown is visible even when disabled
-            countrySelect.style.cssText = `
-                display: inline-block !important;
-                visibility: visible !important;
-                opacity: ${useDefaultLocationCheckbox?.checked ? '0.7' : '1'} !important;
-            `;
-            
-            // Debug
-            console.log('Applied visibility fix to country dropdown');
+        // Helper function to safely set field values
+        function safeSetFieldValue(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value;
+            } else {
+                console.warn(`Element with id ${id} not found`);
+            }
         }
         
-        // Initial setup
-        if (useDefaultLocationCheckbox) {
-            toggleAddressFields();
-            
-            // Add event listener for checkbox changes
-            useDefaultLocationCheckbox.addEventListener('change', toggleAddressFields);
-        }
+        // Give the page a moment to fully initialize before applying our logic
+        setTimeout(function() {
+            // Initial setup
+            if (useDefaultLocationCheckbox) {
+                toggleAddressFields();
+                
+                // Add event listener for checkbox changes
+                useDefaultLocationCheckbox.addEventListener('change', toggleAddressFields);
+            }
+        }, 50); // Short delay to ensure DOM is fully processed
     });
 </script>

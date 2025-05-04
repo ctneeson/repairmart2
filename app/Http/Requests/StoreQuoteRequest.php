@@ -68,7 +68,7 @@ class StoreQuoteRequest extends FormRequest
             'city' => 'required|string|max:255',
             'postcode' => 'required|string|max:255',
             'country_id' => 'required|integer|exists:countries,id',
-            'phone' => 'nullable|string|max:45',
+            'phone' => ['nullable', 'string', 'max:45', 'regex:/^[0-9\+\-\(\)\s]+$/'],
             'attachments.*' => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,svg,mp4,mov,ogg,qt,pdf,doc,docx,txt',
         ];
     }

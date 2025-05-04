@@ -85,7 +85,7 @@ class QuotePolicy
     {
         // First check if user is owner or admin
         if (!($user->id === $quote->user_id || $user->hasRole('admin'))) {
-            return Response::denyWithStatus(404);
+            return Response::denyWithStatus(404, 'You do not have permission to delete this quote.');
         }
 
         // Then check if quote is open (admins can delete regardless of status)

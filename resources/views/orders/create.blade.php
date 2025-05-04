@@ -25,7 +25,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="detail-group">
-                                    <label>Estimated Completion</label>
+                                    <label>Estimated Turnaround</label>
                                     <div class="detail-value">
                                         {{ $quote->turnaround }} days
                                     </div>

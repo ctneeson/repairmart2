@@ -39,7 +39,7 @@ class UpdateQuoteRequest extends FormRequest
             'city' => 'required|string|max:255',
             'postcode' => 'required|string|max:255',
             'country_id' => 'required|integer|exists:countries,id',
-            'phone' => 'nullable|string|max:45',
+            'phone' => ['nullable', 'string', 'max:45', 'regex:/^[0-9\+\-\(\)\s]+$/'],
         ];
     }
 }

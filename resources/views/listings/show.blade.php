@@ -17,7 +17,6 @@
           @endif
         </div>
         <div class="listing-details-region">
-          Location: {{$listing->city}}, {{$listing->country->name}}<br>
           Published: {{$listing->published_at->format('d M Y')}}<br>
           Expiry: {{$listing->getExpiryDateAttribute()->format('d M Y')}}
         </div>

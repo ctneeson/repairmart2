@@ -119,6 +119,23 @@ class OrderController extends Controller
 
             \Log::info('Updated Quote #' . $quote->id . ' status to Closed-Order Created');
 
+            // Get the listing from the current quote
+            $listing = $quote->listing;
+
+            // Find the "Closed-Order Created" status ID for listings
+            $listingOrderCreatedStatusId = \DB::table('listing_statuses')
+                ->where('name', 'Closed-Order Created')->value('id');
+
+            if (!$listingOrderCreatedStatusId) {
+                throw new \Exception('Required listing status not found in database');
+            }
+
+            // Update the listing status
+            $listing->status_id = $listingOrderCreatedStatusId;
+            $listing->save();
+
+            \Log::info('Updated Listing #' . $listing->id . ' status to Closed-Order Created');
+
             // Get the listing ID from the current quote
             $listingId = $quote->listing_id;
 

@@ -1881,6 +1881,7 @@ input#phone[readonly] {
 
 .quote-status-accepted,
 .listing-status-closed-order-created,
+.quote-status-closed-order-created,
 .order-status-price-adjustment-approved,
 .order-status-received-by-customer {
     background-color: #e8f5e9;

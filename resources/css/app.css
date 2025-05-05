@@ -1408,9 +1408,11 @@ a.pagination-item:hover {
 .page-my-listings .btn-edit,
 .page-my-listings .btn-delete,
 .page-my-listings .btn-relist,
+.page-my-listings .btn-view-order,
 .page-quotes-index .btn-edit,
 .page-quotes-index .btn-delete,
 .page-quotes-index .btn-relist,
+.page-quotes-index .btn-view-order,
 .page-orders-index .btn-edit,
 .page-orders-index .btn-delete,
 .page-orders-index .btn-relist {
@@ -1423,9 +1425,11 @@ a.pagination-item:hover {
 .page-my-listings .btn-edit:hover,
 .page-my-listings .btn-delete:hover,
 .page-my-listings .btn-relist:hover,
+.page-my-listings .btn-view-order:hover,
 .page-quotes-index .btn-edit:hover,
 .page-quotes-index .btn-delete:hover,
 .page-quotes-index .btn-relist:hover,
+.page-quotes-index .btn-view-order:hover,
 .page-orders-index .btn-edit:hover,
 .page-orders-index .btn-delete:hover,
 .page-orders-index .btn-relist:hover {

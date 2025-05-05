@@ -125,8 +125,14 @@
                           </form>
                           
                         @elseif($listing->status->name === 'Closed-Order Created')
-                          <!-- No actions for Closed-Order Created listings -->
-                          <span class="text-gray-500 text-sm italic">No actions available</span>
+                          <a href="{{ route('orders.show', $listing->order->id) }}"
+                            class="btn btn btn-view-order">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                              stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l-3.75-3.75M12 19.5l3.75-3.75M4.5 12h15" />
+                            </svg>
+                            view order
+                          </a>
                         @else 
                           <!-- Default view for other statuses -->
                           <span class="text-gray-500 text-sm italic">No actions available</span>

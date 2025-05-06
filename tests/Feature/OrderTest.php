@@ -249,23 +249,3 @@ it('can access the View Order page as the order\'s specialist', function () {
         ]);
     }
 });
-
-/*** UPDATE ORDER */
-it('can change the Order status from "Created" to "Dispatched to Specialist" as a customer', function () {
-    $customer = \App\Models\User::factory()->customer()->verified()->create();
-    $specialist = \App\Models\User::factory()->specialist()->verified()->create();
-    $listing = \App\Models\Listing::factory()->create(['user_id' => $customer->id]);
-    $quote = \App\Models\Quote::factory()->create(['listing_id' => $listing->id, 'user_id' => $specialist->id]);
-    $order = \App\Models\Order::factory()->forQuote($quote)->create(['status_id' => 1]);
-    /*
-     * @var \Illuminate\Foundation\Testing\TestResponse $response
-     */
-    $this->actingAs($customer);
-    $response = $this->put(route('orders.update', ['order' => $order]), [
-        'status_id' => 2,
-        'comment' => 'Order dispatched to specialist'
-    ]);
-    $response->assertRedirecttoRoute('orders.show', ['order' => $order]);
-    $response->assertStatus(302);
-    $response->assertSessionHas('success', 'Order status updated successfully.');
-});

@@ -502,30 +502,32 @@
                         <!-- Feedback Section -->
                         @if($order->hasStatus('Closed'))
                             <div class="row mt-3">
-                                @if(auth()->id() === $order->customer_id
-                                    && empty($order->customer_feedback_id))
-                                <h3>Customer Feedback</h3>
-                            </div>
-                            <div class="row my-small">
-                                <form action="{{ route('orders.feedback', $order) }}"
-                                    style="width: 100%; margin-right: 0.5rem;"
-                                    method="POST">
-                                    @csrf
-                                    <label for="feedback_type" class="form-label">Rating</label><br>
-                                    <select name="feedback_type_id" id="feedback_type"
-                                        class="form-select my-small" style="width: 30%" required>
-                                        <option value="">Select a rating</option>
-                                        @foreach($feedbackTypes as $type)
-                                            <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                        @endforeach
-                                    </select><br>
-                                    <label for="feedback_comment" class="form-label">Comment</label><br>
-                                    <textarea name="feedback" id="feedback_comment" rows="3" 
-                                        class="form-control my-small" maxlength="255" required></textarea>
-                                    <input type="hidden" name="feedback_type" value="customer">
-                                    <button type="submit" class="btn btn-primary my-small">Submit Feedback</button>
-                                </form>
-                            </div>
+                                <!-- Customer Feedback -->
+                                @if(auth()->id() === $order->customer_id && empty($order->customer_feedback_id))
+                                    <div class="col-md-6">
+                                        <div class="card p-3">
+                                            <h3>Customer Feedback</h3>
+                                            <form action="{{ route('orders.feedback', $order) }}" method="POST">
+                                                @csrf
+                                                <div class="mb-3">
+                                                    <label for="feedback_type" class="form-label">Rating</label>
+                                                    <select name="feedback_type_id" id="feedback_type" class="form-select" required>
+                                                        <option value="">Select a rating</option>
+                                                        @foreach($feedbackTypes as $type)
+                                                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="feedback_comment" class="form-label">Comment</label>
+                                                    <textarea name="feedback" id="feedback_comment" rows="3" 
+                                                        class="form-control" maxlength="255" required></textarea>
+                                                </div>
+                                                <input type="hidden" name="feedback_type" value="customer">
+                                                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 @elseif(auth()->id() === $order->customer_id && !empty($order->customer_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
@@ -543,6 +545,7 @@
                                     </div>
                                 @endif
                                 
+                                <!-- Specialist Feedback -->
                                 @if(auth()->id() === $order->specialist_id && empty($order->specialist_feedback_id))
                                     <div class="col-md-6">
                                         <div class="card p-3">
@@ -618,7 +621,7 @@
                                     </div>
                                 @endif
                             </div>
-                        @endif                        
+                        @endif
                     </div>
                     <div class="col-md-4">
                         <div class="contact-sidebar">

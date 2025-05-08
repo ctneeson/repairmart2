@@ -1,66 +1,150 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><img src="https://github.com/ctneeson/repairmart2/blob/main/public/img/RepairMart-logo.png" width="400" alt="RepairMart Logo"></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## About RepairMart
 
-## About Laravel
+RepairMart is an online marketplace-style web application where Customers can submit requests for repair of their electronic goods, and Repair Specialists can review requests and submit quotes for repair.
+Customers may review submitted quotes and accept in order to create a repair order, which will then be managed until completion through the RepairMart system.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Installation Instructions
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Prerequisites
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   PHP 8.2 or higher
+-   Composer
+-   MySQL 8.0 or SQLite (for development)
+-   Node.js and npm
+-   Laravel requirements: BCMath, Ctype, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
 
-## Learning Laravel
+### Step 1: Clone the Repository
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+git clone https://github.com/yourusername/repairmart2.git
+cd repairmart2
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Step 2: Install PHP Dependencies
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+```
 
-## Laravel Sponsors
+### Step 3: Install JavaScript Dependencies
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+npm install
+```
 
-### Premium Partners
+### Step 4: Configure Environment
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+1. Create a copy of the environment file:
 
-## Contributing
+```bash
+cp .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. Generate application key:
 
-## Code of Conduct
+```bash
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. Configure your database in the .env file:
 
-## Security Vulnerabilities
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=repairmart
+DB_USERNAME=your_database_username
+DB_PASSWORD=your_database_password
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Configure OAuth settings for social authentication:
 
-## License
+```bash
+FACEBOOK_CLIENT_ID=your_facebook_client_id
+FACEBOOK_CLIENT_SECRET=your_facebook_client_secret
+FACEBOOK_REDIRECT=http://localhost:8000/auth/facebook/callback
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT=http://localhost:8000/auth/google/callback
+```
+
+### Step 5: Set Up the Database
+
+1. Run migrations to create database tables:
+
+```bash
+php artisan migrate
+```
+
+2. Seed the database with initial data:
+
+```bash
+php artisan db:seed
+```
+
+### Step 6: Storage and File Uploads Configuration
+
+1. Create symbolic link for storage:
+
+```bash
+php artisan storage:link
+```
+
+2. Ensure the proper directory permissions:
+
+```bash
+chmod -R 775 storage bootstrap/cache
+```
+
+### Step 7: Build Assets
+
+```bash
+npm run build
+```
+
+### Step 8: Start Development Server
+
+```bash
+php artisan serve
+```
+
+The application will be available at http://localhost:8000
+
+### Step 9: Schedule Cron Job (Production)
+
+For production environments, add the Laravel scheduler to your crontab:
+
+```bash
+* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+This enables automated tasks like listing expiration and email notifications.
+
+Default Admin User
+After seeding, you can log in with the default admin account:
+
+Email: admin@repairmart.com
+Password: password
+
+## Testing
+
+To run the test suite:
+
+```bash
+php artisan test
+```
+
+For development with SQLite:
+
+```bash
+php artisan test --env=testing
+```
+
+## Additional Configuration
+
+Email: Configure your mail driver in the .env file for notification emails
+Queue: For production, configure a queue driver like Redis or database
+Search: Full-text search is configured automatically in development; see documentation for production settings
